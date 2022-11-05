@@ -3,62 +3,84 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
-  MessageActionRowComponentBuilder,
-  ModalActionRowComponentBuilder,
-  ModalBuilder,
   SelectMenuBuilder,
-  TextInputBuilder,
+  User,
 } from "discord.js";
-import { ApplicationRejectReason } from "../interfaces/ApplicationRejectReason";
-import { WhitelistApplication } from "../interfaces/WhitelistApplication";
 
-export function adminApplicationEmbed(application: WhitelistApplication) {
+import { ApplicationRejectReason } from "../interfaces/ApplicationRejectReason";
+import { WhitelistApplication } from "@prisma/client";
+
+export function adminApplicationEmbed(
+  application: WhitelistApplication,
+  user: User
+) {
   return new EmbedBuilder()
-    .setTitle(`${application.discordUsername}'s Create Application`)
+    .setTitle(`${user.username}'s Create Application`)
     .addFields([
       {
-        name: "minecraft uuid",
+        name: "age",
+        value: `${application.age}`,
+      },
+      {
+        name: "reason",
+        value: `${application.reason}`,
+      },
+      {
+        name: "application_id",
+        value: application.id,
+      },
+      {
+        name: "minecraft_uuid",
         value: application.minecraftUUID,
         inline: false,
       },
       {
-        name: "discord name",
-        value: application.discordUsername,
+        name: "discord_hash",
+        value: `${user.username}#${user.discriminator}`,
         inline: false,
       },
       {
-        name: "discord id",
+        name: "discord_id",
         value: application.discordID,
         inline: false,
       },
-    ]);
+    ])
+    .setThumbnail(user.displayAvatarURL() || user.defaultAvatarURL);
 }
-
-export const adminApplicationEmbedComponents = [
-  new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setCustomId("create-application-accept")
-      .setLabel("Accept")
-      .setStyle(ButtonStyle.Success)
-  ),
-  new ActionRowBuilder<SelectMenuBuilder>().addComponents(
-    new SelectMenuBuilder().setCustomId("create-application-reject").addOptions(
-      {
-        label: "underage (< 13)",
-        value: ApplicationRejectReason.Underage,
-      },
-      {
-        label: "no reason provided",
-        value: ApplicationRejectReason.NoReasonProvided,
-      },
-      {
-        label: "bad reason",
-        value: ApplicationRejectReason.BadReason,
-      },
-      {
-        label: "offensive name",
-        value: ApplicationRejectReason.OffensiveName,
-      }
-    )
-  ),
-];
+export const adminApplicationEmbedComponents = (applicationID: string) => {
+  return [
+    new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId(`create-application-accept:${applicationID}`)
+        .setLabel("Accept")
+        .setStyle(ButtonStyle.Success)
+    ),
+    new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+      new SelectMenuBuilder()
+        .setCustomId(`create-application-reject:${applicationID}`)
+        .addOptions(
+          {
+            label: "underage (< 13)",
+            value: ApplicationRejectReason.Underage,
+          },
+          {
+            label: "no reason provided",
+            value: ApplicationRejectReason.NoReasonProvided,
+          },
+          {
+            label: "bad reason",
+            value: ApplicationRejectReason.BadReason,
+          },
+          {
+            label: "offensive name",
+            value: ApplicationRejectReason.OffensiveName,
+          },
+          {
+            label: "applications are suspended",
+            value: ApplicationRejectReason.Suspended,
+          }
+        )
+        .setPlaceholder("Reject with reason")
+    ),
+  ];
+};

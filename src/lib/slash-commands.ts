@@ -2,7 +2,6 @@ import {
   CommandInteraction,
   Interaction,
   RESTPostAPIChatInputApplicationCommandsJSONBody,
-  SlashCommandBuilder,
 } from "discord.js";
 import { REST, Routes } from "discord.js";
 

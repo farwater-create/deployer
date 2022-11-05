@@ -21,7 +21,6 @@ export class DeployerBot {
   private botSlashCommandGuildRepository?: BotSlashCommandGuildRepository;
   private clientOpts: ClientOptions;
   private plugins: Plugin[];
-  private client?: Client;
   constructor(opts: DeployerBotOptions) {
     this.clientID = opts.clientID;
     this.guildID = opts.guildID;
@@ -53,7 +52,6 @@ export class DeployerBot {
     );
     this.botSlashCommandGuildRepository.add(...this.commands);
     await this.botSlashCommandGuildRepository.push();
-    this.client = client;
     this.plugins.forEach((plugin) => plugin(client));
   }
 }

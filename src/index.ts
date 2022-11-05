@@ -1,24 +1,28 @@
 import { DeployerBotOptions, DeployerBot } from "./lib/DeployerBot";
-import dotenv from "dotenv";
 import { ping } from "./commands/ping";
-dotenv.config();
-
-const assertEnv = (key: string) => {
-  if (process.env[key]) {
-    return process.env[key] as string;
-  }
-  throw new Error(`${key} not found`);
-};
+import { apply } from "./commands/apply";
+import applicationDecisionListener from "./plugins/application-decision-listener";
+import { whitelist } from "./commands/whitelist";
+import { config } from "./lib/config";
+import { unwhitelist } from "./commands/unwhitelist";
+import applicationSubmitListener from "./plugins/application-submit-listener";
+import easterEgg from "./plugins/easter-egg";
+import memberLeaveUnwhitelist from "./plugins/member-leave-unwhitelist";
 
 const opts: DeployerBotOptions = {
-  guildID: assertEnv("GUILD_ID"),
-  clientID: assertEnv("CLIENT_ID"),
-  slashCommands: [ping],
-  plugins: [],
+  guildID: config.DISCORD_GUILD_ID,
+  clientID: config.DISCORD_CLIENT_ID,
+  slashCommands: [ping, apply, whitelist, unwhitelist],
+  plugins: [
+    applicationSubmitListener,
+    applicationDecisionListener,
+    easterEgg,
+    memberLeaveUnwhitelist,
+  ],
   clientOpts: {
     intents: ["MessageContent", "GuildBans", "GuildMessageReactions", "Guilds"],
   },
 };
 
 const bot = new DeployerBot(opts);
-bot.login(assertEnv("TOKEN"));
+bot.login(config.DISCORD_TOKEN);

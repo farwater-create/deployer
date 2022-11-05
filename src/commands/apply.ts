@@ -1,17 +1,5 @@
-import {
-  SlashCommandBuilder,
-  CommandInteraction,
-  ModalBuilder,
-  TextInputBuilder,
-  TextInputStyle,
-  ActionRowBuilder,
-  ModalActionRowComponentBuilder,
-  EmbedBuilder,
-  TextChannel,
-  Interaction,
-  ButtonComponent,
-  ComponentType,
-} from "discord.js";
+import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import prisma from "../lib/prisma";
 import { BotSlashCommand } from "../lib/slash-commands";
 import { whitelistApplicationModal } from "../templates/whitelist-application-modal";
 
@@ -21,7 +9,15 @@ export const apply: BotSlashCommand = {
     .setDescription("responds with pong")
     .toJSON(),
   handler: async function (interaction: CommandInteraction): Promise<void> {
-    interaction.guild?.channels.fetch("1013541292300582922");
+    const application = await prisma.whitelistApplication.findFirst({
+      where: {
+        discordID: interaction.user.id,
+      },
+    });
+    if (application) {
+      await interaction.reply("You've already submited an application.");
+      return;
+    }
     await interaction.showModal(whitelistApplicationModal);
   },
 };
