@@ -7,7 +7,7 @@ import {
   User,
 } from "discord.js";
 
-import { ApplicationRejectReason } from "../interfaces/ApplicationRejectReason";
+import { ApplicationRejectReason } from "../interfaces/application-reject-reason";
 import { WhitelistApplication } from "@prisma/client";
 
 export function adminApplicationEmbed(

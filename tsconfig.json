@@ -11,5 +11,5 @@
     "rootDir": "src",
     "outDir": "build"
   },
-  "exclude": ["node_modules", "src/**/*.spec.ts"]
+  "exclude": ["node_modules"]
 }
