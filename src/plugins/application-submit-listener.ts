@@ -13,6 +13,8 @@ export default (client: Client) => {
     if (interaction.customId !== "create-application") return;
     let age: number;
     try {
+      const x = 5;
+      console.log(x);
       age = Number.parseInt(interaction.fields.getTextInputValue("age"));
     } catch (error) {
       console.error(error);
