@@ -9,7 +9,7 @@ import applicationSubmitListener from "./plugins/application-submit-listener";
 import easterEgg from "./plugins/easter-egg";
 import memberLeaveUnwhitelist from "./plugins/member-leave-unwhitelist";
 
-const opts: DeployerBotOptions = {
+const options: DeployerBotOptions = {
   guildID: config.DISCORD_GUILD_ID,
   clientID: config.DISCORD_CLIENT_ID,
   slashCommands: [ping, apply, whitelist, unwhitelist],
@@ -24,5 +24,5 @@ const opts: DeployerBotOptions = {
   },
 };
 
-const bot = new DeployerBot(opts);
+const bot = new DeployerBot(options);
 bot.login(config.DISCORD_TOKEN);

@@ -1,15 +1,5 @@
-import axios from "axios";
-import {
-  CommandInteraction,
-  SlashCommandBuilder,
-  SlashCommandStringOption,
-} from "discord.js";
-import {
-  fetchUsername,
-  fetchUUID,
-  unwhitelistAccount,
-  whitelistAccount,
-} from "../lib/minecraft";
+import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { fetchUsername, unwhitelistAccount } from "../lib/minecraft";
 import prisma from "../lib/prisma";
 import { BotSlashCommand } from "../lib/slash-commands";
 import { whitelistEmbed } from "../templates/whitelist-embed";
@@ -54,6 +44,7 @@ export const unwhitelist: BotSlashCommand = {
         ephemeral: true,
       });
     } catch (error) {
+      console.error(error);
       await interaction.followUp("Something went wrong. Is the server up?");
     }
   },

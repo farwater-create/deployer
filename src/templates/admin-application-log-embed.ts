@@ -45,12 +45,14 @@ export function adminApplicationLogEmbed(
     ])
     .setThumbnail(user.displayAvatarURL() || user.defaultAvatarURL);
   switch (status) {
-    case "accepted":
+    case "accepted": {
       embed.setColor(Colors.Green);
       break;
-    case "rejected":
+    }
+    case "rejected": {
       embed.setColor(Colors.Red);
       break;
+    }
   }
   if (reason) {
     embed.addFields([

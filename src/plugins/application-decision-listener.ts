@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-await-expression-member */
 import { WhitelistApplication } from "@prisma/client";
 import {
   Client,
@@ -6,7 +7,7 @@ import {
   SelectMenuInteraction,
   TextChannel,
 } from "discord.js";
-import { ApplicationRejectReason } from "../interfaces/ApplicationRejectReason";
+import { ApplicationRejectReason } from "../interfaces/application-reject-reason";
 import { config } from "../lib/config";
 import { fetchUsername, whitelistAccount } from "../lib/minecraft";
 import prisma from "../lib/prisma";
@@ -99,7 +100,7 @@ export default (client: Client) => {
         }
       }
     } catch (error) {
-      await logChannel.send(`${JSON.stringify(error, null, 2)}`);
+      await logChannel.send(`${JSON.stringify(error, undefined, 2)}`);
     }
   });
 };
@@ -110,37 +111,46 @@ const handleReject = async (
 ) => {
   const reason = interaction.values[0];
   switch (reason) {
-    case ApplicationRejectReason.Underage:
+    case ApplicationRejectReason.Underage: {
       await (
         await interaction.user.createDM(true)
       ).send(
         "Your create application was denied for breaking discord terms of service. You must be at least thirteen years old."
       );
       break;
-    case ApplicationRejectReason.NoReasonProvided:
+    }
+    case ApplicationRejectReason.NoReasonProvided: {
       await (
         await interaction.user.createDM(true)
       ).send(
         "Your create application was denied for not providing a reason. Please try again."
       );
       break;
-    case ApplicationRejectReason.OffensiveName:
+    }
+    case ApplicationRejectReason.OffensiveName: {
       await (
         await interaction.user.createDM(true)
       ).send(
         "Your create application was denied for having an offensive name. Please change your name, rejoin and try again."
       );
       break;
-    case ApplicationRejectReason.BadReason:
-      await (
-        await interaction.user.createDM(true)
-      ).send("Your application was denied.");
-    case ApplicationRejectReason.Suspended:
+    }
+    case ApplicationRejectReason.BadReason: {
+      {
+        await (
+          await interaction.user.createDM(true)
+        ).send("Your application was denied.");
+      }
+      break;
+    }
+    case ApplicationRejectReason.Suspended: {
       await (
         await interaction.user.createDM(true)
       ).send(
         "Your application was denied because applications are suspended. Please try again at a later date. Check the announcements channel for more information."
       );
+      break;
+    }
   }
   await prisma.whitelistApplication.deleteMany({
     where: {
