@@ -6,15 +6,15 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model WhitelistApplication {
-  id String @id @default(uuid())
-  age Int
-  reason String
+  id            String @id @default(uuid())
+  age           Int
+  reason        String
   minecraftUUID String
-  discordID String
-  status String @default("pending")
+  discordID     String
+  status        String @default("pending")
 }
