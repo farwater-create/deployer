@@ -22,8 +22,7 @@ const reasonInput = new TextInputBuilder()
   .setStyle(TextInputStyle.Paragraph)
   .setCustomId("reason")
   .setLabel("Why do you want to join the server?")
-  .setRequired(true)
-  .setMaxLength(250);
+  .setRequired(true);
 
 const minecraftUsername = new TextInputBuilder()
   .setStyle(TextInputStyle.Short)

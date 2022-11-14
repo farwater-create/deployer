@@ -30,7 +30,7 @@ export const unwhitelist: BotSlashCommand = {
     const profile = await fetchUsername(application.minecraftUUID);
     await interaction.deferReply();
     try {
-      await unwhitelistAccount(profile.name);
+      await unwhitelistAccount({ uuid: profile.id, name: profile.name });
       await prisma.whitelistApplication.updateMany({
         where: {
           discordID: interaction.user.id,
@@ -45,7 +45,10 @@ export const unwhitelist: BotSlashCommand = {
       });
     } catch (error) {
       console.error(error);
-      await interaction.followUp("Something went wrong. Is the server up?");
+      await interaction.followUp({
+        content: "Something went wrong.",
+        ephemeral: true,
+      });
     }
   },
 };

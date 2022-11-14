@@ -28,8 +28,8 @@ export function adminApplicationLogEmbed(
         inline: false,
       },
       {
-        name: "discord_hash",
-        value: `${user.username}#${user.discriminator}`,
+        name: "discord",
+        value: `<@${user.id}>`,
         inline: false,
       },
       {

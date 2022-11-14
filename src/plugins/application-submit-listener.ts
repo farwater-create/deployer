@@ -11,11 +11,17 @@ export default (client: Client) => {
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isModalSubmit()) return;
     if (interaction.customId !== "create-application") return;
+
     let age: number;
     try {
       age = Number.parseInt(interaction.fields.getTextInputValue("age"));
-    } catch (error) {
-      console.error(error);
+      if (Number.isNaN(age)) {
+        throw new TypeError("age is not a number");
+      }
+      if (!Number.isInteger(age)) {
+        throw new TypeError("age is not an int");
+      }
+    } catch {
       await interaction.reply({
         ephemeral: true,
         content: "Age must be a valid number.",
@@ -47,13 +53,15 @@ export default (client: Client) => {
       status: "pending",
     };
 
+    console.log("Recieved application: \n", whitelistApplicationData);
+
     const whitelistApplication = await prisma.whitelistApplication.create({
       data: whitelistApplicationData,
     });
 
     await interaction.reply({
       ephemeral: true,
-      content: "your application has been submitted",
+      content: "Your application has been submitted",
     });
 
     const adminApplicationChannel = interaction.client.channels.cache.get(

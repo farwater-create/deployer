@@ -69,53 +69,58 @@ export const whitelist: BotSlashCommand = {
       return;
     }
 
-    const exists = await prisma.whitelistApplication.findFirst({
-      where: {
-        minecraftUUID: profile.id,
-      },
-    });
+    try {
+      const exists = await prisma.whitelistApplication.findFirst({
+        where: {
+          minecraftUUID: profile.id,
+        },
+      });
 
-    if (exists?.discordID != interaction.id) {
-      await interaction.reply(
-        "Someone else already owns that account, nice try."
-      );
-      return;
+      if (exists && exists.discordID != interaction.user.id) {
+        await interaction.reply({
+          content: "Someone else already whitelisted that account.",
+          ephemeral: true,
+        });
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+      await interaction.reply({
+        content: "Internal server error",
+        ephemeral: true,
+      });
     }
 
     if (application.minecraftUUID === profile.id) {
-      await interaction.deferReply();
-      await interaction.followUp({
-        content:
-          "Attempting to rewhitelist. Please be patient while the server handles your request.",
-        ephemeral: true,
-      });
       try {
-        await whitelistAccount(profile.name);
-        await interaction.followUp({
+        await whitelistAccount({ uuid: profile.id, name: profile.name });
+        await interaction.reply({
           embeds: [whitelistEmbed(profile).setTitle("Whitelist")],
           ephemeral: true,
         });
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          await interaction.followUp("Something went wrong. Is the server up?");
-        } else {
-          console.log(error);
-        }
+        await interaction.reply({
+          content: "Something went wrong. Is the server up?",
+          ephemeral: true,
+        });
+        console.error(error);
       }
       return;
     }
 
     const oldAccountProfile = await fetchUsername(application.minecraftUUID);
     try {
-      await interaction.deferReply();
-      await unwhitelistAccount(oldAccountProfile.name);
-      await interaction.followUp({
+      await unwhitelistAccount({
+        uuid: oldAccountProfile.id,
+        name: oldAccountProfile.name,
+      });
+      await interaction.reply({
         embeds: [
           whitelistEmbed(oldAccountProfile).setTitle("Removed From Whitelist"),
         ],
         ephemeral: true,
       });
-      await whitelistAccount(profile.name);
+      await whitelistAccount({ uuid: profile.id, name: profile.name });
       await prisma.whitelistApplication.updateMany({
         where: {
           discordID: interaction.id,
@@ -130,7 +135,7 @@ export const whitelist: BotSlashCommand = {
       });
     } catch (error) {
       if (axios.isAxiosError(error))
-        await interaction.followUp("Something went wrong. Is the server up?");
+        await interaction.followUp("Something went wrong.");
       else console.log(error);
     }
   },

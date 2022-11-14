@@ -40,8 +40,8 @@ export function adminApplicationEmbed(
         inline: false,
       },
       {
-        name: "discord_id",
-        value: application.discordID,
+        name: "discord",
+        value: `<@${application.discordID}>`,
         inline: false,
       },
     ])

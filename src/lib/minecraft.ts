@@ -1,5 +1,13 @@
-import axios, { AxiosResponse } from "axios";
-import { config } from "./config";
+import axios from "axios";
+import { executeCommand } from "./ptero/execute-command";
+import { PteroFS } from "./ptero/fs";
+
+interface MinecraftWhitelistEntry {
+  uuid: string;
+  name: string;
+}
+
+type MinecraftWhitelist = Array<MinecraftWhitelistEntry>;
 
 export const fetchUUID = async (
   name: string
@@ -21,30 +29,46 @@ export const fetchUsername = async (uuid: string) => {
   return resp.data as { name: string; id: string };
 };
 
-const commandEndpoint = `${config.PTERO_SERVER}/api/client/servers/${config.PTERO_SERVER_ID}/command`;
-
-const executeCommand = async (command: string): Promise<AxiosResponse> => {
-  const resp = await axios.post(
-    commandEndpoint,
-    {
-      command,
-    },
-    {
-      headers: {
-        Authorization: "Bearer " + config.PTERO_TOKEN,
-        "Content-Type": "application/json",
-        Accept: "Application/vnd.pterodactyl.v1+json",
-      },
+export const whitelistAccount = async (account: {
+  name: string;
+  uuid: string;
+}) => {
+  console.log("whitelisting " + account.name);
+  try {
+    await executeCommand("whitelist add " + account.name);
+  } catch {
+    const whitelistBuffer = await PteroFS.readFile("whitelist.json");
+    const whitelistJSON = whitelistBuffer.toString("utf8");
+    const whitelist = JSON.parse(whitelistJSON) as MinecraftWhitelist;
+    let exists = false;
+    for (const entry of whitelist) {
+      if (entry.uuid === account.uuid || account.name === entry.name) {
+        exists = true;
+      }
     }
-  );
-  return resp;
+    if (exists) {
+      return;
+    }
+    whitelist.push(account);
+    const buffer = Buffer.from(JSON.stringify(whitelist, undefined, 2), "utf8");
+    PteroFS.writeFile("whitelist.json", buffer);
+  }
 };
 
-export const whitelistAccount = async (accountName: string) => {
-  console.log("whitelisting " + accountName);
-  return await executeCommand("whitelist add " + accountName);
-};
-export const unwhitelistAccount = async (accountName: string) => {
-  console.log("unwhitelisting " + accountName);
-  return await executeCommand("whitelist remove " + accountName);
+export const unwhitelistAccount = async (account: {
+  name: string;
+  uuid: string;
+}) => {
+  try {
+    await executeCommand("whitelist remove " + account.name);
+  } catch {
+    const whitelistBuffer = await PteroFS.readFile("whitelist.json");
+    const whitelistJSON = whitelistBuffer.toString("utf8");
+    let whitelist = JSON.parse(whitelistJSON) as MinecraftWhitelist;
+    whitelist = whitelist.filter(
+      (item) => item.uuid != account.uuid && item.name != account.name
+    );
+    const buffer = Buffer.from(JSON.stringify(whitelist, undefined, 2), "utf8");
+    PteroFS.writeFile("whitelist.json", buffer);
+  }
 };

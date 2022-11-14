@@ -21,6 +21,7 @@
     "discord.js": "^14.6.0",
     "dotenv": "^16.0.3",
     "eslint-plugin-unicorn": "^44.0.2",
+    "p-queue": "^7.3.0",
     "ptero-api": "^1.0.6",
     "zod": "^3.19.1"
   },
@@ -47,12 +48,16 @@
     "typescript": "^4.8.4"
   },
   "scripts": {
+    "build": "tsc",
     "test": "yarn jest",
     "prepare": "husky install",
     "dev": "ts-node-dev src/index.ts",
     "production": "node build/index.js",
     "lint": "eslint src --ext .ts",
-    "format": "prettier --write --ignore-unknown src"
+    "format": "prettier --write --ignore-unknown src",
+    "migrate": "prisma migrate",
+    "serialize": "npx prisma generate && ts-node migrations/db-to-json.ts",
+    "deserialize": "npx prisma generate && ts-node migrations/json-to-db.ts"
   },
   "keywords": [],
   "eslintConfig": {

@@ -15,9 +15,13 @@ export const apply: BotSlashCommand = {
       },
     });
     if (application) {
-      await interaction.reply("You've already submited an application.");
+      await interaction.reply({
+        content: "You've already submited an application.",
+        ephemeral: true,
+      });
       return;
     }
     await interaction.showModal(whitelistApplicationModal);
   },
 };
+``;

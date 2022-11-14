@@ -2,15 +2,18 @@ import { Client } from "discord.js";
 import { fetchUsername, unwhitelistAccount } from "../lib/minecraft";
 import prisma from "../lib/prisma";
 
-export default (client: Client) => {
-  client.on("guildMemberRemove", async (member) => {
-    const application = await prisma.whitelistApplication.findFirst({
-      where: {
-        discordID: member.id,
-      },
-    });
-    if (!application) return;
-    const profile = await fetchUsername(application.minecraftUUID);
-    await unwhitelistAccount(profile.name);
+const deleteUserHandler = async (id: string) => {
+  const application = await prisma.whitelistApplication.findFirst({
+    where: {
+      discordID: id,
+    },
   });
+  if (!application) return;
+  const profile = await fetchUsername(application.minecraftUUID);
+  await unwhitelistAccount({ uuid: id, name: profile.name });
+};
+
+export default (client: Client) => {
+  client.on("guildMemberRemove", (member) => deleteUserHandler(member.user.id));
+  client.on("guildBanAdd", (ban) => deleteUserHandler(ban.user.id));
 };

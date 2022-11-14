@@ -1,4 +1,4 @@
-import { DeployerBotOptions, DeployerBot } from "./lib/DeployerBot";
+import { DeployerBotOptions, DeployerBot } from "./lib/deployer-bot";
 import { ping } from "./commands/ping";
 import { apply } from "./commands/apply";
 import applicationDecisionListener from "./plugins/application-decision-listener";
@@ -8,6 +8,7 @@ import { unwhitelist } from "./commands/unwhitelist";
 import applicationSubmitListener from "./plugins/application-submit-listener";
 import easterEgg from "./plugins/easter-egg";
 import memberLeaveUnwhitelist from "./plugins/member-leave-unwhitelist";
+import applicationEmbedListener from "./plugins/application-embed-listener";
 
 const options: DeployerBotOptions = {
   guildID: config.DISCORD_GUILD_ID,
@@ -16,6 +17,7 @@ const options: DeployerBotOptions = {
   plugins: [
     applicationSubmitListener,
     applicationDecisionListener,
+    applicationEmbedListener,
     easterEgg,
     memberLeaveUnwhitelist,
   ],

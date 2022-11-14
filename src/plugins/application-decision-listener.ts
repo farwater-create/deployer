@@ -6,13 +6,20 @@ import {
   Interaction,
   SelectMenuInteraction,
   TextChannel,
+  User,
 } from "discord.js";
 import { ApplicationRejectReason } from "../interfaces/application-reject-reason";
 import { config } from "../lib/config";
 import { fetchUsername, whitelistAccount } from "../lib/minecraft";
 import prisma from "../lib/prisma";
 import { adminApplicationLogEmbed } from "../templates/admin-application-log-embed";
+import gettingStarted from "../templates/getting-started";
 import { whitelistEmbed } from "../templates/whitelist-embed";
+import whitelistError from "../templates/whitelist-error";
+import whitelistErrorOffensiveName from "../templates/whitelist-error-offensive-name";
+import whitelistErrorSuspended from "../templates/whitelist-error-suspended";
+
+const ACCESS_CREATE_ROLE = "795578910221664266";
 
 export default (client: Client) => {
   client.on(Events.InteractionCreate, async (interaction) => {
@@ -37,14 +44,11 @@ export default (client: Client) => {
         if (application) {
           try {
             handleAccept(application, interaction);
+            const user =
+              client.users.cache.get(application.discordID) ||
+              (await client.users.fetch(application.discordID));
             await logChannel.send({
-              embeds: [
-                adminApplicationLogEmbed(
-                  application,
-                  interaction.user,
-                  "accepted"
-                ),
-              ],
+              embeds: [adminApplicationLogEmbed(application, user, "accepted")],
             });
             await interaction.message.delete();
           } catch (error) {
@@ -74,12 +78,17 @@ export default (client: Client) => {
         });
         if (application) {
           try {
-            handleReject(application, interaction);
+            const user =
+              interaction.client.users.cache.get(application.discordID) ||
+              (await interaction.client.users.fetch(application.discordID));
+            if (!user) return;
+            const reason = interaction.values[0];
+            await handleReject(user, reason);
             await logChannel.send({
               embeds: [
                 adminApplicationLogEmbed(
                   application,
-                  interaction.user,
+                  user,
                   "rejected",
                   interaction.values[0]
                 ),
@@ -105,15 +114,11 @@ export default (client: Client) => {
   });
 };
 
-const handleReject = async (
-  application: WhitelistApplication,
-  interaction: SelectMenuInteraction
-) => {
-  const reason = interaction.values[0];
+const handleReject = async (user: User, reason: string) => {
   switch (reason) {
     case ApplicationRejectReason.Underage: {
       await (
-        await interaction.user.createDM(true)
+        await user.createDM(true)
       ).send(
         "Your create application was denied for breaking discord terms of service. You must be at least thirteen years old."
       );
@@ -121,40 +126,30 @@ const handleReject = async (
     }
     case ApplicationRejectReason.NoReasonProvided: {
       await (
-        await interaction.user.createDM(true)
+        await user.createDM(true)
       ).send(
         "Your create application was denied for not providing a reason. Please try again."
       );
       break;
     }
     case ApplicationRejectReason.OffensiveName: {
-      await (
-        await interaction.user.createDM(true)
-      ).send(
-        "Your create application was denied for having an offensive name. Please change your name, rejoin and try again."
-      );
+      await (await user.createDM(true)).send(whitelistErrorOffensiveName);
       break;
     }
     case ApplicationRejectReason.BadReason: {
       {
-        await (
-          await interaction.user.createDM(true)
-        ).send("Your application was denied.");
+        await (await user.createDM(true)).send("Your application was denied.");
       }
       break;
     }
     case ApplicationRejectReason.Suspended: {
-      await (
-        await interaction.user.createDM(true)
-      ).send(
-        "Your application was denied because applications are suspended. Please try again at a later date. Check the announcements channel for more information."
-      );
+      await (await user.createDM(true)).send(whitelistErrorSuspended);
       break;
     }
   }
   await prisma.whitelistApplication.deleteMany({
     where: {
-      discordID: interaction.user.id,
+      discordID: user.id,
     },
   });
 };
@@ -179,9 +174,28 @@ const handleAccept = async (
   }
   const DMChannel = await user.createDM(true);
   const profile = await fetchUsername(application.minecraftUUID);
-  await whitelistAccount(profile.name);
-  DMChannel.send("Your application was approved. Welcome to farwater!");
-  DMChannel.send({
-    embeds: [whitelistEmbed(profile)],
-  });
+  const accessCreateRole = await interaction.guild?.roles.fetch(
+    ACCESS_CREATE_ROLE
+  );
+  const member = interaction.guild?.members.cache.get(application.discordID);
+  if (!member || !accessCreateRole) {
+    console.error("could not find member or role for application!");
+    return;
+  }
+  try {
+    await interaction.guild?.members.addRole({
+      user: member,
+      role: accessCreateRole,
+      reason: "application accepted",
+    });
+    await DMChannel.send(gettingStarted);
+    await whitelistAccount({ uuid: profile.id, name: profile.name });
+    await DMChannel.send({
+      embeds: [whitelistEmbed(profile)],
+    });
+  } catch (error) {
+    console.error(error);
+    await DMChannel.send(whitelistError);
+    return;
+  }
 };
