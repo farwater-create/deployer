@@ -9,7 +9,7 @@ export const apply: BotSlashCommand = {
     .setDescription("responds with pong")
     .toJSON(),
   handler: async function (interaction: CommandInteraction): Promise<void> {
-    const application = await prisma.WhitelistApplication.findFirst({
+    const application = await prisma.whitelistApplication.findFirst({
       where: {
         discordID: interaction.user.id,
       },

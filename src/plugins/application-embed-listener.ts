@@ -57,7 +57,7 @@ export default async (client: Client) => {
       interaction.isButton() &&
       interaction.customId.startsWith("create-application-apply")
     ) {
-      const application = await prisma.WhitelistApplication.findFirst({
+      const application = await prisma.whitelistApplication.findFirst({
         where: {
           discordID: interaction.user.id,
         },

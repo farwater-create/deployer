@@ -11,7 +11,7 @@ export const unwhitelist: BotSlashCommand = {
     .setDescription("unwhitelist your account")
     .toJSON(),
   handler: async function (interaction: CommandInteraction): Promise<void> {
-    const application = await prisma.WhitelistApplication.findFirst({
+    const application = await prisma.whitelistApplication.findFirst({
       where: {
         discordID: interaction.user.id,
       },
@@ -31,7 +31,7 @@ export const unwhitelist: BotSlashCommand = {
     await interaction.deferReply();
     try {
       await unwhitelistAccount({ uuid: profile.id, name: profile.name });
-      await prisma.WhitelistApplication.updateMany({
+      await prisma.whitelistApplication.updateMany({
         where: {
           discordID: interaction.user.id,
         },

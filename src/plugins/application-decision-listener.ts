@@ -29,7 +29,7 @@ export default (client: Client) => {
         interaction.isButton() &&
         interaction.customId.startsWith("create-application-accept:")
       ) {
-        const application = await prisma.WhitelistApplication.findUnique({
+        const application = await prisma.whitelistApplication.findUnique({
           where: {
             id: interaction.customId.split(":")[1],
           },
@@ -47,7 +47,7 @@ export default (client: Client) => {
           } catch (error) {
             console.error(error);
             await interaction.message.delete();
-            await prisma.WhitelistApplication.delete({
+            await prisma.whitelistApplication.delete({
               where: {
                 id: application.id,
               },
@@ -64,7 +64,7 @@ export default (client: Client) => {
         interaction.isSelectMenu() &&
         interaction.customId.startsWith("create-application-reject:")
       ) {
-        const application = await prisma.WhitelistApplication.findUnique({
+        const application = await prisma.whitelistApplication.findUnique({
           where: {
             id: interaction.customId.split(":")[1],
           },
@@ -90,7 +90,7 @@ export default (client: Client) => {
             await interaction.message.delete();
           } catch (error) {
             console.error(error);
-            await prisma.WhitelistApplication.delete({
+            await prisma.whitelistApplication.delete({
               where: {
                 id: application.id,
               },
@@ -140,7 +140,7 @@ const handleReject = async (user: User, reason: string) => {
       break;
     }
   }
-  await prisma.WhitelistApplication.deleteMany({
+  await prisma.whitelistApplication.deleteMany({
     where: {
       discordID: user.id,
     },
@@ -151,7 +151,7 @@ const handleAccept = async (
   application: WhitelistApplication,
   interaction: Interaction
 ) => {
-  await prisma.WhitelistApplication.update({
+  await prisma.whitelistApplication.update({
     where: {
       id: application.id,
     },

@@ -55,7 +55,7 @@ export default (client: Client) => {
 
     console.log("Recieved application: \n", WhitelistApplicationData);
 
-    const WhitelistApplication = await prisma.WhitelistApplication.create({
+    const WhitelistApplication = await prisma.whitelistApplication.create({
       data: WhitelistApplicationData,
     });
 
