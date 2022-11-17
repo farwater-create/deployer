@@ -4,4 +4,5 @@ export enum ApplicationRejectReason {
   BadReason = "bad-reason",
   OffensiveName = "offensive-name",
   Suspended = "suspended",
+  BadAccount = "bad-account",
 }

@@ -137,6 +137,7 @@ const handleReject = async (user: User, reason: string) => {
       await (await user.createDM(true)).send(whitelistErrorOffensiveName);
       break;
     }
+    case ApplicationRejectReason.BadAccount:
     case ApplicationRejectReason.BadReason: {
       {
         await (await user.createDM(true)).send("Your application was denied.");
