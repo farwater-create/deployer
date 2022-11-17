@@ -9,11 +9,12 @@ import applicationSubmitListener from "./plugins/application-submit-listener";
 import easterEgg from "./plugins/easter-egg";
 import memberLeaveUnwhitelist from "./plugins/member-leave-unwhitelist";
 import applicationEmbedListener from "./plugins/application-embed-listener";
+import { whois } from "./commands/whois";
 
 const options: DeployerBotOptions = {
   guildID: config.DISCORD_GUILD_ID,
   clientID: config.DISCORD_CLIENT_ID,
-  slashCommands: [ping, apply, whitelist, unwhitelist],
+  slashCommands: [ping, apply, whitelist, unwhitelist, whois],
   plugins: [
     applicationSubmitListener,
     applicationDecisionListener,

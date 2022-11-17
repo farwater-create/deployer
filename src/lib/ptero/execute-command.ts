@@ -13,12 +13,14 @@ export const executeCommand = async (
   if (commandSet.has(command)) {
     return CommandExistsError;
   }
-
+  console.log("added command: " + command + " to the queue");
   if (!commandQueueInterval) {
     setInterval(() => {
       const handler = commandQueue.pop();
       if (handler) {
+        commandSet.delete(command);
         handler();
+        console.log("ran command: " + command);
       } else {
         clearInterval(commandQueueInterval);
         commandQueueInterval = undefined;
