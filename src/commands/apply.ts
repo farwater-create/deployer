@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import prisma from "../lib/prisma";
 import { BotSlashCommand } from "../lib/slash-commands";
-import { whitelistApplicationModal } from "../templates/whitelist-application-modal";
+import { WhitelistApplicationModal } from "../templates/whitelist-application-modal";
 
 export const apply: BotSlashCommand = {
   json: new SlashCommandBuilder()
@@ -21,7 +21,7 @@ export const apply: BotSlashCommand = {
       });
       return;
     }
-    await interaction.showModal(whitelistApplicationModal);
+    await interaction.showModal(WhitelistApplicationModal);
   },
 };
 ``;

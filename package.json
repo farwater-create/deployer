@@ -56,8 +56,8 @@
     "lint": "eslint src --ext .ts",
     "format": "prettier --write --ignore-unknown src",
     "migrate": "prisma migrate",
-    "serialize": "npx prisma generate && ts-node migrations/db-to-json.ts",
-    "deserialize": "npx prisma generate && ts-node migrations/json-to-db.ts"
+    "serialize": "npx prisma generate && ts-node migrations/database-to-json.ts",
+    "deserialize": "npx prisma generate && ts-node migrations/json-to-database.ts"
   },
   "keywords": [],
   "eslintConfig": {

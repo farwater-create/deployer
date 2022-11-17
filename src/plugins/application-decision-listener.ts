@@ -1,13 +1,6 @@
 /* eslint-disable unicorn/no-await-expression-member */
 import { WhitelistApplication } from "@prisma/client";
-import {
-  Client,
-  Events,
-  Interaction,
-  SelectMenuInteraction,
-  TextChannel,
-  User,
-} from "discord.js";
+import { Client, Events, Interaction, TextChannel, User } from "discord.js";
 import { ApplicationRejectReason } from "../interfaces/application-reject-reason";
 import { config } from "../lib/config";
 import { fetchUsername, whitelistAccount } from "../lib/minecraft";
