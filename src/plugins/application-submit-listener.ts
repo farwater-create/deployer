@@ -45,7 +45,7 @@ export default (client: Client) => {
       return;
     }
 
-    const whitelistApplicationData = {
+    const WhitelistApplicationData = {
       discordID: interaction.user.id,
       reason,
       age,
@@ -53,10 +53,10 @@ export default (client: Client) => {
       status: "pending",
     };
 
-    console.log("Recieved application: \n", whitelistApplicationData);
+    console.log("Recieved application: \n", WhitelistApplicationData);
 
-    const whitelistApplication = await prisma.whitelistApplication.create({
-      data: whitelistApplicationData,
+    const WhitelistApplication = await prisma.WhitelistApplication.create({
+      data: WhitelistApplicationData,
     });
 
     await interaction.reply({
@@ -69,8 +69,8 @@ export default (client: Client) => {
     ) as TextChannel;
 
     await adminApplicationChannel.send({
-      embeds: [adminApplicationEmbed(whitelistApplication, interaction.user)],
-      components: adminApplicationEmbedComponents(whitelistApplication.id),
+      embeds: [adminApplicationEmbed(WhitelistApplication, interaction.user)],
+      components: adminApplicationEmbedComponents(WhitelistApplication.id),
     });
   });
 };

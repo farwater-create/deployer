@@ -3,7 +3,7 @@ import { fetchUsername, unwhitelistAccount } from "../lib/minecraft";
 import prisma from "../lib/prisma";
 
 const deleteUserHandler = async (id: string) => {
-  const application = await prisma.whitelistApplication.findFirst({
+  const application = await prisma.WhitelistApplication.findFirst({
     where: {
       discordID: id,
     },

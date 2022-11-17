@@ -27,7 +27,7 @@ export const whitelist: BotSlashCommand = {
     )
     .toJSON(),
   handler: async function (interaction: CommandInteraction): Promise<void> {
-    const application = await prisma.whitelistApplication.findFirst({
+    const application = await prisma.WhitelistApplication.findFirst({
       where: {
         discordID: interaction.user.id,
       },
@@ -70,7 +70,7 @@ export const whitelist: BotSlashCommand = {
     }
 
     try {
-      const exists = await prisma.whitelistApplication.findFirst({
+      const exists = await prisma.WhitelistApplication.findFirst({
         where: {
           minecraftUUID: profile.id,
         },
@@ -121,7 +121,7 @@ export const whitelist: BotSlashCommand = {
         ephemeral: true,
       });
       await whitelistAccount({ uuid: profile.id, name: profile.name });
-      await prisma.whitelistApplication.updateMany({
+      await prisma.WhitelistApplication.updateMany({
         where: {
           discordID: interaction.id,
         },

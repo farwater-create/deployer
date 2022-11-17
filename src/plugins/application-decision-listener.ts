@@ -1,13 +1,6 @@
 /* eslint-disable unicorn/no-await-expression-member */
 import { WhitelistApplication } from "@prisma/client";
-import {
-  Client,
-  Events,
-  Interaction,
-  SelectMenuInteraction,
-  TextChannel,
-  User,
-} from "discord.js";
+import { Client, Events, Interaction, TextChannel, User } from "discord.js";
 import { ApplicationRejectReason } from "../interfaces/application-reject-reason";
 import { config } from "../lib/config";
 import { fetchUsername, whitelistAccount } from "../lib/minecraft";
@@ -36,7 +29,7 @@ export default (client: Client) => {
         interaction.isButton() &&
         interaction.customId.startsWith("create-application-accept:")
       ) {
-        const application = await prisma.whitelistApplication.findUnique({
+        const application = await prisma.WhitelistApplication.findUnique({
           where: {
             id: interaction.customId.split(":")[1],
           },
@@ -54,7 +47,7 @@ export default (client: Client) => {
           } catch (error) {
             console.error(error);
             await interaction.message.delete();
-            await prisma.whitelistApplication.delete({
+            await prisma.WhitelistApplication.delete({
               where: {
                 id: application.id,
               },
@@ -71,7 +64,7 @@ export default (client: Client) => {
         interaction.isSelectMenu() &&
         interaction.customId.startsWith("create-application-reject:")
       ) {
-        const application = await prisma.whitelistApplication.findUnique({
+        const application = await prisma.WhitelistApplication.findUnique({
           where: {
             id: interaction.customId.split(":")[1],
           },
@@ -97,7 +90,7 @@ export default (client: Client) => {
             await interaction.message.delete();
           } catch (error) {
             console.error(error);
-            await prisma.whitelistApplication.delete({
+            await prisma.WhitelistApplication.delete({
               where: {
                 id: application.id,
               },
@@ -147,7 +140,7 @@ const handleReject = async (user: User, reason: string) => {
       break;
     }
   }
-  await prisma.whitelistApplication.deleteMany({
+  await prisma.WhitelistApplication.deleteMany({
     where: {
       discordID: user.id,
     },
@@ -158,7 +151,7 @@ const handleAccept = async (
   application: WhitelistApplication,
   interaction: Interaction
 ) => {
-  await prisma.whitelistApplication.update({
+  await prisma.WhitelistApplication.update({
     where: {
       id: application.id,
     },

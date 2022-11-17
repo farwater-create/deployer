@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import prisma from "../lib/prisma";
 import { BotSlashCommand } from "../lib/slash-commands";
-import { whitelistApplicationModal } from "../templates/whitelist-application-modal";
+import { WhitelistApplicationModal } from "../templates/whitelist-application-modal";
 
 export const apply: BotSlashCommand = {
   json: new SlashCommandBuilder()
@@ -9,7 +9,7 @@ export const apply: BotSlashCommand = {
     .setDescription("responds with pong")
     .toJSON(),
   handler: async function (interaction: CommandInteraction): Promise<void> {
-    const application = await prisma.whitelistApplication.findFirst({
+    const application = await prisma.WhitelistApplication.findFirst({
       where: {
         discordID: interaction.user.id,
       },
@@ -21,7 +21,7 @@ export const apply: BotSlashCommand = {
       });
       return;
     }
-    await interaction.showModal(whitelistApplicationModal);
+    await interaction.showModal(WhitelistApplicationModal);
   },
 };
 ``;

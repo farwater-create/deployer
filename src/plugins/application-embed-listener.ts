@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { config } from "../lib/config";
 import prisma from "../lib/prisma";
-import { whitelistApplicationModal } from "../templates/whitelist-application-modal";
+import { WhitelistApplicationModal } from "../templates/whitelist-application-modal";
 
 export default async (client: Client) => {
   console.log("started application-embed-listener");
@@ -57,7 +57,7 @@ export default async (client: Client) => {
       interaction.isButton() &&
       interaction.customId.startsWith("create-application-apply")
     ) {
-      const application = await prisma.whitelistApplication.findFirst({
+      const application = await prisma.WhitelistApplication.findFirst({
         where: {
           discordID: interaction.user.id,
         },
@@ -69,7 +69,7 @@ export default async (client: Client) => {
         });
         return;
       }
-      await interaction.showModal(whitelistApplicationModal);
+      await interaction.showModal(WhitelistApplicationModal);
     }
   });
 };

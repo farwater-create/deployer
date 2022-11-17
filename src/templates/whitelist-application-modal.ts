@@ -49,4 +49,4 @@ const minecraftUsernameActionRow =
 
 modal.addComponents(ageActionRow, reasonActionRow, minecraftUsernameActionRow);
 
-export const whitelistApplicationModal = modal;
+export const WhitelistApplicationModal = modal;
