@@ -20,7 +20,7 @@ async function main() {
   const whitelist = whitelistSchema.parse(JSON.parse(whitelistJSON));
   for (const entry of whitelist) {
     try {
-      await client.WhitelistApplication.create({
+      await client.whitelistApplication.create({
         data: entry,
       });
     } catch (error) {
