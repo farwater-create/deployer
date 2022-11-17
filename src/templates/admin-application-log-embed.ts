@@ -4,6 +4,7 @@ import { Colors, EmbedBuilder, User } from "discord.js";
 export function adminApplicationLogEmbed(
   application: WhitelistApplication,
   user: User,
+  reviewer: User,
   status: "accepted" | "rejected",
   reason?: string
 ) {
@@ -41,6 +42,10 @@ export function adminApplicationLogEmbed(
         name: "status",
         value: status,
         inline: false,
+      },
+      {
+        name: "reviewer",
+        value: `<@${reviewer.id}>`,
       },
     ])
     .setThumbnail(user.displayAvatarURL() || user.defaultAvatarURL);

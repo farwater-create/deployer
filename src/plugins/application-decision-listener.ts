@@ -41,7 +41,14 @@ export default (client: Client) => {
               client.users.cache.get(application.discordID) ||
               (await client.users.fetch(application.discordID));
             await logChannel.send({
-              embeds: [adminApplicationLogEmbed(application, user, "accepted")],
+              embeds: [
+                adminApplicationLogEmbed(
+                  application,
+                  user,
+                  interaction.user,
+                  "accepted"
+                ),
+              ],
             });
             await interaction.message.delete();
           } catch (error) {
@@ -82,6 +89,7 @@ export default (client: Client) => {
                 adminApplicationLogEmbed(
                   application,
                   user,
+                  interaction.user,
                   "rejected",
                   interaction.values[0]
                 ),

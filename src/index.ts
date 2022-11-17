@@ -6,7 +6,6 @@ import { whitelist } from "./commands/whitelist";
 import { config } from "./lib/config";
 import { unwhitelist } from "./commands/unwhitelist";
 import applicationSubmitListener from "./plugins/application-submit-listener";
-import easterEgg from "./plugins/easter-egg";
 import memberLeaveUnwhitelist from "./plugins/member-leave-unwhitelist";
 import applicationEmbedListener from "./plugins/application-embed-listener";
 import { whois } from "./commands/whois";
@@ -19,7 +18,6 @@ const options: DeployerBotOptions = {
     applicationSubmitListener,
     applicationDecisionListener,
     applicationEmbedListener,
-    easterEgg,
     memberLeaveUnwhitelist,
   ],
   clientOpts: {
