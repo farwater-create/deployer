@@ -2,32 +2,26 @@ import { AxiosResponse } from "axios";
 import { config } from "../config";
 import { serverAPI } from "./client";
 const commandQueue: Array<() => void> = [];
-const commandSet: Set<string> = new Set();
 let commandQueueInterval: NodeJS.Timer | undefined;
-
-const CommandExistsError = new Error("command already exists");
-
+const COMMAND_COOLDOWN = 10 * 1000;
 export const executeCommand = async (
   command: string
 ): Promise<AxiosResponse | Error> => {
-  if (commandSet.has(command)) {
-    return CommandExistsError;
-  }
   console.log("added command: " + command + " to the queue");
   if (!commandQueueInterval) {
-    setInterval(() => {
+    const handleCommand = () => {
       const handler = commandQueue.pop();
       if (handler) {
-        commandSet.delete(command);
         handler();
         console.log("ran command: " + command);
       } else {
         clearInterval(commandQueueInterval);
         commandQueueInterval = undefined;
       }
-    }, 1000);
+    };
+    handleCommand();
+    setInterval(() => handleCommand, COMMAND_COOLDOWN);
   }
-
   return new Promise((resolve, reject) => {
     commandQueue.push(() => {
       serverAPI
