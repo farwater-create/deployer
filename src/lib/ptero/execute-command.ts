@@ -3,7 +3,7 @@ import { config } from "../config";
 import { serverAPI } from "./client";
 const commandQueue: Array<() => void> = [];
 let commandQueueInterval: NodeJS.Timer | undefined;
-const COMMAND_COOLDOWN = 10 * 1000;
+const COMMAND_COOLDOWN = 1000;
 export const executeCommand = async (
   command: string
 ): Promise<AxiosResponse | Error> => {
