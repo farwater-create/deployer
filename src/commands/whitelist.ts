@@ -13,7 +13,6 @@ import {
 import prisma from "../lib/prisma";
 import { BotSlashCommand } from "../lib/slash-commands";
 import { whitelistEmbed } from "../templates/whitelist-embed";
-import { apply } from "./apply";
 
 export const whitelist: BotSlashCommand = {
   json: new SlashCommandBuilder()
@@ -38,7 +37,10 @@ export const whitelist: BotSlashCommand = {
     });
 
     if (!application) {
-      apply.handler(interaction);
+      await interaction.reply({
+        content: "You need to submit an application first.",
+        ephemeral: true,
+      });
       return;
     }
 
@@ -81,7 +83,7 @@ export const whitelist: BotSlashCommand = {
       });
 
       if (exists && exists.discordID != interaction.user.id) {
-        await interaction.reply({
+        await interaction.followUp({
           content: "Someone else already whitelisted that account.",
           ephemeral: true,
         });
@@ -118,7 +120,7 @@ export const whitelist: BotSlashCommand = {
         uuid: oldAccountProfile.id,
         name: oldAccountProfile.name,
       });
-      await interaction.reply({
+      await interaction.followUp({
         embeds: [
           whitelistEmbed(oldAccountProfile).setTitle("Removed From Whitelist"),
         ],

@@ -26,13 +26,14 @@ export const whois: BotSlashCommand = {
     )
     .toJSON(),
   handler: async function (interaction: CommandInteraction): Promise<void> {
+    await interaction.deferReply();
     let user = interaction.options.getUser("discord", false);
     const minecraftUsername = interaction.options
       .get("minecraft", false)
       ?.value?.toString();
 
     if (!user && !minecraftUsername) {
-      await interaction.reply(
+      await interaction.followUp(
         "you must provide a value for discord user or minecraft username"
       );
       return;
@@ -60,7 +61,7 @@ export const whois: BotSlashCommand = {
         },
       });
       if (!application) {
-        await interaction.reply(
+        await interaction.followUp(
           `user ${minecraftUsername} is not part of Farwater`
         );
         return;
@@ -69,7 +70,7 @@ export const whois: BotSlashCommand = {
         interaction.client.users.cache.get(application.discordID) ||
         (await interaction.client.users.fetch(application.discordID));
       if (!user) {
-        await interaction.reply(
+        await interaction.followUp(
           `the user associated with this account is not on the server`
         );
       }
@@ -80,28 +81,28 @@ export const whois: BotSlashCommand = {
         },
       });
       if (!application) {
-        await interaction.reply(`user ${user.username} is not registered.`);
+        await interaction.followUp(`user ${user.username} is not registered.`);
         return;
       }
       try {
         minecraftAccount = await fetchUsername(application?.minecraftUUID);
       } catch {
-        await interaction.reply(
+        await interaction.followUp(
           `error while fetching ${user.username}'s minecraft account`
         );
         return;
       }
     } else {
-      await interaction.reply("Internal server error");
+      await interaction.followUp("Internal server error");
       return;
     }
 
     if (!application || !user) {
-      await interaction.reply("Internal server error");
+      await interaction.followUp("Internal server error");
       return;
     }
 
-    await interaction.reply({
+    await interaction.followUp({
       embeds: [userEmbed(minecraftAccount, user)],
     });
   },
