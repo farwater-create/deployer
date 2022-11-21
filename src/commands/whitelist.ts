@@ -13,7 +13,6 @@ import {
 import prisma from "../lib/prisma";
 import { BotSlashCommand } from "../lib/slash-commands";
 import { whitelistEmbed } from "../templates/whitelist-embed";
-import { apply } from "./apply";
 
 export const whitelist: BotSlashCommand = {
   json: new SlashCommandBuilder()
@@ -27,6 +26,10 @@ export const whitelist: BotSlashCommand = {
     )
     .toJSON(),
   handler: async function (interaction: CommandInteraction): Promise<void> {
+    await interaction.deferReply({
+      ephemeral: true,
+    });
+
     const application = await prisma.whitelistApplication.findFirst({
       where: {
         discordID: interaction.user.id,
@@ -34,12 +37,15 @@ export const whitelist: BotSlashCommand = {
     });
 
     if (!application) {
-      apply.handler(interaction);
+      await interaction.reply({
+        content: "You need to submit an application first.",
+        ephemeral: true,
+      });
       return;
     }
 
     if (application.status != "accepted") {
-      await interaction.reply({
+      await interaction.followUp({
         content: "Your application is still awaiting approval.",
         ephemeral: true,
       });
@@ -62,7 +68,7 @@ export const whitelist: BotSlashCommand = {
       } else {
         console.log(error);
       }
-      await interaction.reply({
+      await interaction.followUp({
         content: "Minecraft account not found.",
         ephemeral: true,
       });
@@ -77,7 +83,7 @@ export const whitelist: BotSlashCommand = {
       });
 
       if (exists && exists.discordID != interaction.user.id) {
-        await interaction.reply({
+        await interaction.followUp({
           content: "Someone else already whitelisted that account.",
           ephemeral: true,
         });
@@ -85,7 +91,7 @@ export const whitelist: BotSlashCommand = {
       }
     } catch (error) {
       console.error(error);
-      await interaction.reply({
+      await interaction.followUp({
         content: "Internal server error",
         ephemeral: true,
       });
@@ -94,12 +100,12 @@ export const whitelist: BotSlashCommand = {
     if (application.minecraftUUID === profile.id) {
       try {
         await whitelistAccount({ uuid: profile.id, name: profile.name });
-        await interaction.reply({
+        await interaction.followUp({
           embeds: [whitelistEmbed(profile).setTitle("Whitelist")],
           ephemeral: true,
         });
       } catch (error) {
-        await interaction.reply({
+        await interaction.followUp({
           content: "Something went wrong. Is the server up?",
           ephemeral: true,
         });
@@ -114,7 +120,7 @@ export const whitelist: BotSlashCommand = {
         uuid: oldAccountProfile.id,
         name: oldAccountProfile.name,
       });
-      await interaction.reply({
+      await interaction.followUp({
         embeds: [
           whitelistEmbed(oldAccountProfile).setTitle("Removed From Whitelist"),
         ],

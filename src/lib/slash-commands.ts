@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-array-for-each */
 import {
   CommandInteraction,
   Interaction,
@@ -39,7 +40,7 @@ export class BotSlashCommandGuildRepository {
     this.commands.forEach((command: BotSlashCommand) => {
       body.push(command.json);
     });
-    const data = await this.rest.put(
+    await this.rest.put(
       Routes.applicationGuildCommands(this.clientID, this.guildID),
       { body }
     );

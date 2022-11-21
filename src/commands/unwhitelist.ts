@@ -11,6 +11,9 @@ export const unwhitelist: BotSlashCommand = {
     .setDescription("unwhitelist your account")
     .toJSON(),
   handler: async function (interaction: CommandInteraction): Promise<void> {
+    await interaction.deferReply({
+      ephemeral: true,
+    });
     const application = await prisma.whitelistApplication.findFirst({
       where: {
         discordID: interaction.user.id,
@@ -21,7 +24,7 @@ export const unwhitelist: BotSlashCommand = {
       return;
     }
     if (application.status != "accepted") {
-      await interaction.reply({
+      await interaction.followUp({
         content: "Your application is still awaiting approval.",
         ephemeral: true,
       });

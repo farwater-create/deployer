@@ -4,7 +4,6 @@ import { apply } from "./commands/apply";
 import applicationDecisionListener from "./plugins/application-decision-listener";
 import { whitelist } from "./commands/whitelist";
 import { config } from "./lib/config";
-import { unwhitelist } from "./commands/unwhitelist";
 import applicationSubmitListener from "./plugins/application-submit-listener";
 import memberLeaveUnwhitelist from "./plugins/member-leave-unwhitelist";
 import applicationEmbedListener from "./plugins/application-embed-listener";
@@ -13,7 +12,7 @@ import { whois } from "./commands/whois";
 const options: DeployerBotOptions = {
   guildID: config.DISCORD_GUILD_ID,
   clientID: config.DISCORD_CLIENT_ID,
-  slashCommands: [ping, apply, whitelist, unwhitelist, whois],
+  slashCommands: [ping, apply, whitelist, whois],
   plugins: [
     applicationSubmitListener,
     applicationDecisionListener,
