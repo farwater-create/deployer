@@ -31,9 +31,7 @@ export function userEmbed(
         inline: false,
       },
     ])
-    .setThumbnail(
-      user.avatarURL() ||
-        `https://crafatar.com/renders/head/${minecraftUser.id}`
-    );
+    .setThumbnail(`https://mc-heads.net/avatar/${minecraftUser.id}.png`)
+    .setImage(`https://mc-heads.net/body/${minecraftUser.id}.png`);
   return embed;
 }

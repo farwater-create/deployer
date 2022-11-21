@@ -45,7 +45,6 @@ export const whois: BotSlashCommand = {
           id: string;
         }
       | undefined;
-
     let application: WhitelistApplication | null;
 
     if (minecraftUsername) {

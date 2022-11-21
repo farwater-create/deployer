@@ -1,6 +1,6 @@
 import { serverAPI } from "./client";
 import z from "zod";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 const serverAPIFileDownloadResponseSchema = z.object({
   object: z.string(),
   attributes: z.object({
@@ -23,7 +23,7 @@ export const PteroFS = {
     return Buffer.from(fileResp.data);
   },
 
-  async writeFile(path: string, data: Buffer): Promise<unknown> {
+  async writeFile(path: string, data: Buffer): Promise<void> {
     const parameters = new URLSearchParams();
     parameters.append("file", path);
 
@@ -32,21 +32,15 @@ export const PteroFS = {
         if (!fileLocks.has(path)) {
           clearInterval(interval);
           resolve();
-        } else {
-          fileLocks.add(path);
-          clearInterval(interval);
-          resolve();
         }
       }, 1000);
     });
 
-    try {
-      await serverAPI.post("/files/write?" + parameters.toString(), data);
-    } catch (error) {
-      return error;
-    } finally {
-      fileLocks.delete(path);
-    }
+    fileLocks.add(path);
+
+    await serverAPI.post("/files/write?" + parameters.toString(), data);
+
+    fileLocks.delete(path);
     return;
   },
 };
