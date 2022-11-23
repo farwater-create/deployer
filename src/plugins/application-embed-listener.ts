@@ -7,11 +7,11 @@ import {
   Events,
 } from "discord.js";
 import { config } from "../lib/config";
+import logger from "../lib/logger";
 import prisma from "../lib/prisma";
 import { WhitelistApplicationModal } from "../templates/whitelist-application-modal";
 
 export default async (client: Client) => {
-  console.log("started application-embed-listener");
   const channel =
     client.channels.cache.get(config.APPLICATIONS_CHANNEL) ||
     (await client.channels.fetch(config.APPLICATIONS_CHANNEL));
@@ -28,7 +28,7 @@ export default async (client: Client) => {
   const isMessageEmbed =
     message?.author.bot && message.author.id === client.user?.id;
   if (!isMessageEmbed) {
-    console.log("recreating applications embed");
+    logger.info("recreating applications embed");
     channel.send({
       embeds: [
         new EmbedBuilder()
@@ -50,7 +50,7 @@ export default async (client: Client) => {
       ],
     });
   } else {
-    console.log("last message is from bot, assuming it exists");
+    logger.error("last message is from bot, assuming it exists");
   }
   client.on(Events.InteractionCreate, async (interaction) => {
     if (

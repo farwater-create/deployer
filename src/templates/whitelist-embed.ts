@@ -3,7 +3,7 @@ import { EmbedBuilder } from "discord.js";
 export const whitelistEmbed = (profile: { id: string; name: string }) => {
   return new EmbedBuilder()
     .setTitle("Whitelisted")
-    .setThumbnail(`https://mc-heads.net/avatar/${profile.id}`)
+    .setThumbnail(`https://mc-heads.net/avatar/${profile.id}.png`)
     .addFields([
       {
         name: "uuid",
@@ -15,5 +15,6 @@ export const whitelistEmbed = (profile: { id: string; name: string }) => {
         value: profile.name,
         inline: false,
       },
-    ]);
+    ])
+    .setImage(`https://mc-heads.net/body/${profile.id}.png`);
 };

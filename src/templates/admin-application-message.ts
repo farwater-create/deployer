@@ -45,7 +45,8 @@ export function adminApplicationEmbed(
         inline: false,
       },
     ])
-    .setThumbnail(user.displayAvatarURL() || user.defaultAvatarURL);
+    .setThumbnail(user.displayAvatarURL() || user.defaultAvatarURL)
+    .setImage(`https://mc-heads.net/body/${application.minecraftUUID}.png`);
 }
 export const adminApplicationEmbedComponents = (applicationID: string) => {
   return [

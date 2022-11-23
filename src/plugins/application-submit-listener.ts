@@ -1,5 +1,6 @@
 import { Client, Events, TextChannel } from "discord.js";
 import { config } from "../lib/config";
+import logger from "../lib/logger";
 import { fetchUUID } from "../lib/minecraft";
 import prisma from "../lib/prisma";
 import {
@@ -53,7 +54,7 @@ export default (client: Client) => {
       status: "pending",
     };
 
-    console.log("Recieved application: \n", WhitelistApplicationData);
+    logger.info("Recieved application: \n", WhitelistApplicationData);
 
     const WhitelistApplication = await prisma.whitelistApplication.create({
       data: WhitelistApplicationData,

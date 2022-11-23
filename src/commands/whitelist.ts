@@ -4,6 +4,7 @@ import {
   SlashCommandBuilder,
   SlashCommandStringOption,
 } from "discord.js";
+import logger from "../lib/logger";
 import {
   fetchUsername,
   fetchUUID,
@@ -62,11 +63,11 @@ export const whitelist: BotSlashCommand = {
       profile = await fetchUUID(username);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log(
+        logger.error(
           `Error fetching uuid - ${error.code}: ${error.response?.data}`
         );
       } else {
-        console.log(error);
+        logger.error(error);
       }
       await interaction.followUp({
         content: "Minecraft account not found.",
@@ -142,7 +143,7 @@ export const whitelist: BotSlashCommand = {
     } catch (error) {
       if (axios.isAxiosError(error))
         await interaction.followUp("Something went wrong.");
-      else console.log(error);
+      else logger.error(error);
     }
   },
 };

@@ -5,7 +5,7 @@ import applicationDecisionListener from "./plugins/application-decision-listener
 import { whitelist } from "./commands/whitelist";
 import { config } from "./lib/config";
 import applicationSubmitListener from "./plugins/application-submit-listener";
-import memberLeaveUnwhitelist from "./plugins/member-leave-unwhitelist";
+import memberLeaveUnwhitelistListener from "./plugins/member-leave-unwhitelist-listener";
 import applicationEmbedListener from "./plugins/application-embed-listener";
 import { whois } from "./commands/whois";
 
@@ -17,10 +17,16 @@ const options: DeployerBotOptions = {
     applicationSubmitListener,
     applicationDecisionListener,
     applicationEmbedListener,
-    memberLeaveUnwhitelist,
+    memberLeaveUnwhitelistListener,
   ],
   clientOpts: {
-    intents: ["MessageContent", "GuildBans", "GuildMessageReactions", "Guilds"],
+    intents: [
+      "MessageContent",
+      "GuildBans",
+      "GuildMessageReactions",
+      "Guilds",
+      "GuildMembers",
+    ],
   },
 };
 

@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Config {
+  key String @id
+  value String @db.LongText
+}
+
 model WhitelistApplication {
   id            String @id @default(uuid())
   age           Int

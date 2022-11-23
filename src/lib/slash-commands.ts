@@ -5,6 +5,7 @@ import {
   RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
 import { REST, Routes } from "discord.js";
+import logger from "./logger";
 
 export interface BotSlashCommand {
   json: RESTPostAPIChatInputApplicationCommandsJSONBody;
@@ -44,6 +45,6 @@ export class BotSlashCommandGuildRepository {
       Routes.applicationGuildCommands(this.clientID, this.guildID),
       { body }
     );
-    console.log(`reloaded ${body.length} slash commands`);
+    logger.info(`reloaded ${body.length} slash commands`);
   }
 }

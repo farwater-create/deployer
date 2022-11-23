@@ -1,4 +1,5 @@
 import { Client, ClientOptions, Interaction } from "discord.js";
+import logger from "./logger";
 import {
   BotSlashCommandGuildRepository,
   BotSlashCommand,
@@ -40,7 +41,7 @@ export class DeployerBot {
     if (this.beforeReadyPlugins)
       for (const plugin of this.beforeReadyPlugins) plugin(client);
     client.on("ready", (client) => {
-      console.log(`Logged in as ${client.user.username}`);
+      logger.info(`Logged in as ${client.user.username}`);
     });
     return client;
   }

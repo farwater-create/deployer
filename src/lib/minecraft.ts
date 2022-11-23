@@ -1,4 +1,5 @@
 import axios from "axios";
+import logger from "./logger";
 import { executeCommand } from "./ptero/execute-command";
 import { PteroFS } from "./ptero/fs";
 
@@ -33,7 +34,7 @@ export const whitelistAccount = async (account: {
   name: string;
   uuid: string;
 }) => {
-  console.log("whitelisting " + account.name);
+  logger.info("whitelisting " + account.name);
   try {
     await executeCommand("whitelist add " + account.name);
   } catch {
