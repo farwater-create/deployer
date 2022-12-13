@@ -54,7 +54,10 @@ export default (client: Client) => {
       status: "pending",
     };
 
-    logger.info("Recieved application: \n", WhitelistApplicationData);
+    logger.info(
+      "Recieved application: \n",
+      JSON.stringify(WhitelistApplicationData, undefined, 2)
+    );
 
     const WhitelistApplication = await prisma.whitelistApplication.create({
       data: WhitelistApplicationData,

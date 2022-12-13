@@ -38,7 +38,7 @@ export const whitelist: BotSlashCommand = {
     });
 
     if (!application) {
-      await interaction.reply({
+      await interaction.followUp({
         content: "You need to submit an application first.",
         ephemeral: true,
       });
