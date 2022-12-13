@@ -4,6 +4,7 @@ import {
   CommandInteraction,
   SlashCommandUserOption,
   SlashCommandStringOption,
+  PermissionFlagsBits,
 } from "discord.js";
 import { fetchUsername, fetchUUID } from "../lib/minecraft";
 import prisma from "../lib/prisma";
@@ -24,6 +25,7 @@ export const whois: BotSlashCommand = {
         .setDescription("a minecraft account")
         .setName("minecraft")
     )
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .toJSON(),
   handler: async function (interaction: CommandInteraction): Promise<void> {
     await interaction.deferReply();
@@ -39,12 +41,7 @@ export const whois: BotSlashCommand = {
       return;
     }
 
-    let minecraftAccount:
-      | {
-          name: string;
-          id: string;
-        }
-      | undefined;
+    let minecraftAccount: { name: string; id: string } | undefined;
 
     let application: WhitelistApplication | null;
 
