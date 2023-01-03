@@ -4,7 +4,7 @@ import { Client, Events, Interaction, TextChannel, User } from "discord.js";
 import { ApplicationRejectReason } from "../interfaces/application-reject-reason";
 import { config } from "../lib/config";
 import logger from "../lib/logger";
-import { fetchUsername } from "../lib/minecraft";
+import { fetchUsername, whitelistAccount } from "../lib/minecraft";
 import prisma from "../lib/prisma";
 import { adminApplicationLogEmbed } from "../templates/admin-application-log-embed";
 import gettingStarted from "../templates/getting-started";
@@ -33,38 +33,36 @@ export default (client: Client) => {
             id: interaction.customId.split(":")[1],
           },
         });
-        if (application) {
-          try {
-            handleAccept(application, interaction);
-            const user =
-              client.users.cache.get(application.discordID) ||
-              (await client.users.fetch(application.discordID));
-            await logChannel.send({
-              embeds: [
-                adminApplicationLogEmbed(
-                  application,
-                  user,
-                  interaction.user,
-                  "accepted"
-                ),
-              ],
-            });
-            await interaction.message.delete();
-          } catch (error) {
-            console.error(error);
-            await interaction.message.delete();
-            await prisma.whitelistApplication.delete({
-              where: {
-                id: application.id,
-              },
-            });
-          }
-        } else {
-          await interaction.channel?.send("Application id not found!");
+        if (!application) {
+          await interaction.reply("User has left the server...");
+          return;
+        }
+        try {
+          handleAccept(application, interaction);
+          const user =
+            client.users.cache.get(application.discordID) ||
+            (await client.users.fetch(application.discordID));
+          await logChannel.send({
+            embeds: [
+              adminApplicationLogEmbed(
+                application,
+                user,
+                interaction.user,
+                "accepted"
+              ),
+            ],
+          });
           await interaction.message.delete();
+        } catch (error) {
+          console.error(error);
+          await interaction.message.delete();
+          await prisma.whitelistApplication.delete({
+            where: {
+              id: application.id,
+            },
+          });
         }
       }
-
       // Reject Handler
       if (
         interaction.isSelectMenu() &&
@@ -75,37 +73,33 @@ export default (client: Client) => {
             id: interaction.customId.split(":")[1],
           },
         });
-        if (application) {
-          try {
-            const user =
-              interaction.client.users.cache.get(application.discordID) ||
-              (await interaction.client.users.fetch(application.discordID));
-            if (!user) return;
-            const reason = interaction.values[0];
-            await handleReject(user, reason);
-            await logChannel.send({
-              embeds: [
-                adminApplicationLogEmbed(
-                  application,
-                  user,
-                  interaction.user,
-                  "rejected",
-                  interaction.values[0]
-                ),
-              ],
-            });
-            await interaction.message.delete();
-          } catch (error) {
-            console.error(error);
-            await prisma.whitelistApplication.delete({
-              where: {
-                id: application.id,
-              },
-            });
-          }
-        } else {
-          await interaction.channel?.send("Application id not found!");
+        if (!application) return;
+        try {
+          const user =
+            interaction.client.users.cache.get(application.discordID) ||
+            (await interaction.client.users.fetch(application.discordID));
+          if (!user) return;
+          const reason = interaction.values[0];
+          await handleReject(user, reason);
+          await logChannel.send({
+            embeds: [
+              adminApplicationLogEmbed(
+                application,
+                user,
+                interaction.user,
+                "rejected",
+                interaction.values[0]
+              ),
+            ],
+          });
           await interaction.message.delete();
+        } catch (error) {
+          console.error(error);
+          await prisma.whitelistApplication.delete({
+            where: {
+              id: application.id,
+            },
+          });
         }
       }
     } catch (error) {
@@ -176,6 +170,11 @@ const handleAccept = async (
         status: "accepted",
       },
     });
+    const account = await fetchUsername(application.minecraftUUID);
+    await whitelistAccount({
+      name: account.name,
+      uuid: account.id,
+    });
   } catch (error) {
     console.error(error);
   }
@@ -215,24 +214,28 @@ const handleAccept = async (
 
   try {
     const profile = await fetchUsername(application.minecraftUUID);
-    const whitelistChannel =
+    const applicationsAcceptedChannel =
       interaction.client.channels.cache.get(
         config.APPLICATIONS_ACCEPTED_CHANNEL
       ) ||
       ((await interaction.client.channels.fetch(
         config.APPLICATIONS_ACCEPTED_CHANNEL
       )) as TextChannel);
-    if (!whitelistChannel || !whitelistChannel.isTextBased()) {
-      logger.error("whistlist channel not found");
+    if (
+      !applicationsAcceptedChannel ||
+      !applicationsAcceptedChannel.isTextBased()
+    ) {
+      logger.error("applications channel not found");
       return;
     }
-    await whitelistChannel.send({
-      content: gettingStarted,
+    const embed = whitelistEmbed(profile);
+    embed.setDescription(`${gettingStarted}\n<@${application.discordID}>`);
+    await applicationsAcceptedChannel.send({
+      embeds: [embed],
     });
-    await whitelistChannel.send({
-      embeds: [whitelistEmbed(profile)],
+    (await user.createDM(true)).send({
+      embeds: [embed],
     });
-    await whitelistChannel.send(`<@${application.discordID}>`);
   } catch (error) {
     logger.log(error);
   }

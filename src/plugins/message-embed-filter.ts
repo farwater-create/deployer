@@ -41,7 +41,14 @@ export default async (client: Client) => {
       urls.add(new URL(value).hostname);
     });
     message.embeds.forEach((embed) => {
-      if (embed.url) urls.add(new URL(embed.url).hostname);
+      try {
+        if (embed.url) {
+          urls.add(embed.url);
+          urls.add(new URL(embed.url).hostname);
+        }
+      } catch (error) {
+        console.error(error);
+      }
     });
     for (const url of urls) {
       if (badURLS.has(url)) {

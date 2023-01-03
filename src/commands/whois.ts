@@ -4,6 +4,7 @@ import {
   CommandInteraction,
   SlashCommandUserOption,
   SlashCommandStringOption,
+  PermissionFlagsBits,
 } from "discord.js";
 import { fetchUsername, fetchUUID } from "../lib/minecraft";
 import prisma from "../lib/prisma";
@@ -24,6 +25,7 @@ export const whois: BotSlashCommand = {
         .setDescription("a minecraft account")
         .setName("minecraft")
     )
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     .toJSON(),
   handler: async function (interaction: CommandInteraction): Promise<void> {
     await interaction.deferReply();
@@ -33,9 +35,11 @@ export const whois: BotSlashCommand = {
       ?.value?.toString();
 
     if (!user && !minecraftUsername) {
-      await interaction.followUp(
-        "you must provide a value for discord user or minecraft username"
-      );
+      await interaction.followUp({
+        content:
+          "you must provide a value for discord user or minecraft username",
+        ephemeral: true,
+      });
       return;
     }
 
@@ -61,18 +65,20 @@ export const whois: BotSlashCommand = {
         },
       });
       if (!application) {
-        await interaction.followUp(
-          `user ${minecraftUsername} is not part of Farwater`
-        );
+        await interaction.followUp({
+          content: `user ${minecraftUsername} is not part of Farwater`,
+          ephemeral: true,
+        });
         return;
       }
       user =
         interaction.client.users.cache.get(application.discordID) ||
         (await interaction.client.users.fetch(application.discordID));
       if (!user) {
-        await interaction.followUp(
-          `the user associated with this account is not on the server`
-        );
+        await interaction.followUp({
+          content: `the user associated with this account is not on the server`,
+          ephemeral: true,
+        });
       }
     } else if (user) {
       application = await prisma.whitelistApplication.findFirst({
@@ -81,29 +87,40 @@ export const whois: BotSlashCommand = {
         },
       });
       if (!application) {
-        await interaction.followUp(`user ${user.username} is not registered.`);
+        await interaction.followUp({
+          content: `user ${user.username} is not registered.`,
+          ephemeral: true,
+        });
         return;
       }
       try {
         minecraftAccount = await fetchUsername(application?.minecraftUUID);
       } catch {
-        await interaction.followUp(
-          `error while fetching ${user.username}'s minecraft account`
-        );
+        await interaction.followUp({
+          content: `error while fetching ${user.username}'s minecraft account`,
+          ephemeral: true,
+        });
         return;
       }
     } else {
-      await interaction.followUp("Internal server error");
+      await interaction.followUp({
+        content: "Internal server error",
+        ephemeral: true,
+      });
       return;
     }
 
     if (!application || !user) {
-      await interaction.followUp("Internal server error");
+      await interaction.followUp({
+        content: "Internal server error",
+        ephemeral: true,
+      });
       return;
     }
 
     await interaction.followUp({
       embeds: [userEmbed(minecraftAccount, user)],
+      ephemeral: true,
     });
   },
 };
