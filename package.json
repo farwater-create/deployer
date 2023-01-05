@@ -54,7 +54,7 @@
     "test": "yarn jest",
     "prepare": "husky install",
     "dev": "ts-node-dev src/index.ts",
-    "production": "node build/index.js",
+    "start": "ts-node build/index.js",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write --ignore-unknown src",
     "migrate": "prisma migrate",
