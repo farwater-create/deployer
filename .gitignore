@@ -6,3 +6,4 @@ build
 *.db
 userdata.json
 logs
+build
