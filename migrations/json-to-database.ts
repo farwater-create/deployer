@@ -26,7 +26,7 @@ async function main() {
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      if (error["code"] && error.code !== "P2002") console.error(error);
+      if (error["code"] && error.code !== "P2002") logger.error(error);
     }
   }
 }

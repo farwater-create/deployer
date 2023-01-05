@@ -79,6 +79,10 @@ export const adminApplicationEmbedComponents = (applicationID: string) => {
           {
             label: "applications are suspended",
             value: ApplicationRejectReason.Suspended,
+          },
+          {
+            label: "user left the server",
+            value: ApplicationRejectReason.Left,
           }
         )
         .setPlaceholder("Reject with reason")
