@@ -54,7 +54,7 @@ export default (client: Client) => {
           });
           await interaction.message.delete();
         } catch (error) {
-          console.error(error);
+          logger.error(error);
           await interaction.message.delete();
           await prisma.whitelistApplication.delete({
             where: {
@@ -94,7 +94,7 @@ export default (client: Client) => {
           });
           await interaction.message.delete();
         } catch (error) {
-          console.error(error);
+          logger.error(error);
           await prisma.whitelistApplication.delete({
             where: {
               id: application.id,
@@ -176,7 +176,7 @@ const handleAccept = async (
       uuid: account.id,
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   // fetch role
@@ -185,7 +185,7 @@ const handleAccept = async (
   );
 
   if (!accessCreateRole) {
-    console.error("create role not found");
+    logger.error("create role not found");
     return;
   }
 
@@ -193,7 +193,7 @@ const handleAccept = async (
   let user = interaction.client.users.cache.get(application.discordID);
   if (!user) user = await interaction.client.users.fetch(application.discordID);
   if (!user) {
-    console.error("could not fetch user " + application.discordID);
+    logger.error("could not fetch user " + application.discordID);
     return;
   }
 
@@ -208,7 +208,7 @@ const handleAccept = async (
       reason: "application accepted",
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return;
   }
 
@@ -237,6 +237,6 @@ const handleAccept = async (
       embeds: [embed],
     });
   } catch (error) {
-    logger.log(error);
+    logger.error(error);
   }
 };

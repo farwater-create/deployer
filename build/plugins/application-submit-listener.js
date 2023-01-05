@@ -39,7 +39,7 @@ exports.default = (client) => {
             profile = await (0, minecraft_1.fetchUUID)(minecraftUsername);
         }
         catch (error) {
-            console.error(error);
+            logger_1.default.error(error);
             await interaction.reply({
                 ephemeral: true,
                 content: "Could not find minecraft username, please apply again.",

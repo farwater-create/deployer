@@ -91,7 +91,7 @@ export const whitelist: BotSlashCommand = {
         return;
       }
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       await interaction.followUp({
         content: "Internal server error",
         ephemeral: true,
@@ -106,11 +106,16 @@ export const whitelist: BotSlashCommand = {
           ephemeral: true,
         });
       } catch (error) {
-        await interaction.followUp({
-          content: "Something went wrong. Is the server up?",
-          ephemeral: true,
-        });
-        console.error(error);
+        try {
+          await interaction.followUp({
+            content: "Something went wrong. Is the server up?",
+            ephemeral: true,
+          });
+        } catch (error) {
+          logger.error(error);
+          return;
+        }
+        logger.error(error);
       }
       return;
     }

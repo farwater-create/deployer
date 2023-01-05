@@ -8,26 +8,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable unicorn/prefer-top-level-await */
 const blacklist_json_1 = __importDefault(require("./blacklist.json"));
 const axios_1 = __importDefault(require("axios"));
+const logger_1 = __importDefault(require("../lib/logger"));
 const badURLS = new Set(blacklist_json_1.default.urls);
 const LOGS_CHANNEL = "1045241784445435977";
 let logChannel;
-(0, axios_1.default)({
-    url: "https://dbl.oisd.nl/",
-    method: "GET",
-    responseType: "blob",
-}).then((response) => {
-    response.data.split("\n").forEach((url) => {
-        if (url[0] != "#")
-            badURLS.add(url);
-    });
-    console.log("blacklisted" + " " + badURLS.size + " urls");
-});
 const MatchURL = /(https?:\/\/(?:www\.|(?!www))[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|https?:\/\/(?:www\.|(?!www))[\dA-Za-z]+\.\S{2,}|www\.[\dA-Za-z]+\.\S{2,})/gm;
 exports.default = async (client) => {
     client.on("ready", async () => {
         logChannel =
             client.channels.cache.get(LOGS_CHANNEL) ||
                 (await client.channels.fetch(LOGS_CHANNEL));
+        (0, axios_1.default)({
+            url: "https://dbl.oisd.nl/",
+            method: "GET",
+            responseType: "blob",
+        }).then((response) => {
+            response.data.split("\n").forEach((url) => {
+                if (url[0] != "#")
+                    badURLS.add(url);
+            });
+            logger_1.default.log("blacklisted" + " " + badURLS.size + " urls");
+        });
     });
     client.on("messageCreate", async (message) => {
         if (message.author.bot && message.author.id != "1042552045569327166")
@@ -45,7 +46,7 @@ exports.default = async (client) => {
                 }
             }
             catch (error) {
-                console.error(error);
+                logger_1.default.error(error);
             }
         });
         for (const url of urls) {

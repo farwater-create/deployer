@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const logger_1 = __importDefault(require("../lib/logger"));
 const minecraft_1 = require("../lib/minecraft");
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const deleteUserHandler = async (id) => {
@@ -23,7 +24,7 @@ const deleteUserHandler = async (id) => {
         });
     }
     catch (error) {
-        console.error(error);
+        logger_1.default.error(error);
     }
 };
 exports.default = (client) => {

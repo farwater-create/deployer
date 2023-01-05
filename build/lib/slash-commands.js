@@ -27,7 +27,7 @@ class BotSlashCommandGuildRepository {
                 this.commands.get(interaction.commandName)?.handler(interaction);
             }
             catch (error) {
-                console.error(error);
+                logger_1.default.error(error);
             }
         }
     }

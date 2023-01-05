@@ -32,7 +32,7 @@ export class BotSlashCommandGuildRepository {
       try {
         this.commands.get(interaction.commandName)?.handler(interaction);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
       }
     }
   }

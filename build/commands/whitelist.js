@@ -75,7 +75,7 @@ exports.whitelist = {
             }
         }
         catch (error) {
-            console.error(error);
+            logger_1.default.error(error);
             await interaction.followUp({
                 content: "Internal server error",
                 ephemeral: true,
@@ -90,11 +90,17 @@ exports.whitelist = {
                 });
             }
             catch (error) {
-                await interaction.followUp({
-                    content: "Something went wrong. Is the server up?",
-                    ephemeral: true,
-                });
-                console.error(error);
+                try {
+                    await interaction.followUp({
+                        content: "Something went wrong. Is the server up?",
+                        ephemeral: true,
+                    });
+                }
+                catch (error) {
+                    logger_1.default.error(error);
+                    return;
+                }
+                logger_1.default.error(error);
             }
             return;
         }

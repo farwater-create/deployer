@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.whois = void 0;
 const discord_js_1 = require("discord.js");
+const logger_1 = __importDefault(require("../lib/logger"));
 const minecraft_1 = require("../lib/minecraft");
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const user_embed_1 = require("../templates/user-embed");
@@ -40,7 +41,7 @@ exports.whois = {
                 minecraftAccount = await (0, minecraft_1.fetchUUID)(minecraftUsername);
             }
             catch (error) {
-                console.error(error);
+                logger_1.default.error(error);
                 return;
             }
             application = await prisma_1.default.whitelistApplication.findFirst({

@@ -6,6 +6,7 @@ import {
   SlashCommandStringOption,
   PermissionFlagsBits,
 } from "discord.js";
+import logger from "../lib/logger";
 import { fetchUsername, fetchUUID } from "../lib/minecraft";
 import prisma from "../lib/prisma";
 import { BotSlashCommand } from "../lib/slash-commands";
@@ -56,7 +57,7 @@ export const whois: BotSlashCommand = {
       try {
         minecraftAccount = await fetchUUID(minecraftUsername);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         return;
       }
       application = await prisma.whitelistApplication.findFirst({

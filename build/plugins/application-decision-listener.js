@@ -43,7 +43,7 @@ exports.default = (client) => {
                     await interaction.message.delete();
                 }
                 catch (error) {
-                    console.error(error);
+                    logger_1.default.error(error);
                     await interaction.message.delete();
                     await prisma_1.default.whitelistApplication.delete({
                         where: {
@@ -77,7 +77,7 @@ exports.default = (client) => {
                     await interaction.message.delete();
                 }
                 catch (error) {
-                    console.error(error);
+                    logger_1.default.error(error);
                     await prisma_1.default.whitelistApplication.delete({
                         where: {
                             id: application.id,
@@ -149,12 +149,12 @@ const handleAccept = async (application, interaction) => {
         });
     }
     catch (error) {
-        console.error(error);
+        logger_1.default.error(error);
     }
     // fetch role
     const accessCreateRole = await interaction.guild?.roles.fetch(ACCESS_CREATE_ROLE);
     if (!accessCreateRole) {
-        console.error("create role not found");
+        logger_1.default.error("create role not found");
         return;
     }
     // fetch user info
@@ -162,7 +162,7 @@ const handleAccept = async (application, interaction) => {
     if (!user)
         user = await interaction.client.users.fetch(application.discordID);
     if (!user) {
-        console.error("could not fetch user " + application.discordID);
+        logger_1.default.error("could not fetch user " + application.discordID);
         return;
     }
     const member = interaction.guild?.members.cache.get(application.discordID);
@@ -177,7 +177,7 @@ const handleAccept = async (application, interaction) => {
         });
     }
     catch (error) {
-        console.error(error);
+        logger_1.default.error(error);
         return;
     }
     try {
@@ -199,6 +199,6 @@ const handleAccept = async (application, interaction) => {
         });
     }
     catch (error) {
-        logger_1.default.log(error);
+        logger_1.default.error(error);
     }
 };
