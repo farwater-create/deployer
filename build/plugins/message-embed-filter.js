@@ -51,7 +51,11 @@ exports.default = async (client) => {
         });
         for (const url of urls) {
             if (badURLS.has(url)) {
-                await message.delete();
+                try {
+                    await message.delete();
+                    // eslint-disable-next-line no-empty
+                }
+                catch { }
                 await logChannel.send(`user <@${message.author.id}> sent bad url \n${url}`);
                 return;
             }

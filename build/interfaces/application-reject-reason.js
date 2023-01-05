@@ -9,4 +9,5 @@ var ApplicationRejectReason;
     ApplicationRejectReason["OffensiveName"] = "offensive-name";
     ApplicationRejectReason["Suspended"] = "suspended";
     ApplicationRejectReason["BadAccount"] = "bad-account";
+    ApplicationRejectReason["Left"] = "left";
 })(ApplicationRejectReason = exports.ApplicationRejectReason || (exports.ApplicationRejectReason = {}));
