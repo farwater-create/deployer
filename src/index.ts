@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-module */
 import { DeployerBotOptions, DeployerBot } from "./lib/deployer-bot";
 import { ping } from "./commands/ping";
 import applicationDecisionListener from "./plugins/application-decision-listener";
