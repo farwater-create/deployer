@@ -1,11 +1,11 @@
 /* eslint-disable unicorn/no-await-expression-member */
 import { Client, Events, TextChannel } from "discord.js";
-import { config } from "../lib/config";
-import logger from "../lib/logger";
-import prisma from "../lib/prisma";
-import { adminApplicationLogEmbed } from "../templates/admin-application-log-embed";
-import { handleAccept } from "./application-decision-listener/handle-accept";
-import { handleReject } from "./application-decision-listener/handle-reject";
+import { config } from "../../lib/config";
+import logger from "../../lib/logger";
+import prisma from "../../lib/prisma";
+import { adminApplicationLogEmbed } from "../../templates/admin-application-log-embed";
+import { handleAccept } from "./handle-accept";
+import { handleReject } from "./handle-reject";
 
 export default (client: Client) => {
   client.on(Events.InteractionCreate, async (interaction) => {
@@ -31,7 +31,7 @@ export default (client: Client) => {
           await interaction.reply("User has left the server...");
           return;
         }
-        handleAccept(application, interaction);
+        await handleAccept(application, interaction);
         const user =
           client.users.cache.get(application.discordID) ||
           (await client.users.fetch(application.discordID));
