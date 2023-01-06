@@ -120,7 +120,7 @@ export const whois: BotSlashCommand = {
     }
 
     await interaction.followUp({
-      embeds: [userEmbed(minecraftAccount, user)],
+      embeds: [userEmbed(minecraftAccount, user, application.status)],
       ephemeral: true,
     });
   },

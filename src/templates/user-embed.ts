@@ -5,7 +5,8 @@ export function userEmbed(
     name: string;
     id: string;
   },
-  user: User
+  user: User,
+  applicationStatus?: string
 ) {
   const embed = new EmbedBuilder()
     .setTitle(`${user.username}'s Create Profile`)
@@ -36,5 +37,12 @@ export function userEmbed(
         `https://crafatar.com/renders/head/${minecraftUser.id}`
     )
     .setImage(`https://mc-heads.net/body/${minecraftUser.id}.png`);
+  if (applicationStatus) {
+    embed.addFields({
+      name: "application status",
+      value: applicationStatus,
+      inline: false,
+    });
+  }
   return embed;
 }
