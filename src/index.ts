@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-module */
 import { DeployerBotOptions, DeployerBot } from "./lib/deployer-bot";
 import { ping } from "./commands/ping";
 import applicationDecisionListener from "./plugins/application-decision-listener";
@@ -9,8 +8,7 @@ import memberLeaveUnwhitelistListener from "./plugins/member-leave-unwhitelist-l
 import applicationEmbedListener from "./plugins/application-embed-listener";
 import { whois } from "./commands/whois";
 import messageEmbedFilter from "./plugins/message-embed-filter";
-import { isMainThread, Worker } from "node:worker_threads";
-import logger from "./lib/logger";
+import faqBot from "./plugins/faq-bot";
 
 const options: DeployerBotOptions = {
   guildID: config.DISCORD_GUILD_ID,
@@ -22,6 +20,7 @@ const options: DeployerBotOptions = {
     applicationEmbedListener,
     memberLeaveUnwhitelistListener,
     messageEmbedFilter,
+    faqBot,
   ],
   clientOpts: {
     intents: [
@@ -37,19 +36,5 @@ const options: DeployerBotOptions = {
   },
 };
 
-if (isMainThread) {
-  let worker = new Worker(__filename);
-  worker.addListener("error", (event) => {
-    logger.error(event);
-    worker = new Worker(__filename);
-  });
-  worker.addListener("online", () => {
-    logger.info("started worker thread");
-  });
-  process.on("beforeExit", () => {
-    worker.terminate();
-  });
-} else {
-  const bot = new DeployerBot(options);
-  bot.login(config.DISCORD_TOKEN);
-}
+const bot = new DeployerBot(options);
+bot.login(config.DISCORD_TOKEN);

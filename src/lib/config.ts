@@ -32,6 +32,7 @@ export const config = {
     "APPLICATIONS_ACCEPTED_CHANNEL",
     "1044731747260190790"
   ),
+  FAQ_CHANNEL: assertEnvironment("FAQ_CHANNEL", "1046208302092136539"),
 };
 
 export type Config = typeof config;
