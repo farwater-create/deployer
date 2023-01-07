@@ -41,7 +41,6 @@ export class PhraseMap {
     let lastConfidence = -1;
     for (const keywordResponse of this.phraseResponses) {
       const confidence = matchedWordCount(keywordResponse.keywords, testString);
-      console.log(confidence);
       if (confidence > lastConfidence) {
         response = keywordResponse;
         lastConfidence = confidence;
