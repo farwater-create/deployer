@@ -9,6 +9,7 @@ import { handleReject } from "./handle-reject";
 
 export default (client: Client) => {
   client.on(Events.InteractionCreate, async (interaction) => {
+    if (interaction.guildId != config.DISCORD_GUILD_ID) return;
     const logChannel =
       (interaction.client.channels.cache.get(
         config.APPLICATION_LOG_CHANNEL

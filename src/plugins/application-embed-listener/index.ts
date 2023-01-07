@@ -6,10 +6,10 @@ import {
   EmbedBuilder,
   Events,
 } from "discord.js";
-import { config } from "../lib/config";
-import logger from "../lib/logger";
-import prisma from "../lib/prisma";
-import { WhitelistApplicationModal } from "../templates/whitelist-application-modal";
+import { config } from "../../lib/config";
+import logger from "../../lib/logger";
+import prisma from "../../lib/prisma";
+import { WhitelistApplicationModal } from "../../templates/whitelist-application-modal";
 
 export default async (client: Client) => {
   const channel =
@@ -53,6 +53,8 @@ export default async (client: Client) => {
     logger.error("last message is from bot, assuming it exists");
   }
   client.on(Events.InteractionCreate, async (interaction) => {
+    if (interaction.guildId != config.DISCORD_GUILD_ID) return;
+
     if (
       interaction.isButton() &&
       interaction.customId.startsWith("create-application-apply")

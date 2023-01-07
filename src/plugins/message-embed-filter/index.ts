@@ -4,12 +4,12 @@
 import blacklist from "./blacklist.json";
 import { Client, TextChannel } from "discord.js";
 import axios from "axios";
-import logger from "../lib/logger";
-import { config } from "../lib/config";
+import logger from "../../lib/logger";
+import { config } from "../../lib/config";
 
 const badURLS: Set<string> = new Set(blacklist.urls);
 
-const { LOGS_CHANNEL } = config;
+const { LOGS_CHANNEL, DISCORD_GUILD_ID } = config;
 
 let logChannel: TextChannel;
 
@@ -34,8 +34,8 @@ export default async (client: Client) => {
   });
 
   client.on("messageCreate", async (message) => {
-    if (message.author.bot && message.author.id != "1042552045569327166")
-      return;
+    if (message.guildId != DISCORD_GUILD_ID) return;
+    if (message.author.bot) return;
     const urls: Set<string> = new Set();
     const matches = MatchURL.exec(message.content);
     matches?.forEach((value) => {

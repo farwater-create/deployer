@@ -1,6 +1,6 @@
 import { Client } from "discord.js";
-import { config } from "../lib/config";
-import logger from "../lib/logger";
+import { config } from "../../lib/config";
+import logger from "../../lib/logger";
 
 export default async (client: Client) => {
   try {

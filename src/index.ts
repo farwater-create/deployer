@@ -4,12 +4,12 @@ import applicationDecisionListener from "./plugins/application-decision-listener
 import { whitelist } from "./commands/whitelist";
 import { config } from "./lib/config";
 import applicationSubmitListener from "./plugins/application-submit-listener";
-import memberLeaveUnwhitelistListener from "./plugins/member-leave-unwhitelist-listener";
+import memberLeaveUnwhitelistListener from "./plugins/member-leave-unwhitelist";
 import applicationEmbedListener from "./plugins/application-embed-listener";
 import { whois } from "./commands/whois";
 import messageEmbedFilter from "./plugins/message-embed-filter";
 import faqBot from "./plugins/faq-bot";
-import leaveUknownGuilds from "./plugins/leave-uknown-guilds";
+import leaveUknownGuilds from "./plugins/leave-unknown-guilds";
 
 const options: DeployerBotOptions = {
   guildID: config.DISCORD_GUILD_ID,

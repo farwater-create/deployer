@@ -1,12 +1,12 @@
 import { Client, Events, TextChannel } from "discord.js";
-import { config } from "../lib/config";
-import logger from "../lib/logger";
-import { fetchUUID } from "../lib/minecraft";
-import prisma from "../lib/prisma";
+import { config } from "../../lib/config";
+import logger from "../../lib/logger";
+import { fetchUUID } from "../../lib/minecraft";
+import prisma from "../../lib/prisma";
 import {
   adminApplicationEmbed,
   adminApplicationEmbedComponents,
-} from "../templates/admin-application-message";
+} from "../../templates/admin-application-message";
 
 export default (client: Client) => {
   client.on(Events.InteractionCreate, async (interaction) => {

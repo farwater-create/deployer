@@ -1,7 +1,7 @@
 import { Client } from "discord.js";
-import logger from "../lib/logger";
-import { fetchUsername, unwhitelistAccount } from "../lib/minecraft";
-import prisma from "../lib/prisma";
+import logger from "../../lib/logger";
+import { fetchUsername, unwhitelistAccount } from "../../lib/minecraft";
+import prisma from "../../lib/prisma";
 
 const deleteUserHandler = async (id: string) => {
   try {

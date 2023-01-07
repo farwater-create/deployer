@@ -11,6 +11,6 @@
     "outDir": "build",
     "resolveJsonModule": true
   },
-  "include": ["src/"],
-  "exclude": ["node_modules/", "migrations/"]
+  "include": ["src/**/*.ts", "src/**/*.json"],
+  "exclude": ["node_modules/", "migrations/", "src/**/*.spec.ts"]
 }
