@@ -10,6 +10,7 @@ import { whois } from "./commands/whois";
 import messageEmbedFilter from "./plugins/message-embed-filter";
 import faqBot from "./plugins/faq-bot";
 import leaveUknownGuilds from "./plugins/leave-unknown-guilds";
+import { Client } from "discord.js";
 
 const options: DeployerBotOptions = {
   guildID: config.DISCORD_GUILD_ID,
@@ -23,6 +24,11 @@ const options: DeployerBotOptions = {
     messageEmbedFilter,
     faqBot,
     leaveUknownGuilds,
+    (client: Client) => {
+      process.on("beforeExit", () => {
+        client.destroy();
+      });
+    },
   ],
   clientOpts: {
     intents: [

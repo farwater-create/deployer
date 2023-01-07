@@ -3,6 +3,4 @@ services:
     build: .
     env_file:
       - .env
-    volumes:
-      - /opt/deployer:/opt/deployer
     restart: always

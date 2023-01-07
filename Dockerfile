@@ -2,17 +2,17 @@ FROM node:18-alpine3.16 as BUILD
 WORKDIR /app
 COPY prisma prisma/
 COPY src src/
-COPY yarn.lock .
+COPY package-lock.json .
 COPY package.json .
 COPY tsconfig.json .
-RUN yarn install
-RUN yarn prisma generate
-RUN yarn build
+RUN npm install
+RUN npx prisma generate
+RUN npm run build
 
 FROM node:18-alpine3.16
+USER node
 WORKDIR /app
-COPY --from=BUILD /app/node_modules node_modules/
-COPY --from=BUILD /app/build build/
+COPY --from=BUILD --chown=node:node /app/node_modules node_modules/
+COPY --from=BUILD -chown=node:node /app/build build/
 COPY package.json .
-ENV DATABASE_URL=file:/opt/deployer/userdata.db
-CMD [ "yarn", "run", "production" ]
+CMD [ "node", "/app/build/index.js" ]
