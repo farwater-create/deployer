@@ -45,13 +45,13 @@ export class DeployerBot {
       throw new Error("invalid token");
     }
     const client = this.clientFactory();
-    await client.login(token);
     if (this.plugins) for (const plugin of this.plugins) plugin(client);
     this.botSlashCommandGuildRepository = new BotSlashCommandGuildRepository(
       this.clientID,
       token,
       this.guildID
     );
+    await client.login(token);
     if (this.commands)
       this.botSlashCommandGuildRepository.add(...this.commands);
     await this.botSlashCommandGuildRepository.push();

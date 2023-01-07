@@ -5,10 +5,11 @@ import blacklist from "./blacklist.json";
 import { Client, TextChannel } from "discord.js";
 import axios from "axios";
 import logger from "../lib/logger";
+import { config } from "../lib/config";
 
 const badURLS: Set<string> = new Set(blacklist.urls);
 
-const LOGS_CHANNEL = "1045241784445435977";
+const { LOGS_CHANNEL } = config;
 
 let logChannel: TextChannel;
 
