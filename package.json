@@ -51,7 +51,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --maxWorkers=1",
     "prepare": "husky install",
     "dev": "ts-node-dev src/index.ts",
     "start": "ts-node build/index.js",
