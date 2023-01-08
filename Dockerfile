@@ -13,6 +13,6 @@ FROM node:18-alpine3.16
 USER node
 WORKDIR /app
 COPY --from=BUILD --chown=node:node /app/node_modules node_modules/
-COPY --from=BUILD -chown=node:node /app/build build/
-COPY package.json .
+COPY --from=BUILD --chown=node:node /app/build build/
+COPY --chown=node:node package.json .
 CMD [ "node", "/app/build/index.js" ]
