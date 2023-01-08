@@ -1,11 +1,5 @@
 import { WhitelistApplication } from "@prisma/client";
-import {
-  GuildMember,
-  GuildMemberManager,
-  Interaction,
-  Role,
-  TextChannel,
-} from "discord.js";
+import { Interaction, TextChannel } from "discord.js";
 import { config } from "../../lib/config";
 import logger from "../../lib/logger";
 import { fetchUsername, whitelistAccount } from "../../lib/minecraft";
@@ -13,34 +7,6 @@ import prisma from "../../lib/prisma";
 import { ACCESS_CREATE_ROLE } from "../../lib/roles";
 import gettingStarted from "../../templates/getting-started";
 import { whitelistEmbed } from "../../templates/whitelist-embed";
-
-const ADD_ROLE_ATTEMPTS = 3;
-
-const retryAddRole = async (
-  members: GuildMemberManager,
-  member: GuildMember,
-  role: Role
-) => {
-  for (let index = 0; index < ADD_ROLE_ATTEMPTS; index++) {
-    try {
-      await members.addRole({
-        user: member,
-        role,
-        reason: "application accepted",
-      });
-      const resolvedRole = member?.roles.resolve(role);
-      if (resolvedRole?.id === role.id) {
-        break;
-      }
-      await new Promise<void>((resolve) => {
-        setTimeout(() => resolve(), 1000);
-      });
-    } catch (error) {
-      logger.error(error);
-    }
-    throw new Error("could not add access role after 3 attempts");
-  }
-};
 
 export const handleAccept = async (
   application: WhitelistApplication,
@@ -52,33 +18,47 @@ export const handleAccept = async (
   const accessCreateRole = await interaction.guild?.roles.fetch(
     ACCESS_CREATE_ROLE
   );
+
   if (!accessCreateRole) {
     logger.error("create role not found");
     return;
   }
 
   // add role
-  const guildMember = await interaction.guild.members.fetch(
-    interaction.member.user.id
-  );
-  await retryAddRole(interaction.guild?.members, guildMember, accessCreateRole);
+  try {
+    await interaction.guild.members.addRole({
+      user: interaction.user,
+      role: accessCreateRole,
+      reason: "application accepted",
+    });
+  } catch (error) {
+    logger.error(error);
+  }
 
   // whitelist account
-  const account = await fetchUsername(application.minecraftUUID);
-  await whitelistAccount({
-    name: account.name,
-    uuid: account.id,
-  });
+  try {
+    const account = await fetchUsername(application.minecraftUUID);
+    await whitelistAccount({
+      name: account.name,
+      uuid: account.id,
+    });
+  } catch (error) {
+    logger.error(error);
+  }
 
   // update database
-  await prisma.whitelistApplication.update({
-    where: {
-      id: application.id,
-    },
-    data: {
-      status: "accepted",
-    },
-  });
+  try {
+    await prisma.whitelistApplication.update({
+      where: {
+        id: application.id,
+      },
+      data: {
+        status: "accepted",
+      },
+    });
+  } catch (error) {
+    logger.error(error);
+  }
 
   // fetch user info
   let user = interaction.client.users.cache.get(application.discordID);
