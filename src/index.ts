@@ -8,7 +8,6 @@ import memberLeaveUnwhitelistListener from "./plugins/member-leave-unwhitelist";
 import applicationEmbedListener from "./plugins/application-embed-listener";
 import { whois } from "./commands/whois";
 import messageEmbedFilter from "./plugins/message-embed-filter";
-import faqBot from "./plugins/faq-bot";
 import leaveUknownGuilds from "./plugins/leave-unknown-guilds";
 import { Client } from "discord.js";
 
@@ -22,7 +21,6 @@ const options: DeployerBotOptions = {
     applicationEmbedListener,
     memberLeaveUnwhitelistListener,
     messageEmbedFilter,
-    faqBot,
     leaveUknownGuilds,
     (client: Client) => {
       process.on("beforeExit", () => {
