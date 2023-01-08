@@ -14,21 +14,13 @@ export const handleAccept = async (
 ) => {
   if (!interaction.guild) return;
   if (!interaction.member) return;
-  // fetch role
-  const accessCreateRole = await interaction.guild?.roles.fetch(
-    ACCESS_CREATE_ROLE
-  );
-
-  if (!accessCreateRole) {
-    logger.error("create role not found");
-    return;
-  }
-
+  const role = interaction.guild.roles.resolve(ACCESS_CREATE_ROLE);
+  if (!role) throw new Error("role " + role + " not found");
   // add role
   try {
     await interaction.guild.members.addRole({
       user: interaction.user,
-      role: accessCreateRole,
+      role,
       reason: "application accepted",
     });
   } catch (error) {
