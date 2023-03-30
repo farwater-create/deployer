@@ -9,9 +9,9 @@ const red = "\u001B[41m";
 
 const reset = "\u001B[0m";
 
-const logFile = fs.createWriteStream(
-  `./logs/${new Date(Date.now()).toISOString()}`
-);
+const logFile =
+  process.env.ENV === "production" &&
+  fs.createWriteStream(`./logs/${new Date(Date.now()).toISOString()}`);
 
 const prettyPrint = (object: unknown) => {
   switch (typeof object) {
@@ -33,7 +33,7 @@ const log = (color: string) => {
     const contents = args.map((value) => prettyPrint(value)).join(" ") + "\n";
     const date = `[${new Date(Date.now()).toISOString()}]`;
     process.stdout.write(`${color}${date}${reset} ${contents}`);
-    logFile.write(`${date} ${contents}`);
+    logFile && logFile.write(`${date} ${contents}`);
   };
 };
 
@@ -43,4 +43,4 @@ export default {
   info: log(reset),
 };
 
-process.on("beforeExit", () => logFile.close());
+logFile && process.on("beforeExit", () => logFile.close());

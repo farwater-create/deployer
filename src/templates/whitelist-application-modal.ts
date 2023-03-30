@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 
 const modal = new ModalBuilder()
-  .setTitle("Create Application")
+  .setTitle("Farwater Create Application")
   .setCustomId("create-application");
 
 const ageInput = new TextInputBuilder()
@@ -15,7 +15,7 @@ const ageInput = new TextInputBuilder()
   .setMaxLength(2)
   .setMinLength(1)
   .setStyle(TextInputStyle.Short)
-  .setLabel("Your age.")
+  .setLabel("Your age")
   .setRequired(true);
 
 const reasonInput = new TextInputBuilder()

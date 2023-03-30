@@ -1,4 +1,1 @@
-export default `
-Your create application was denied for having an offensive discord and or minecraft name.
- Please change your name, rejoin and try again.
-`.trim();
+export default `Your application has been declined due to your Discord or Minecraft name being offensive. Please change your name, rejoin and try again.`.trim();

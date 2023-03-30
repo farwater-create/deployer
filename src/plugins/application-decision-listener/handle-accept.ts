@@ -77,8 +77,9 @@ export const handleAccept = async (
     return;
   }
   const embed = whitelistEmbed(profile);
-  embed.setDescription(`${gettingStarted}\n<@${application.discordID}>`);
+  embed.setDescription(`${gettingStarted}`);
   await applicationsAcceptedChannel.send({
+    content: `<@${application.discordID}>`,
     embeds: [embed],
   });
   // eslint-disable-next-line unicorn/no-await-expression-member
