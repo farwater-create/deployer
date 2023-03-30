@@ -1,4 +1,9 @@
-import { StringSelectMenuInteraction, TextChannel, User } from "discord.js";
+import {
+  EmbedBuilder,
+  StringSelectMenuInteraction,
+  TextChannel,
+  User,
+} from "discord.js";
 import { ApplicationRejectReason } from "../../interfaces/application-reject-reason";
 import { config } from "../../lib/config";
 import logger from "../../lib/logger";
@@ -18,34 +23,67 @@ export const handleReject = async (
     logger.error("whitelist channel not found");
     return;
   }
+  const embed = new EmbedBuilder().setTitle("Application declined");
   switch (reason) {
     case ApplicationRejectReason.Underage: {
-      await whitelistChannel.send(
-        `<@${user.id}> Your create application was denied for breaking discord terms of service. You must be at least thirteen years old.`
+      embed.setDescription(
+        "Your application has been declined for breaking the Discord terms of service. You must be at least thirteen years old."
       );
+
+      await whitelistChannel.send({
+        content: `<@${user.id}>`,
+        embeds: [embed],
+      });
+
       break;
     }
     case ApplicationRejectReason.NoReasonProvided: {
-      await whitelistChannel.send(
-        `<@${user.id}> Your create application was denied for not providing a valid reason. Please try again.`
+      embed.setDescription(
+        "The reason you provided was either too short or did not provide a sufficient reason for us to approve your application. Please try again."
       );
+
+      await whitelistChannel.send({
+        content: `<@${user.id}>`,
+        embeds: [embed],
+      });
       break;
     }
     case ApplicationRejectReason.OffensiveName: {
-      await whitelistChannel.send(whitelistErrorOffensiveName);
+      embed.setDescription(whitelistErrorOffensiveName);
+
+      await whitelistChannel.send({
+        content: `<@${user.id}>`,
+        embeds: [embed],
+      });
       break;
     }
     case ApplicationRejectReason.BadAccount: {
-      await whitelistChannel.send(`<@${user.id}> Your application was denied.`);
+      embed.setDescription("Your application has been declined");
+
+      await whitelistChannel.send({
+        content: `<@${user.id}>`,
+        embeds: [embed],
+      });
       break;
     }
     case ApplicationRejectReason.BadReason: {
-      await whitelistChannel.send(`<@${user.id}> Your application was denied.`);
+      embed.setDescription("Your application has been declined");
+
+      await whitelistChannel.send({
+        content: `<@${user.id}>`,
+        embeds: [embed],
+      });
       break;
     }
     case ApplicationRejectReason.Suspended: {
-      await whitelistChannel.send(`<@${user.id}> Your application was denied because applications are suspended.
-          Please try again at a later date. Check the announcements channel for more information.`);
+      embed.setDescription(
+        "Your application has been declined because applications are suspended. Please try again at a later time. Check the announcements channel for more information."
+      );
+
+      await whitelistChannel.send({
+        content: `<@${user.id}>`,
+        embeds: [embed],
+      });
       break;
     }
     case ApplicationRejectReason.Left: {

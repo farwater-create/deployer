@@ -35,10 +35,10 @@ export default async (client: Client) => {
           new EmbedBuilder()
             .setTitle("Farwater Create Applications")
             .setDescription(
-              'Please read the rules @ <#1020403465643638894> Click "Apply" to apply.'
+              'Welcome to Farwater! Please read our <#1020403465643638894>. Click "Apply" to apply.'
             )
             .setThumbnail(
-              "https://gitea.kamaii.xyz/humbertovnavarro/season-7-modpack/raw/branch/main/overrides/background.png"
+              "https://media.forgecdn.net/avatars/thumbnails/444/296/64/64/637698958460822126.png"
             ),
         ],
         components: [
