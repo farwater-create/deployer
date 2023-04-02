@@ -14,29 +14,10 @@ export const handleAccept = async (
 ) => {
   if (!interaction.guild) return;
   if (!interaction.member) return;
-  const role = interaction.guild.roles.resolve(ACCESS_CREATE_ROLE);
-  if (!role) throw new Error("role " + role + " not found");
-  // add role
-  try {
-    await interaction.guild.members.addRole({
-      user: interaction.user,
-      role,
-      reason: "application accepted",
-    });
-  } catch (error) {
-    logger.error(error);
-  }
 
-  // whitelist account
-  try {
-    const account = await fetchUsername(application.minecraftUUID);
-    await whitelistAccount({
-      name: account.name,
-      uuid: account.id,
-    });
-  } catch (error) {
-    logger.error(error);
-  }
+  await addRole(interaction);
+
+  await whitelistUser(application);
 
   // update database
   try {
@@ -86,4 +67,34 @@ export const handleAccept = async (
   (await user.createDM(true)).send({
     embeds: [embed],
   });
+};
+
+export const addRole = async (interaction: Interaction) => {
+  if (!interaction.guild) return;
+
+  const role = interaction.guild.roles.resolve(ACCESS_CREATE_ROLE);
+  if (!role) throw new Error("role " + role + " not found");
+
+  try {
+    await interaction.guild.members.addRole({
+      user: interaction.user,
+      role,
+      reason: "application accepted",
+    });
+  } catch (error) {
+    logger.error(error);
+  }
+};
+
+export const whitelistUser = async (application: WhitelistApplication) => {
+  // whitelist account
+  try {
+    const account = await fetchUsername(application.minecraftUUID);
+    await whitelistAccount({
+      name: account.name,
+      uuid: account.id,
+    });
+  } catch (error) {
+    logger.error(error);
+  }
 };
