@@ -1,8 +1,0 @@
-node_modules
-*.lock
-prisma
-Dockerfile
-docker-compose.yml
-prisma
-build
-*.js
