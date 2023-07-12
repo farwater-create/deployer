@@ -6,6 +6,11 @@ import {
   TextInputStyle,
 } from "discord.js";
 
+const AGE_DESCRIPTION = "Please enter your age in years.";
+const REASON_DESCRIPTION = "Please enter a reason for joining.";
+const MINECRAFT_NAME_DESCRIPTION = "Please enter your Minecraft name. (case sensitive)";
+const REFERRAL_DESCRIPTION = "Please enter the name of the person who referred you. (optional)";
+
 export const ApplicationSubmissionModal = () => {
   return new ModalBuilder()
     .setTitle("Whitelist Application")
@@ -17,7 +22,7 @@ export const ApplicationSubmissionModal = () => {
           .setMaxLength(2)
           .setMinLength(1)
           .setStyle(TextInputStyle.Short)
-          .setLabel("Your age")
+          .setLabel(AGE_DESCRIPTION)
           .setRequired(true),
       ),
       new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
@@ -25,8 +30,8 @@ export const ApplicationSubmissionModal = () => {
           .setCustomId("reason")
           .setMaxLength(100)
           .setMinLength(1)
-          .setStyle(TextInputStyle.Short)
-          .setLabel("Reason for joining")
+          .setStyle(TextInputStyle.Paragraph)
+          .setLabel(REASON_DESCRIPTION)
           .setRequired(true),
       ),
       new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
@@ -35,8 +40,17 @@ export const ApplicationSubmissionModal = () => {
           .setMaxLength(16)
           .setMinLength(1)
           .setStyle(TextInputStyle.Short)
-          .setLabel("Minecraft name (case sensitive)")
+          .setLabel(MINECRAFT_NAME_DESCRIPTION)
           .setRequired(true),
       ),
-    ]);
+      new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+        new TextInputBuilder()
+          .setCustomId("referral")
+          .setMaxLength(16)
+          .setMinLength(1)
+          .setStyle(TextInputStyle.Short)
+          .setLabel(REFERRAL_DESCRIPTION)
+          .setRequired(false),
+      ),
+    ])
 };

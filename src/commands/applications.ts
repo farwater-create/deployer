@@ -1,4 +1,4 @@
-import { ApplicationSubmissionModal } from "@views/application/application-submission-modal";
+import { ApplicationSubmissionEmbed } from "@views/application/application-submission-embed";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -9,14 +9,14 @@ import {
 const $submitButton = new ActionRowBuilder<ButtonBuilder>().addComponents(
   new ButtonBuilder()
     .setCustomId("application:apply")
-    .setLabel("apply")
+    .setLabel("Apply")
     .setStyle(ButtonStyle.Success),
 );
 
 export const applicationCommand = async (message: Message) => {
   const channel = message.channel;
   channel.send({
-    embeds: [ApplicationSubmissionModal().toJSON()],
+    embeds: [ApplicationSubmissionEmbed],
     components: [$submitButton],
   });
 };

@@ -3,6 +3,7 @@ import { config } from "@config";
 import { logger } from "@logger";
 import { ChannelType } from "discord.js";
 import { ApplicationDecisionEmbed } from "@views/application/application-decision-embed";
+import z from "zod";
 const { LOG_CHANNEL_ID } = config;
 
 export const applicationSubmit = async (
@@ -26,12 +27,27 @@ export const applicationSubmit = async (
     return;
   }
 
+  let minecraftUuid = "⚠️NO UUID FOUND⚠️";
+  try {
+    const response = await fetch("https://api.mojang.com/users/profiles/minecraft/" + minecraftName);
+    const expectedResponseSchema = z.object({
+      id: z.string(),
+      name: z.string(),
+    });
+    const result = expectedResponseSchema.parse(await response.json());
+    minecraftUuid = result.id;
+  } catch (e) {
+    logger.error(`Could not find minecraft uuid for ${minecraftName}`);
+  }
+
+
   await channel.send({
     embeds: [
       ApplicationDecisionEmbed({
         age,
         reason,
         minecraftName,
+        minecraftUuid,
         discordId: interaction.user.id,
       }),
     ],

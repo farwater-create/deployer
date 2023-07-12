@@ -2,6 +2,8 @@
   "devDependencies": {
     "@jest/globals": "^29.5.2",
     "@types/jest": "^29.5.2",
+    "eslint": "^8.44.0",
+    "eslint-plugin-unicorn": "^47.0.0",
     "husky": "^8.0.0",
     "jest": "^29.6.1",
     "pino-pretty": "^10.0.1",
@@ -19,6 +21,23 @@
   "dependencies": {
     "discord.js": "^14.11.0",
     "dotenv": "^16.3.1",
-    "pino": "^8.14.1"
+    "pino": "^8.14.1",
+    "zod": "^3.21.4"
+  },
+  "eslintConfig": {
+    "env": {
+      "es2024": true
+    },
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    },
+    "plugins": [
+      "unicorn"
+    ],
+    "rules": {
+      "unicorn/better-regex": "error",
+      "unicorn/…": "error"
+    }
   }
 }

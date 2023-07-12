@@ -16,6 +16,7 @@ export const ApplicationDecisionEmbed = ({
   age,
   reason,
   minecraftName,
+  minecraftUuid
 }: ApplicationModel) => {
   const $acceptButton = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
@@ -44,15 +45,19 @@ export const ApplicationDecisionEmbed = ({
       },
       {
         name: "minecraft_uuid",
-        value: minecraftName,
+        value: minecraftUuid,
       },
       {
-        name: "minecraft_name",
-        value: `[link](https://namemc.com/profile/${minecraftName})`,
+        name: "minecraft_uuid",
+        value: minecraftUuid,
+      },
+      {
+        name: "minecraft_cape",
+        value: `[Minecraft Cape]( https://crafatar.com/capes/${minecraftUuid})`,
       },
       {
         name: "minecraft_skin",
-        value: `[link](https://mc-heads.net/body/${minecraftName}.png)`,
+        value: `[Minecraft Skin (Full)](https://crafatar.com/skins/${minecraftUuid})`,
       },
     ])
     .setThumbnail(`https://mc-heads.net/body/${minecraftName}.png`)
