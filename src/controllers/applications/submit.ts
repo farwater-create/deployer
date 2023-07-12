@@ -29,7 +29,9 @@ export const applicationSubmit = async (
 
   let minecraftUuid = "⚠️NO UUID FOUND⚠️";
   try {
-    const response = await fetch("https://api.mojang.com/users/profiles/minecraft/" + minecraftName);
+    const response = await fetch(
+      "https://api.mojang.com/users/profiles/minecraft/" + minecraftName,
+    );
     const expectedResponseSchema = z.object({
       id: z.string(),
       name: z.string(),
@@ -39,7 +41,6 @@ export const applicationSubmit = async (
   } catch (e) {
     logger.error(`Could not find minecraft uuid for ${minecraftName}`);
   }
-
 
   await channel.send({
     embeds: [

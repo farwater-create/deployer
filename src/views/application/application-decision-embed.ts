@@ -16,7 +16,7 @@ export const ApplicationDecisionEmbed = ({
   age,
   reason,
   minecraftName,
-  minecraftUuid
+  minecraftUuid,
 }: ApplicationModel) => {
   const $acceptButton = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()

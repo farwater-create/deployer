@@ -1,9 +1,8 @@
 import { EmbedBuilder } from "discord.js";
 
-const TITLE = "🚀 Whitelist Application Process 📝"
+const TITLE = "🚀 Whitelist Application Process 📝";
 
-const DESCRIPTION =
-`## Whitelist Application Process
+const DESCRIPTION = `## Whitelist Application Process
 
 Welcome to our Minecraft server discord whitelist application process! We're excited to have you join our community. To ensure a safe and fun environment for everyone, we have a simple application process. Here's how it works:
 
@@ -22,7 +21,7 @@ Welcome to our Minecraft server discord whitelist application process! We're exc
 Remember, the whitelist application process helps us maintain a positive and fun community. We appreciate your interest in our Minecraft server discord, and we can't wait to play with you! 🎮✨
 
 Click the button below to get started!
-`
+`;
 
 export const ApplicationSubmissionEmbed = new EmbedBuilder()
   .setTitle(TITLE)

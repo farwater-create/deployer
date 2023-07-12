@@ -8,8 +8,10 @@ import {
 
 const AGE_DESCRIPTION = "Please enter your age in years.";
 const REASON_DESCRIPTION = "Please enter a reason for joining.";
-const MINECRAFT_NAME_DESCRIPTION = "Please enter your Minecraft name. (case sensitive)";
-const REFERRAL_DESCRIPTION = "Please enter the name of the person who referred you. (optional)";
+const MINECRAFT_NAME_DESCRIPTION =
+  "Please enter your Minecraft name. (case sensitive)";
+const REFERRAL_DESCRIPTION =
+  "Please enter the name of the person who referred you. (optional)";
 
 export const ApplicationSubmissionModal = () => {
   return new ModalBuilder()
@@ -52,5 +54,5 @@ export const ApplicationSubmissionModal = () => {
           .setLabel(REFERRAL_DESCRIPTION)
           .setRequired(false),
       ),
-    ])
+    ]);
 };

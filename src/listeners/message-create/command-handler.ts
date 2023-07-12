@@ -1,9 +1,12 @@
 import { applicationCommand } from "@commands/applications";
 import { Message } from "discord.js";
 
-export type CommandHandler = (message: Message, args: Array<string>) => Promise<void>;
+export type CommandHandler = (
+  message: Message,
+  args: Array<string>,
+) => Promise<void>;
 
-export  const commands = new Map<string, CommandHandler>();
+export const commands = new Map<string, CommandHandler>();
 commands.set("create-application-embed", applicationCommand);
 
 const PREFIX = "!";
@@ -22,4 +25,4 @@ export const commandHandler = async (message: Message) => {
   } catch (error) {
     console.error(error);
   }
-}
+};
