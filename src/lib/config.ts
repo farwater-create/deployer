@@ -8,6 +8,8 @@ const schema = z.object({
   GUILD_ID: z.string().nonempty(),
   LOG_LEVEL: z.string().nonempty().default("info"),
   LOG_CHANNEL_ID: z.string().nonempty(),
+  ADMIN_ROLE_ID: z.string().nonempty(),
+  APPLICATIONS_CHANNEL_ID: z.string().nonempty(),
 });
 
 const rawConfig = schema.safeParse(process.env);

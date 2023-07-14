@@ -2,7 +2,7 @@ import { Client, GatewayIntentBits } from "discord.js";
 import { ready } from "listeners/ready";
 import { config } from "@lib/config";
 import { messageCreate } from "listeners/message-create";
-import { interactionCreate } from "listeners/interaction/interaction-create";
+import { interactionCreate } from "listeners/interaction";
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -10,6 +10,7 @@ const intents = [
   GatewayIntentBits.MessageContent,
   GatewayIntentBits.GuildMembers,
   GatewayIntentBits.DirectMessages,
+  GatewayIntentBits.GuildModeration
 ];
 
 const client = new Client({

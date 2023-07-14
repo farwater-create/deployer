@@ -1,5 +1,8 @@
-import { EmbedBuilder, TextBasedChannel } from "discord.js";
+import { EmbedBuilder, GuildTextBasedChannel, Role, RoleResolvable, TextBasedChannel } from "discord.js";
 import pino from "pino";
+import { roleToMentionString } from "@lib/discord-helpers/mentions";
+import { config } from "@config";
+const { ADMIN_ROLE_ID } = config;
 
 type LogLevel = "info" | "error" | "warn" | "debug";
 
@@ -10,7 +13,7 @@ const pinoLogger = pino({
 });
 
 interface CustomLogger {
-  logChannel?: TextBasedChannel;
+  logChannel?: GuildTextBasedChannel;
   discordLogQueue: any[];
   info: (message: any) => void;
   error: (message: any) => void;
@@ -25,38 +28,35 @@ export const logger: CustomLogger = {
   discordLogQueue: [],
   info: (message: any) => {
     pinoLogger.info(message);
-    logger.discord("info", message);
   },
   error: (message: any) => {
     pinoLogger.error(message);
-    logger.discord("error", message);
   },
   warn: (message: any) => {
     pinoLogger.warn(message);
-    logger.discord("warn", message);
   },
   debug: (message: any) => {
     pinoLogger.debug(message);
-    logger.discord("debug", message);
   },
   fatal: (message: any) => {
     pinoLogger.fatal(message);
-    logger.discord("error", message);
   },
-  discord: (level: LogLevel, message: any) => {
-    if (!logger.logChannel) {
-      logger.discordLogQueue.push(message);
-      return;
+  discord: (level: LogLevel, message: string) => {
+    let mention: string = "";
+    if(level === "error") {
+      mention = roleToMentionString(ADMIN_ROLE_ID)
     }
 
-    if (logger.discordLogQueue.length > 0) {
-      logger.discord(level, logger.discordLogQueue.shift());
+    if (!logger.logChannel) {
+      logger.error("No log channel set, cannot log discord message, logging to console instead.");
+      logger.error(message);
+      return
     }
 
     logger.logChannel.send({
       embeds: [
         new EmbedBuilder()
-          .setTitle(`[${level}]`)
+          .setTitle(`[${level}] ${mention}`)
           .setDescription(`${message}`)
           .setColor(
             level === "error" ? "Red" : level === "warn" ? "Yellow" : "Blue",

@@ -15,6 +15,7 @@ export type ApplicationRejectReason =
   | "offensive_application"
   | "user_not_in_discord_server"
   | "no_minecraft_account"
+  | "other_bannable"
   | "other";
 
 export const ApplicationRejectReasons: Array<ApplicationRejectReasonField> = [
@@ -55,7 +56,25 @@ export const ApplicationRejectReasons: Array<ApplicationRejectReasonField> = [
     value: "user_not_in_discord_server",
   },
   {
+    label: "minecraft account not found",
+    value: "no_minecraft_account",
+  },
+  {
     label: "other",
     value: "other",
   },
+  {
+    label: "other (bannable)",
+    value: "other_bannable",
+  }
 ];
+
+const rejectionDescriptionMap = new Map<ApplicationRejectReason, string>();
+
+for(const reason of ApplicationRejectReasons) {
+  rejectionDescriptionMap.set(reason.value, reason.label);
+}
+
+export const getApplicationRejectReasonDescription = (reason: ApplicationRejectReason) => {
+  return rejectionDescriptionMap.get(reason) || "uknown reason" as string;
+}

@@ -1,4 +1,11 @@
-import { EmbedBuilder } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  EmbedBuilder,
+  MessageCreateOptions,
+} from "discord.js";
+import { ApplicationCallback } from "../../models/application-callback-id";
 
 const TITLE = "🚀 Whitelist Application Process 📝";
 
@@ -23,9 +30,21 @@ Remember, the whitelist application process helps us maintain a positive and fun
 Click the button below to get started!
 `;
 
-export const ApplicationSubmissionEmbed = new EmbedBuilder()
+const ApplicationSubmissionEmbed = new EmbedBuilder()
   .setTitle(TITLE)
   .setDescription(DESCRIPTION)
   .setThumbnail(
-    "https://media.forgecdn.net/avatars/thumbnails/444/296/64/64/637698958460822126.png",
+    "https://media.forgecdn.net/avatars/thumbnails/444/296/64/64/637698958460822126.png"
   );
+
+export const ApplicationStartMessage: MessageCreateOptions = {
+  embeds: [ApplicationSubmissionEmbed],
+  components: [
+    new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId(ApplicationCallback.Start)
+        .setLabel("Apply")
+        .setStyle(ButtonStyle.Success)
+    ),
+  ],
+};

@@ -1,4 +1,4 @@
-import { applicationCommand } from "@commands/applications";
+import { createApplicationStartMessage } from "@controllers/commands/create-application-message";
 import { Message } from "discord.js";
 
 export type CommandHandler = (
@@ -7,7 +7,7 @@ export type CommandHandler = (
 ) => Promise<void>;
 
 export const commands = new Map<string, CommandHandler>();
-commands.set("create-application-embed", applicationCommand);
+commands.set("create-application-message", createApplicationStartMessage);
 
 const PREFIX = "!";
 

@@ -18,8 +18,9 @@
       "@models/*": ["models/*"],
       "@views/*": ["views/*"],
       "@controllers/*": ["controllers/*"],
-      "@commands/*": ["commands/*"],
+      "@commands/*": ["controllers/commands/*"],
       "@lib/*": ["lib/*"],
+      "@discord-helpers/*": ["lib/discord-helpers/*"],
     }
   },
   "ts-node": {
