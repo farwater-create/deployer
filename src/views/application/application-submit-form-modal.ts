@@ -5,7 +5,10 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
-import { ApplicationCallback } from "../../models/application-callback-id";
+
+export enum MinecraftApplicationModelAction {
+  Submit = "minecraft-application-model-submit"
+}
 
 const AGE_DESCRIPTION = "Age in years";
 const REASON_DESCRIPTION = "Reason for joining.";
@@ -17,7 +20,7 @@ const REFERRAL_DESCRIPTION =
 export const ApplicationSubmitFormModal = () => {
   return new ModalBuilder()
     .setTitle("Whitelist Application")
-    .setCustomId(ApplicationCallback.Submit)
+    .setCustomId(MinecraftApplicationModelAction.Submit)
     .addComponents([
       new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
         new TextInputBuilder()
@@ -57,3 +60,4 @@ export const ApplicationSubmitFormModal = () => {
       ),
     ]);
 };
+

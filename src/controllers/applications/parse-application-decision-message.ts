@@ -1,6 +1,11 @@
+import { ApplicationModel } from "@models/application-model";
 import { Message } from "discord.js";
-
-export const parseApplicationDecisionMessage = (message: Message) => {
+/**
+ * @description Parses an application decision message for application data.
+ * @param message
+ * @returns An object containing the application data if the message is an application decision message, otherwise undefined.
+ */
+export const parseApplicationDecisionMessage = (message: Message): ApplicationModel | undefined => {
   const embed = message.embeds[0];
 
   if (!embed) {

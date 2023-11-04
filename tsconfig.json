@@ -11,6 +11,7 @@
     "rootDir": "src",
     "outDir": "dist",
     "baseUrl": "src",
+    "resolveJsonModule": true,
     "paths": {
       "@logger": ["lib/logger"],
       "@config": ["lib/config.ts"],

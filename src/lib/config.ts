@@ -10,6 +10,8 @@ const schema = z.object({
   LOG_CHANNEL_ID: z.string().nonempty(),
   ADMIN_ROLE_ID: z.string().nonempty(),
   APPLICATIONS_CHANNEL_ID: z.string().nonempty(),
+  PTERODACTYL_API_KEY: z.string().nonempty(),
+  PTERODACTYL_API_URL: z.string().nonempty(),
 });
 
 const rawConfig = schema.safeParse(process.env);
