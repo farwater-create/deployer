@@ -6,21 +6,21 @@ import {
   TextInputStyle,
 } from "discord.js";
 
-export enum MinecraftApplicationModelAction {
+export enum MinecraftApplicationModalEvent {
   Submit = "minecraft-application-model-submit"
 }
 
 const AGE_DESCRIPTION = "Age in years";
-const REASON_DESCRIPTION = "Reason for joining.";
+const REASON_DESCRIPTION = "Reason for joining. (Copy this incase you get auto rejected)";
 const MINECRAFT_NAME_DESCRIPTION =
   "Minecraft name. (case sensitive)";
 const REFERRAL_DESCRIPTION =
   "Referall (optional)";
 
-export const ApplicationSubmitFormModal = () => {
+export const MinecraftApplicationModal = () => {
   return new ModalBuilder()
     .setTitle("Whitelist Application")
-    .setCustomId(MinecraftApplicationModelAction.Submit)
+    .setCustomId(MinecraftApplicationModalEvent.Submit)
     .addComponents([
       new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
         new TextInputBuilder()
@@ -60,4 +60,3 @@ export const ApplicationSubmitFormModal = () => {
       ),
     ]);
 };
-

@@ -1,8 +1,10 @@
-import { Client, GatewayIntentBits } from "discord.js";
-import { ready } from "listeners/ready";
+import { Client, GatewayIntentBits, PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import { config } from "@lib/config";
-import { messageCreate } from "listeners/message-create";
-import { interactionCreate } from "listeners/interaction";
+import { minecraftApplicationModalHandler } from "@controllers/applications/minecraft/handle-minecraft-application-modal";
+import { safetyCheck } from "@controllers/startup/safety-check";
+import { minecraftApplicationModalApplyButtonHandler } from "@controllers/applications/minecraft/handle-minecraft-application-modal-apply-button-press";
+import { CommandCollection } from "@controllers/commands/commands";
+import { MinecraftApplicationStartMessage } from "@views/application/minecraft-application-start-message";
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -17,8 +19,33 @@ const client = new Client({
   intents,
 });
 
-client.on("interactionCreate", interactionCreate);
-client.on("messageCreate", messageCreate);
-client.on("ready", ready);
+CommandCollection.use({
+  json: new SlashCommandBuilder()
+  .setName("applications-channel")
+  .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
+  .setDescription("Creates the initial application message.")
+  .toJSON(),
+  handler: (interaction) => {
+    interaction.channel?.send(MinecraftApplicationStartMessage)
+  }
+})
+
+
+client.on("interactionCreate", interaction => {
+  if(interaction.isCommand()) {
+    CommandCollection.handle(interaction);
+  }
+  if(interaction.isModalSubmit()) {
+    minecraftApplicationModalHandler(interaction);
+  }
+  if(interaction.isButton()) {
+    minecraftApplicationModalApplyButtonHandler(interaction);
+  }
+});
+
+client.on("ready", async (client) => {
+  await safetyCheck(client);
+  CommandCollection.register(config.BOT_TOKEN, config.CLIENT_ID, config.GUILD_ID);
+});
 
 client.login(config.BOT_TOKEN);

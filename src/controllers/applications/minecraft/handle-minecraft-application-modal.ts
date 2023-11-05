@@ -1,20 +1,18 @@
-import { ComponentType, Interaction } from "discord.js";
-import { config } from "@config";
-import { logger } from "@logger";
-import { ChannelType } from "discord.js";
-import { ApplicationDecisionMessage } from "@views/application/application-decision-message";
-import z from "zod";
 import { userToMentionString } from "@lib/discord-helpers/mentions";
-import { autoReview } from "@controllers/tasks/auto-review";
+import { logger } from "@logger";
+import { MinecraftApplicationDecisionMessage } from "@views/application/minecraft-application-decision-message";
+import { Interaction, ComponentType, ChannelType, ModalSubmitInteraction } from "discord.js";
+import z from "zod";
+import { config } from "@config";
+import { MinecraftApplicationModalEvent } from "@views/application/minecraft-application-submit-modal";
+import { autoReviewMinecraftApplication } from "./minecraft-auto-review";
 const { APPLICATIONS_CHANNEL_ID } = config;
 
-export const processApplicationSubmitForm = async (
-  interaction: Interaction,
+export const minecraftApplicationModalHandler = async (
+  interaction: ModalSubmitInteraction,
 ) => {
-  if (!interaction.isModalSubmit()) {
-    logger.warn("Interaction is not a modal submit");
-    return;
-  }
+  if(interaction.customId !== MinecraftApplicationModalEvent.Submit) return;
+
   let age = interaction.fields.getField("age", ComponentType.TextInput).value;
   const reason = interaction.fields.getField(
     "reason",
@@ -59,15 +57,12 @@ export const processApplicationSubmitForm = async (
     minecraftName,
     minecraftUuid
   }
-  
-  try {
-    autoReview(interaction, application);
-  } catch {
-    await channel.send(ApplicationDecisionMessage(application));
-    await interaction.reply({
-      content:
-        "Your application has been submitted. Please wait for a staff member to review it.",
-      ephemeral: true,
-    });
-  }
+
+  const autoReviewResult = autoReviewMinecraftApplication(application);
+  await channel.send(MinecraftApplicationDecisionMessage(application, autoReviewResult));
+  await interaction.reply({
+    content:
+      "Your application has been submitted. Applications can take up to three days to review.",
+    ephemeral: true,
+  });
 };

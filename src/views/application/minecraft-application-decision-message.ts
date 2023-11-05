@@ -1,18 +1,25 @@
-import { ApplicationModel, MinecraftApplicationModel } from "@models/application";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Message, MessageCreateOptions, SelectMenuBuilder, StringSelectMenuBuilder } from "discord.js";
-
-export enum MinecraftApplicationDecision {
+import { MinecraftApplicationModel } from "@models/application";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ColorResolvable, Colors, EmbedBuilder, Message, MessageCreateOptions, SelectMenuBuilder, StringSelectMenuBuilder } from "discord.js";
+import { MinecraftAutoReviewResult, MinecraftAutoReviewStatus } from "@controllers/applications/minecraft/minecraft-auto-review";
+export enum MinecraftApplicationDecisionEvent {
   Accept = "minecraft-application-decision-accept",
   Reject = "minecraft-application-decision-reject"
 }
 
-const MinecraftApplicationDecisionEmbed = ({
-  discordId,
-  age,
-  reason,
-  minecraftName,
-  minecraftUuid,
-}: MinecraftApplicationModel) => {
+const MinecraftApplicationDecisionEmbed = (minecraftApplication: MinecraftApplicationModel, autoReviewResult: MinecraftAutoReviewResult) => {
+  const { reason, discordId, minecraftName, minecraftUuid, age } = minecraftApplication;
+  let color: ColorResolvable;
+  switch(autoReviewResult.status) {
+    case MinecraftAutoReviewStatus.Accepted:
+      color = Colors.Green;
+      break;
+    case MinecraftAutoReviewStatus.Rejected:
+      color = Colors.Red;
+      break;
+    case MinecraftAutoReviewStatus.NeedsManualReview:
+      color = Colors.Blurple
+      break;
+  }
   const embed = new EmbedBuilder()
     .setTitle("Whitelist Application")
     .setDescription(
@@ -34,10 +41,15 @@ const MinecraftApplicationDecisionEmbed = ({
       {
         name: "minecraftUuid",
         value: minecraftUuid
+      },
+      {
+        name: "autoReviewComment",
+        value: autoReviewResult.reason
       }
     ])
     .setThumbnail(`https://mc-heads.net/body/${minecraftName}.png`)
-    .setImage(`https://mc-heads.net/body/${minecraftName}.png`);
+    .setImage(`https://mc-heads.net/body/${minecraftName}.png`)
+    .setColor(color);
     return embed;
 };
 
@@ -106,24 +118,26 @@ export const reasons = [
   }
 ];
 
-export const MinecraftApplicationDecisionMessage = (application: MinecraftApplicationModel) => {
+export const MinecraftApplicationDecisionMessage = (application: MinecraftApplicationModel, autoReviewResult: MinecraftAutoReviewResult) => {
   const opts: MessageCreateOptions = {
-    embeds: [MinecraftApplicationDecisionEmbed(application)],
-    components: [
-      new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId(MinecraftApplicationDecision.Accept)
-          .setLabel("Accept")
-          .setStyle(ButtonStyle.Success)
-      ),
-      new ActionRowBuilder<SelectMenuBuilder>().addComponents(
-        new StringSelectMenuBuilder()
-          .setCustomId(MinecraftApplicationDecision.Reject)
-          .addOptions(reasons)
-          .setPlaceholder("Reject with reason")
-      ),
-    ],
+    embeds: [MinecraftApplicationDecisionEmbed(application, autoReviewResult)]
   };
+  if(autoReviewResult.status === MinecraftAutoReviewStatus.NeedsManualReview) {
+    opts.components = [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder()
+            .setCustomId(MinecraftApplicationDecisionEvent.Accept)
+            .setLabel("Accept")
+            .setStyle(ButtonStyle.Success)
+        ),
+        new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+          new StringSelectMenuBuilder()
+            .setCustomId(MinecraftApplicationDecisionEvent.Reject)
+            .addOptions(reasons)
+            .setPlaceholder("Reject with reason")
+        ),
+    ];
+  }
   return opts;
 };
 
