@@ -1,12 +1,12 @@
 import { MinecraftApplicationModel } from "@models/application";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ColorResolvable, Colors, EmbedBuilder, Message, MessageCreateOptions, SelectMenuBuilder, StringSelectMenuBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ColorResolvable, Colors, EmbedBuilder, Message, MessageCreateOptions, SelectMenuBuilder, StringSelectMenuBuilder, User } from "discord.js";
 import { MinecraftAutoReviewResult, MinecraftAutoReviewStatus } from "@controllers/applications/minecraft/minecraft-auto-review";
 export enum MinecraftApplicationDecisionEvent {
   Accept = "minecraft-application-decision-accept",
   Reject = "minecraft-application-decision-reject"
 }
 
-const MinecraftApplicationDecisionEmbed = (minecraftApplication: MinecraftApplicationModel, autoReviewResult: MinecraftAutoReviewResult) => {
+const MinecraftApplicationDecisionEmbed = (minecraftApplication: MinecraftApplicationModel, autoReviewResult: MinecraftAutoReviewResult, reviewer?: User) => {
   const { reason, discordId, minecraftName, minecraftUuid, age } = minecraftApplication;
   let color: ColorResolvable;
   switch(autoReviewResult.status) {
@@ -20,6 +20,7 @@ const MinecraftApplicationDecisionEmbed = (minecraftApplication: MinecraftApplic
       color = Colors.Blurple
       break;
   }
+
   const embed = new EmbedBuilder()
     .setTitle("Whitelist Application")
     .setDescription(
@@ -47,9 +48,19 @@ const MinecraftApplicationDecisionEmbed = (minecraftApplication: MinecraftApplic
         value: autoReviewResult.reason
       }
     ])
-    .setThumbnail(`https://mc-heads.net/body/${minecraftName}.png`)
-    .setImage(`https://mc-heads.net/body/${minecraftName}.png`)
     .setColor(color);
+    const thumbnail = new URL(`https://mc-heads.net/body/${minecraftName}.png`)
+    const image = new URL(`https://mc-heads.net/body/${minecraftName}.png`);
+    embed.setImage(image.toString());
+    embed.setThumbnail(thumbnail.toString());
+    if(reviewer) {
+      embed.addFields([
+        {
+          name: "reviewer",
+          value: `<@${reviewer.id}>`
+        }
+      ])
+    }
     return embed;
 };
 
@@ -118,9 +129,9 @@ export const reasons = [
   }
 ];
 
-export const MinecraftApplicationDecisionMessage = (application: MinecraftApplicationModel, autoReviewResult: MinecraftAutoReviewResult) => {
+export const MinecraftApplicationDecisionMessage = (application: MinecraftApplicationModel, autoReviewResult: MinecraftAutoReviewResult, reviewer?: User) => {
   const opts: MessageCreateOptions = {
-    embeds: [MinecraftApplicationDecisionEmbed(application, autoReviewResult)]
+    embeds: [MinecraftApplicationDecisionEmbed(application, autoReviewResult, reviewer)]
   };
   if(autoReviewResult.status === MinecraftAutoReviewStatus.NeedsManualReview) {
     opts.components = [

@@ -5,6 +5,7 @@ import { safetyCheck } from "@controllers/startup/safety-check";
 import { minecraftApplicationModalApplyButtonHandler } from "@controllers/applications/minecraft/handle-minecraft-application-modal-apply-button-press";
 import { CommandCollection } from "@controllers/commands/commands";
 import { MinecraftApplicationStartMessage } from "@views/application/minecraft-application-start-message";
+import { minecraftApplicationDenyHandler } from "@controllers/applications/minecraft/handle-minecraft-application-deny";
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -40,6 +41,9 @@ client.on("interactionCreate", interaction => {
   }
   if(interaction.isButton()) {
     minecraftApplicationModalApplyButtonHandler(interaction);
+  }
+  if(interaction.isStringSelectMenu()) {
+    minecraftApplicationDenyHandler(interaction);
   }
 });
 

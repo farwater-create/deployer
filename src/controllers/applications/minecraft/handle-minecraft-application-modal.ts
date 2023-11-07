@@ -59,10 +59,13 @@ export const minecraftApplicationModalHandler = async (
   }
 
   const autoReviewResult = autoReviewMinecraftApplication(application);
+
   await channel.send(MinecraftApplicationDecisionMessage(application, autoReviewResult));
+
   await interaction.reply({
     content:
       "Your application has been submitted. Applications can take up to three days to review.",
     ephemeral: true,
   });
+  
 };

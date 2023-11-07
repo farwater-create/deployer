@@ -11,7 +11,7 @@ export enum MinecraftApplicationModalEvent {
 }
 
 const AGE_DESCRIPTION = "Age in years";
-const REASON_DESCRIPTION = "Reason for joining. (Copy this incase you get auto rejected)";
+const REASON_DESCRIPTION = "Reason for joining.";
 const MINECRAFT_NAME_DESCRIPTION =
   "Minecraft name. (case sensitive)";
 const REFERRAL_DESCRIPTION =
