@@ -1,11 +1,12 @@
 import { userToMentionString } from "@lib/discord-helpers/mentions";
 import { logger } from "@logger";
 import { MinecraftApplicationDecisionMessage } from "@views/application/minecraft-application-decision-message";
-import { Interaction, ComponentType, ChannelType, ModalSubmitInteraction } from "discord.js";
+import { ComponentType, ChannelType, ModalSubmitInteraction } from "discord.js";
 import z from "zod";
 import { config } from "@config";
-import { MinecraftApplicationModalEvent } from "@views/application/minecraft-application-submit-modal";
-import { autoReviewMinecraftApplication } from "./minecraft-auto-review";
+import { MinecraftApplicationModalEvent } from "views/application/minecraft-application-submit-modal";
+import { MinecraftAutoReviewStatus, autoReviewMinecraftApplication } from "./minecraft-auto-review";
+import { denyApplication } from "./handle-minecraft-application-deny";
 const { APPLICATIONS_CHANNEL_ID } = config;
 
 export const minecraftApplicationModalHandler = async (
@@ -67,5 +68,8 @@ export const minecraftApplicationModalHandler = async (
       "Your application has been submitted. Applications can take up to three days to review.",
     ephemeral: true,
   });
-  
+
+  if(autoReviewResult.status === MinecraftAutoReviewStatus.Rejected) {
+    denyApplication(interaction.client, interaction.user.id, autoReviewResult.reason)
+  }
 };

@@ -44,6 +44,8 @@ export const safetyCheck = async (client: Client) => {
   const logChannel = await assertChannel<GuildTextBasedChannel>(guild, config.LOG_CHANNEL_ID, ChannelType.GuildText);
   logger.logChannel = logChannel;
 
+  await assertChannel(guild, config.APPLICATIONS_CHANNEL_ID, ChannelType.GuildText)
+
   const member = await assertBotMember(guild, client);
 
   await assertPermissions(member, requiredPermissions);
@@ -86,7 +88,7 @@ const assertChannel = async <T>(guild: Guild, channelId: string, type: ChannelTy
     throw new Error(
       `Log channel with ID ${channelId} is not a ${type} channel!`
     );
-  logger.info(`✅ Log channel found! (${channel.name})`);
+  logger.info(`✅ channel found! (${channel.name})`);
   return channel as T;
 };
 

@@ -11,7 +11,6 @@ export class CommandCollection {
     try {
       this.commandsMap.get(interaction.commandName)?.handler(interaction);
     } catch(error) {
-      console.error(error);
       if(!interaction.replied) {
         interaction.reply("Internal server error");
       }

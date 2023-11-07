@@ -32,6 +32,10 @@ const MinecraftApplicationDecisionEmbed = (minecraftApplication: MinecraftApplic
         value: discordId
       },
       {
+        name: "discord",
+        value: `<@${discordId}>`
+      },
+      {
         name: "age",
         value: age
       },
@@ -76,9 +80,15 @@ export type MinecraftApplicationRejectReason =
   | "user_not_in_discord_server"
   | "no_minecraft_account"
   | "other_bannable"
+  | "invalid_age"
   | "other";
 
-export const reasons = [
+export const minecraftApplicationDenyReasonDescriptions = new Map<MinecraftApplicationRejectReason, string>();
+
+export const minecraftApplicationDenyReasons: Array<{
+  label: string,
+  value: MinecraftApplicationRejectReason
+}> = [
   {
     label: "underage (< 13)",
     value: "underage",
@@ -126,8 +136,16 @@ export const reasons = [
   {
     label: "other (bannable)",
     value: "other_bannable",
+  },
+  {
+    label: "invalid age",
+    value: "invalid_age"
   }
 ];
+
+minecraftApplicationDenyReasons.forEach(v => {
+  minecraftApplicationDenyReasonDescriptions.set(v.value, v.label);
+})
 
 export const MinecraftApplicationDecisionMessage = (application: MinecraftApplicationModel, autoReviewResult: MinecraftAutoReviewResult, reviewer?: User) => {
   const opts: MessageCreateOptions = {
@@ -144,7 +162,7 @@ export const MinecraftApplicationDecisionMessage = (application: MinecraftApplic
         new ActionRowBuilder<SelectMenuBuilder>().addComponents(
           new StringSelectMenuBuilder()
             .setCustomId(MinecraftApplicationDecisionEvent.Reject)
-            .addOptions(reasons)
+            .addOptions(minecraftApplicationDenyReasons)
             .setPlaceholder("Reject with reason")
         ),
     ];

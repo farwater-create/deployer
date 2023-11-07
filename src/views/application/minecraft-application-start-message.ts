@@ -1,3 +1,4 @@
+import { config } from "@config";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -9,6 +10,8 @@ import {
 export enum MinecraftApplicationEvent {
   Start = "application-start"
 }
+const { RULES_CHANNEL_ID, GUILD_ID, APPLICATIONS_CHANNEL_ID, BOT_USER_ID } = config;
+const rulesChannelLink = `https://discord.com/channels/${GUILD_ID}/${RULES_CHANNEL_ID}`;
 
 const TITLE = "🚀 Whitelist Application Process 📝";
 
@@ -16,13 +19,11 @@ const DESCRIPTION = `## Whitelist Application Process
 
 Welcome to our Minecraft server discord whitelist application process! We're excited to have you join our community. To ensure a safe and fun environment for everyone, we have a simple application process. Here's how it works:
 
-1. **Read the Server Rules**: Check out the rules channel in landing pad to get familiar with our server rules. It's important to follow these rules for a smooth and enjoyable gaming experience.
+1. **Read the Server Rules**: Check out ${rulesChannelLink} to get familiar with our server rules. It's important to follow these rules for a smooth and enjoyable gaming experience.
 
-2. **Complete the Application Form**: In the #whitelist-application channel, you'll find an application form. Copy it and answer the questions honestly. We want to know your playstyle and goals.
+2. **Review Process**: Our staff will review your application, considering your compatibility with our server, previous experience, and community engagement. We'll get back to you as soon as possible, so please be patient.
 
-3. **Review Process**: Our staff will review your application, considering your compatibility with our server, previous experience, and community engagement. We'll get back to you as soon as possible, so please be patient.
-
-4. **Notification**: We'll send you a direct message with our decision. If your application is accepted, you'll receive instructions on joining the server and accessing the whitelist.
+3. **Notification**: We'll send you a direct message with our decision. Make sure your DMS are open to our bot <@${BOT_USER_ID}>. If your application is accepted, you'll receive instructions on joining the server.
 
 Remember, the whitelist application process helps us maintain a positive and fun community. We appreciate your interest in our Minecraft server discord, and we can't wait to play with you! 🎮✨
 
