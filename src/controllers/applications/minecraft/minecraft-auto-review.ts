@@ -1,5 +1,7 @@
+import { getSkin, isGoodSkin } from "@lib/skin-id/skin-id";
 import { MinecraftApplicationModel } from "@models/application";
-import { MinecraftApplicationRejectReason, minecraftApplicationDenyReasons } from "@views/application/minecraft-application-decision-message";
+import { MinecraftApplicationRejectReason } from "@views/application/minecraft-application-decision-message";
+import { Client } from "discord.js";
 /**
  * Throws error if application cannot be auto processed.
  * @param interaction
@@ -8,23 +10,23 @@ import { MinecraftApplicationRejectReason, minecraftApplicationDenyReasons } fro
  */
 
 
-export enum MinecraftAutoReviewStatus {
+export enum MinecraftApplicationAutoReviewStatus {
   Accepted,
   Rejected,
   NeedsManualReview
 }
 
 export type MinecraftAutoReviewResult = {
-  status: MinecraftAutoReviewStatus,
+  status: MinecraftApplicationAutoReviewStatus,
   reason: MinecraftApplicationRejectReason
 }
 
 
-export const autoReviewMinecraftApplication = (application: MinecraftApplicationModel): MinecraftAutoReviewResult => {
+export const autoReviewMinecraftApplication = async (client: Client, application: MinecraftApplicationModel): Promise<MinecraftAutoReviewResult> => {
   const match = /^[1-9][0-9]?$/;
   if(!match.test(application.age)) {
     return {
-      status: MinecraftAutoReviewStatus.Rejected,
+      status: MinecraftApplicationAutoReviewStatus.Rejected,
       reason: "invalid_age"
     }
   }
@@ -33,41 +35,42 @@ export const autoReviewMinecraftApplication = (application: MinecraftApplication
 
   if(Number.isNaN(ageInt)) {
     return {
-      status: MinecraftAutoReviewStatus.Rejected,
+      status: MinecraftApplicationAutoReviewStatus.Rejected,
       reason: "invalid_age",
     }
   }
 
   if(!Number.isSafeInteger(ageInt)) {
     return {
-      status: MinecraftAutoReviewStatus.Rejected,
+      status: MinecraftApplicationAutoReviewStatus.Rejected,
       reason: "invalid_age"
     }
   }
 
   if(ageInt < 13) {
     return {
-      status: MinecraftAutoReviewStatus.Rejected,
+      status: MinecraftApplicationAutoReviewStatus.Rejected,
       reason: "underage"
     }
   }
 
   if(application.minecraftUuid === "⚠️NO UUID FOUND⚠️") {
     return {
-      status: MinecraftAutoReviewStatus.NeedsManualReview,
+      status: MinecraftApplicationAutoReviewStatus.NeedsManualReview,
       reason: "no_minecraft_account"
     }
   }
 
-  if(application.reason.length >= 100) {
+  const skin = await getSkin(application.minecraftUuid);
+  if(skin && !await isGoodSkin(skin)) {
     return {
-      status: MinecraftAutoReviewStatus.Accepted,
-      reason: "other"
+      status: MinecraftApplicationAutoReviewStatus.Rejected,
+      reason: "offensive_skin"
     }
   }
 
   return {
-    status: MinecraftAutoReviewStatus.NeedsManualReview,
-    reason: "low_effort_application"
+    status: MinecraftApplicationAutoReviewStatus.Accepted,
+    reason: "other"
   }
 }

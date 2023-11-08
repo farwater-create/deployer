@@ -42,6 +42,8 @@ export const logger: CustomLogger = {
     pinoLogger.fatal(message);
   },
   discord: (level: LogLevel, message: string) => {
+    logger[level](message);
+
     let mention: string = "";
     if(level === "error") {
       mention = roleToMentionString(ADMIN_ROLE_ID)
@@ -52,7 +54,6 @@ export const logger: CustomLogger = {
       logger.error(message);
       return
     }
-
     logger.logChannel.send({
       embeds: [
         new EmbedBuilder()
@@ -68,5 +69,5 @@ export const logger: CustomLogger = {
 };
 
 process.on("uncaughtException", (error) => {
-  logger.fatal(error);
+  logger.discord("warn", error);
 });

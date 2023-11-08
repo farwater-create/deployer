@@ -1,11 +1,10 @@
-import { userToMentionString } from "@lib/discord-helpers/mentions";
 import { logger } from "@logger";
 import { MinecraftApplicationDecisionMessage } from "@views/application/minecraft-application-decision-message";
 import { ComponentType, ChannelType, ModalSubmitInteraction } from "discord.js";
 import z from "zod";
 import { config } from "@config";
 import { MinecraftApplicationModalEvent } from "views/application/minecraft-application-submit-modal";
-import { MinecraftAutoReviewStatus, autoReviewMinecraftApplication } from "./minecraft-auto-review";
+import { autoReviewMinecraftApplication } from "./minecraft-auto-review";
 import { denyApplication } from "./handle-minecraft-application-deny";
 const { APPLICATIONS_CHANNEL_ID } = config;
 
@@ -25,7 +24,8 @@ export const minecraftApplicationModalHandler = async (
   ).value;
   const channel = interaction.client.channels.cache.get(APPLICATIONS_CHANNEL_ID);
   if (!channel || channel.type !== ChannelType.GuildText) {
-    logger.error(
+    logger.discord(
+      "error",
       `Could not find log channel with id ${APPLICATIONS_CHANNEL_ID} to log application submission`,
     );
     return;
@@ -41,15 +41,7 @@ export const minecraftApplicationModalHandler = async (
     });
     const result = expectedResponseSchema.parse(await response.json());
     minecraftUuid = result.id;
-  } catch (e) {
-    logger.error(`Could not find minecraft uuid for ${minecraftName}`);
-    logger.discord(
-      "warn",
-      `Application submitted but minecraft uuid not found for user ${userToMentionString(
-        interaction.user.id
-      )} with name ${minecraftName}`
-    );
-  }
+  } catch {}
 
   const application = {
     discordId: interaction.user.id,
@@ -59,7 +51,7 @@ export const minecraftApplicationModalHandler = async (
     minecraftUuid
   }
 
-  const autoReviewResult = autoReviewMinecraftApplication(application);
+  const autoReviewResult = await autoReviewMinecraftApplication(interaction.client, application);
 
   await channel.send(MinecraftApplicationDecisionMessage(application, autoReviewResult));
 
@@ -68,8 +60,4 @@ export const minecraftApplicationModalHandler = async (
       "Your application has been submitted. Applications can take up to three days to review.",
     ephemeral: true,
   });
-
-  if(autoReviewResult.status === MinecraftAutoReviewStatus.Rejected) {
-    denyApplication(interaction.client, interaction.user.id, autoReviewResult.reason)
-  }
 };

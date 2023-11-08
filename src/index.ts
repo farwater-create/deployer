@@ -6,6 +6,7 @@ import { minecraftApplicationModalApplyButtonHandler } from "@controllers/applic
 import { CommandCollection } from "@controllers/commands/commands";
 import { MinecraftApplicationStartMessage } from "@views/application/minecraft-application-start-message";
 import { minecraftApplicationDenyHandler } from "@controllers/applications/minecraft/handle-minecraft-application-deny";
+import { logger } from "@logger";
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -50,6 +51,11 @@ client.on("interactionCreate", interaction => {
 client.on("ready", async (client) => {
   await safetyCheck(client);
   CommandCollection.register(config.BOT_TOKEN, config.CLIENT_ID, config.GUILD_ID);
+  logger.discord("info", "Started deployer")
 });
+
+client.on("error", (e) => {
+  logger.discord("error", e);
+})
 
 client.login(config.BOT_TOKEN);

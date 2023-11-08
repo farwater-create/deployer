@@ -1,6 +1,6 @@
 import { MinecraftApplicationModel } from "@models/application";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ColorResolvable, Colors, EmbedBuilder, Message, MessageCreateOptions, SelectMenuBuilder, StringSelectMenuBuilder, User } from "discord.js";
-import { MinecraftAutoReviewResult, MinecraftAutoReviewStatus } from "@controllers/applications/minecraft/minecraft-auto-review";
+import { MinecraftAutoReviewResult, MinecraftApplicationAutoReviewStatus } from "@controllers/applications/minecraft/minecraft-auto-review";
 export enum MinecraftApplicationDecisionEvent {
   Accept = "minecraft-application-decision-accept",
   Reject = "minecraft-application-decision-reject"
@@ -8,16 +8,17 @@ export enum MinecraftApplicationDecisionEvent {
 
 const MinecraftApplicationDecisionEmbed = (minecraftApplication: MinecraftApplicationModel, autoReviewResult: MinecraftAutoReviewResult, reviewer?: User) => {
   const { reason, discordId, minecraftName, minecraftUuid, age } = minecraftApplication;
-  let color: ColorResolvable;
+  let color: ColorResolvable = Colors.Blurple;
+
   switch(autoReviewResult.status) {
-    case MinecraftAutoReviewStatus.Accepted:
+    case MinecraftApplicationAutoReviewStatus.Accepted:
       color = Colors.Green;
       break;
-    case MinecraftAutoReviewStatus.Rejected:
+    case MinecraftApplicationAutoReviewStatus.Rejected:
       color = Colors.Red;
       break;
-    case MinecraftAutoReviewStatus.NeedsManualReview:
-      color = Colors.Blurple
+    case MinecraftApplicationAutoReviewStatus.NeedsManualReview:
+      color = Colors.Yellow
       break;
   }
 
@@ -151,22 +152,20 @@ export const MinecraftApplicationDecisionMessage = (application: MinecraftApplic
   const opts: MessageCreateOptions = {
     embeds: [MinecraftApplicationDecisionEmbed(application, autoReviewResult, reviewer)]
   };
-  if(autoReviewResult.status === MinecraftAutoReviewStatus.NeedsManualReview) {
-    opts.components = [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder()
-            .setCustomId(MinecraftApplicationDecisionEvent.Accept)
-            .setLabel("Accept")
-            .setStyle(ButtonStyle.Success)
-        ),
-        new ActionRowBuilder<SelectMenuBuilder>().addComponents(
-          new StringSelectMenuBuilder()
-            .setCustomId(MinecraftApplicationDecisionEvent.Reject)
-            .addOptions(minecraftApplicationDenyReasons)
-            .setPlaceholder("Reject with reason")
-        ),
-    ];
-  }
+  opts.components = [
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(MinecraftApplicationDecisionEvent.Accept)
+          .setLabel("Accept")
+          .setStyle(ButtonStyle.Success)
+      ),
+      new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+        new StringSelectMenuBuilder()
+          .setCustomId(MinecraftApplicationDecisionEvent.Reject)
+          .addOptions(minecraftApplicationDenyReasons)
+          .setPlaceholder("Reject with reason")
+      ),
+  ];
   return opts;
 };
 
