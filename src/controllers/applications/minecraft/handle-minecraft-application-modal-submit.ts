@@ -4,8 +4,9 @@ import { ComponentType, ChannelType, ModalSubmitInteraction } from "discord.js";
 import z from "zod";
 import { config } from "@config";
 import { MinecraftApplicationModalEvent } from "views/application/minecraft-application-submit-modal";
-import { autoReviewMinecraftApplication } from "./auto-review-minecraft-application";
 import { digestSkinHex, getSkin } from "@lib/skin-id/skin-id";
+import { MinecraftApplicationModel } from "@models/application";
+import { MinecraftApplication } from "./application";
 const { APPLICATIONS_CHANNEL_ID } = config;
 
 export const handleMinecraftApplicationModalSubmit = async (
@@ -47,7 +48,7 @@ export const handleMinecraftApplicationModalSubmit = async (
 
   const minecraftSkinSum = await digestSkinHex(await getSkin(minecraftUuid));
 
-  const application = {
+  const applicationOptions: MinecraftApplicationModel = {
     discordId: interaction.user.id,
     age,
     reason,
@@ -56,8 +57,11 @@ export const handleMinecraftApplicationModalSubmit = async (
     minecraftSkinSum,
   };
 
-  const autoReviewResult = await autoReviewMinecraftApplication(
-    interaction.client,
+  const application = new MinecraftApplication(applicationOptions);
+
+
+
+  const autoReviewResult = await application.autoReviewResult(
     application,
   );
 

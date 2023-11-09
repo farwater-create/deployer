@@ -1,7 +1,6 @@
 import { Command } from "@models/command";
 import {
   CommandInteraction,
-  Interaction,
   REST,
   RESTPostAPIApplicationCommandsJSONBody,
   Routes,

@@ -12,6 +12,7 @@ import { hasCooldown } from "@lib/interaction-cooldown";
 import { handleMinecraftApplicationModalApplyButtonPress } from "@controllers/applications/minecraft/handle-minecraft-application-modal-apply-button-press";
 import { handleMinecraftApplicationModalSubmit } from "@controllers/applications/minecraft/handle-minecraft-application-modal-submit";
 import { handleMinecraftApplicationDecisionMessageStringSelectMenu } from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-string-select-menu";
+import { MinecraftApplicationStartMessageOptions } from "@views/application/minecraft-application-start-message";
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -33,7 +34,7 @@ CommandCollection.use({
     .setDescription("Creates the initial application message.")
     .toJSON(),
   handler: (interaction) => {
-    interaction.channel?.send(MinecraftApplicationStartMessage);
+    interaction.channel?.send(MinecraftApplicationStartMessageOptions);
   },
 });
 

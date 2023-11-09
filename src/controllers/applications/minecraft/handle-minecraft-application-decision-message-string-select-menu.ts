@@ -1,22 +1,15 @@
 import { toMessageLink } from "@lib/discord-helpers/message-link";
 import { logger } from "@logger";
 import {
-  MinecraftApplicationDecisionEvent,
-  MinecraftApplicationDecisionMessageOptions,
-  MinecraftApplicationRejectReason,
-  ParseMinecraftApplicationDecisionMessage,
-  minecraftApplicationDenyReasonDescriptions,
-} from "@views/application/minecraft-application-decision-message";
-import {
   MessageEditOptions,
   StringSelectMenuInteraction,
   Client,
 } from "discord.js";
-import { MinecraftApplicationAutoReviewStatus } from "./auto-review-minecraft-application";
 import { config } from "@config";
-import { addSkinToBadSkinDatabase, getSkin } from "@lib/skin-id/skin-id";
-import { MinecraftApplicationModel } from "@models/application";
+import { MinecraftApplicationAutoReviewStatus, MinecraftApplicationRejectReason } from "@models/application";
 import { loggedKick } from "@lib/discord-helpers/logged-kick";
+import { MinecraftApplicationDecisionEvent, MinecraftApplicationDecisionMessageOptions, minecraftApplicationDenyReasonDescriptions } from "@views/application/minecraft-application-decision-message";
+import { MinecraftApplication } from "./application";
 
 export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
   interaction: StringSelectMenuInteraction,
@@ -25,7 +18,7 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
   const value = interaction.values[0] as MinecraftApplicationRejectReason;
 
   try {
-    const application = ParseMinecraftApplicationDecisionMessage(
+    const application = MinecraftApplication.fromMinecraftApplicationDecisionMessage(
       interaction.message,
     );
 
@@ -58,7 +51,7 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
 
 export const denyApplication = async (
   client: Client,
-  application: MinecraftApplicationModel,
+  application: MinecraftApplication,
   reason: MinecraftApplicationRejectReason,
 ) => {
   const { discordId, minecraftUuid } = application;
@@ -91,11 +84,7 @@ export const denyApplication = async (
         loggedKick(member, reason);
         break;
       case "offensive_skin":
-        const skin = await getSkin(minecraftUuid);
-        if (!skin) {
-          break;
-        }
-        await addSkinToBadSkinDatabase(skin);
+        await application.flagOffensiveSkin();
         loggedKick(member, reason);
         break;
       case "offensive_name":
