@@ -64,12 +64,12 @@ export const autoReviewMinecraftApplication = async (
   }
 
   if (application.minecraftSkinSum != "null") {
-    const badSkin = await prisma.badSkin.findFirst({
+    const offensiveSkin = await prisma.offensiveMinecraftSkin.findFirst({
       where: {
         hash: application.minecraftSkinSum,
       },
     });
-    if (badSkin)
+    if (offensiveSkin)
       return {
         status: MinecraftApplicationAutoReviewStatus.Rejected,
         reason: "offensive_skin",
