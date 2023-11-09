@@ -17,6 +17,12 @@ const UserSessionSchema = z.object({
   profileActions: z.array(z.object({})),
 });
 
+
+export const digestSkinHex = async(skin: string | undefined) => {
+  if(!skin) return "null";
+  return crypto.createHash('sha256').update(skin).digest('hex');
+}
+
 export const getSkin = async (uuid: string): Promise<string | undefined> => {
   const url = new URL(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}/`)
   const resp = await axios.get(url.toString());

@@ -7,4 +7,5 @@ export interface ApplicationModel {
 export type MinecraftApplicationModel  = {
   minecraftName: string;
   minecraftUuid: string;
+  minecraftSkinSum: string;
 } & ApplicationModel;

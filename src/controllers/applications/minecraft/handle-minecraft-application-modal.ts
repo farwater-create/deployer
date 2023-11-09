@@ -5,7 +5,7 @@ import z from "zod";
 import { config } from "@config";
 import { MinecraftApplicationModalEvent } from "views/application/minecraft-application-submit-modal";
 import { autoReviewMinecraftApplication } from "./minecraft-auto-review";
-import { denyApplication } from "./handle-minecraft-application-deny";
+import { digestSkinHex, getSkin } from "@lib/skin-id/skin-id";
 const { APPLICATIONS_CHANNEL_ID } = config;
 
 export const minecraftApplicationModalHandler = async (
@@ -43,12 +43,16 @@ export const minecraftApplicationModalHandler = async (
     minecraftUuid = result.id;
   } catch {}
 
+  const minecraftSkinSum = await digestSkinHex(await getSkin(minecraftUuid));
+
+
   const application = {
     discordId: interaction.user.id,
     age,
     reason,
     minecraftName,
-    minecraftUuid
+    minecraftUuid,
+    minecraftSkinSum
   }
 
   const autoReviewResult = await autoReviewMinecraftApplication(interaction.client, application);

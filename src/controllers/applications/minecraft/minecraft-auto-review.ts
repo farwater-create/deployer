@@ -1,3 +1,4 @@
+import { prisma } from "@lib/prisma";
 import { getSkin, isGoodSkin } from "@lib/skin-id/skin-id";
 import { MinecraftApplicationModel } from "@models/application";
 import { MinecraftApplicationRejectReason } from "@views/application/minecraft-application-decision-message";
@@ -61,8 +62,13 @@ export const autoReviewMinecraftApplication = async (client: Client, application
     }
   }
 
-  const skin = await getSkin(application.minecraftUuid);
-  if(skin && !await isGoodSkin(skin)) {
+  if(application.minecraftSkinSum != "null") {
+    const badSkin = await prisma.badSkin.findFirst({
+      where: {
+        hash: application.minecraftSkinSum
+      }
+    });
+    if(badSkin)
     return {
       status: MinecraftApplicationAutoReviewStatus.Rejected,
       reason: "offensive_skin"

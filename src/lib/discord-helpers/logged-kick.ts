@@ -3,10 +3,7 @@ import { logger } from "@logger";
 
 export const loggedKick = (member: GuildMember | undefined, reason?: string) => {
   if(!member) return;
-  try {
-    member.kick();
-    logger.discord("info", "kicked " + "`" + member + "`" + " for " + reason);
-  } catch {
-    logger.discord("warn", "could not kick member `" + member + "`");
-  }
+  member.kick()
+  .catch(error => logger.discord("warn", "could not kick member `" + member + "` " + error))
+  .then(_ => logger.discord("info", "kicked " + "`" + member + "`" + " for " + reason));
 }

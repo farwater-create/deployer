@@ -7,7 +7,7 @@ export enum MinecraftApplicationDecisionEvent {
 }
 
 const MinecraftApplicationDecisionEmbed = (minecraftApplication: MinecraftApplicationModel, autoReviewResult: MinecraftAutoReviewResult, reviewer?: User) => {
-  const { reason, discordId, minecraftName, minecraftUuid, age } = minecraftApplication;
+  const { reason, discordId, minecraftName, minecraftUuid, age, minecraftSkinSum } = minecraftApplication;
   let color: ColorResolvable = Colors.Blurple;
 
   switch(autoReviewResult.status) {
@@ -47,6 +47,10 @@ const MinecraftApplicationDecisionEmbed = (minecraftApplication: MinecraftApplic
       {
         name: "minecraftUuid",
         value: minecraftUuid
+      },
+      {
+        name: "minecraftSkinSum",
+        value: minecraftSkinSum
       },
       {
         name: "autoReviewComment",
@@ -179,6 +183,7 @@ export const ParseMinecraftApplicationDecisionMessage = (message: Message): Mine
   let discordId: string | undefined;
   let minecraftUuid: string | undefined;
   let minecraftName: string | undefined;
+  let minecraftSkinSum: string | undefined;
   let age: string | undefined;
 
   embed.fields.forEach(field => {
@@ -186,9 +191,10 @@ export const ParseMinecraftApplicationDecisionMessage = (message: Message): Mine
     if(field.name === "minecraftUuid") minecraftUuid = field.value;
     if(field.name === "minecraftName") minecraftName = field.value;
     if(field.name === "age") age = field.value;
+    if(field.name === "minecraftSkinSum") minecraftSkinSum = field.value;
   });
 
-  if(!discordId || !minecraftUuid || !minecraftName || !reason || !age) {
+  if(!discordId || !minecraftUuid || !minecraftName || !reason || !age || !minecraftSkinSum) {
     throw new Error("embed missing fields.");
   }
 
@@ -197,6 +203,7 @@ export const ParseMinecraftApplicationDecisionMessage = (message: Message): Mine
     discordId,
     minecraftUuid,
     minecraftName,
+    minecraftSkinSum,
     reason
   }
 }

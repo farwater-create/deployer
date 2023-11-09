@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, PermissionsBitField, SlashCommandBuilder } from "discord.js";
+import { ButtonInteraction, CacheType, Client, Collection, CommandInteraction, GatewayIntentBits, Interaction, PermissionsBitField, SlashCommandBuilder, StringSelectMenuInteraction } from "discord.js";
 import { config } from "@lib/config";
 import { minecraftApplicationModalHandler } from "@controllers/applications/minecraft/handle-minecraft-application-modal";
 import { safetyCheck } from "@controllers/startup/safety-check";
@@ -7,6 +7,7 @@ import { CommandCollection } from "@controllers/commands/commands";
 import { MinecraftApplicationStartMessage } from "@views/application/minecraft-application-start-message";
 import { minecraftApplicationDenyHandler } from "@controllers/applications/minecraft/handle-minecraft-application-deny";
 import { logger } from "@logger";
+import { hasCooldown } from "@lib/interaction-cooldown";
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -33,18 +34,36 @@ CommandCollection.use({
 })
 
 
+
+
+
 client.on("interactionCreate", interaction => {
+
+  if(hasCooldown(interaction, 2000)) {
+    if(interaction.isRepliable()) {
+      interaction.reply("You're doing that too fast!");
+    }
+    return;
+  }
+
   if(interaction.isCommand()) {
     CommandCollection.handle(interaction);
+    return;
   }
+
   if(interaction.isModalSubmit()) {
     minecraftApplicationModalHandler(interaction);
+    return;
   }
+
   if(interaction.isButton()) {
     minecraftApplicationModalApplyButtonHandler(interaction);
+    return;
   }
+
   if(interaction.isStringSelectMenu()) {
     minecraftApplicationDenyHandler(interaction);
+    return;
   }
 });
 
