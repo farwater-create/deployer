@@ -12,48 +12,49 @@ const UserSessionSchema = z.object({
     z.object({
       name: z.string(),
       value: z.string(),
-    })
+    }),
   ),
   profileActions: z.array(z.object({})),
 });
 
-
-export const digestSkinHex = async(skin: string | undefined) => {
-  if(!skin) return "null";
-  return crypto.createHash('sha256').update(skin).digest('hex');
-}
+export const digestSkinHex = async (skin: string | undefined) => {
+  if (!skin) return "null";
+  return crypto.createHash("sha256").update(skin).digest("hex");
+};
 
 export const getSkin = async (uuid: string): Promise<string | undefined> => {
-  const url = new URL(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}/`)
+  const url = new URL(
+    `https://sessionserver.mojang.com/session/minecraft/profile/${uuid}/`,
+  );
   const resp = await axios.get(url.toString());
   const parsedData = UserSessionSchema.parse(resp.data);
   const skin = parsedData.properties.find((v) => v.name === "textures");
-  if(!skin) return undefined;
+  if (!skin) return undefined;
   return skin.value;
-}
+};
 
-export const isGoodSkin = async(skin: string) => {
-  const hash = crypto.createHash('sha256').update(skin).digest('hex');
+export const isGoodSkin = async (skin: string) => {
+  const hash = crypto.createHash("sha256").update(skin).digest("hex");
   const result = await prisma.badSkin.findFirst({
     where: {
-      hash
-    }
+      hash,
+    },
   });
   console.log(hash);
   console.log(result);
   return result ? false : true;
-}
+};
 
-export const addSkinToBadSkinDatabase = async(skin: string) => {
-  const hash = crypto.createHash('sha256').update(skin).digest('hex');
+export const addSkinToBadSkinDatabase = async (skin: string) => {
+  const hash = crypto.createHash("sha256").update(skin).digest("hex");
   logger.discord("info", "added skin to bad skin database with hash " + hash);
   await prisma.badSkin.upsert({
     where: {
-      hash
+      hash,
     },
     update: {},
     create: {
-      hash
-    }
+      hash,
+    },
   });
-}
+};

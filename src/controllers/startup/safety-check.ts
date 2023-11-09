@@ -25,9 +25,7 @@ const requiredPermissions = new Map<PermissionResolvable, string>([
   [PermissionsBitField.Flags.ManageGuild, "Manage Guild"],
 ]);
 
-const requiredRoles = [
-  config.ADMIN_ROLE_ID,
-]
+const requiredRoles = [config.ADMIN_ROLE_ID];
 
 /**
  * @param client
@@ -41,10 +39,18 @@ export const safetyCheck = async (client: Client) => {
 
   const guild = await assertGuild(client, config.GUILD_ID);
 
-  const logChannel = await assertChannel<GuildTextBasedChannel>(guild, config.LOG_CHANNEL_ID, ChannelType.GuildText);
+  const logChannel = await assertChannel<GuildTextBasedChannel>(
+    guild,
+    config.LOG_CHANNEL_ID,
+    ChannelType.GuildText,
+  );
   logger.logChannel = logChannel;
 
-  await assertChannel(guild, config.APPLICATIONS_CHANNEL_ID, ChannelType.GuildText)
+  await assertChannel(
+    guild,
+    config.APPLICATIONS_CHANNEL_ID,
+    ChannelType.GuildText,
+  );
 
   const member = await assertBotMember(guild, client);
 
@@ -66,7 +72,7 @@ const assertGuild = async (client: Client, guildId: string) => {
   const guild = await client.guilds.fetch(guildId);
   if (!guild)
     throw new Error(
-      `Guild with ID ${config.GUILD_ID} not found! (Did you invite the bot to your server?)`
+      `Guild with ID ${config.GUILD_ID} not found! (Did you invite the bot to your server?)`,
     );
   return guild;
 };
@@ -78,15 +84,16 @@ const assertGuild = async (client: Client, guildId: string) => {
  * @param type
  * @returns
  */
-const assertChannel = async <T>(guild: Guild, channelId: string, type: ChannelType) => {
+const assertChannel = async <T>(
+  guild: Guild,
+  channelId: string,
+  type: ChannelType,
+) => {
   const channel = await guild.channels.fetch(channelId);
-  if (!channel)
-    throw new Error(
-      `Log channel with ID ${channelId} not found!`
-    );
+  if (!channel) throw new Error(`Log channel with ID ${channelId} not found!`);
   if (channel.type !== type)
     throw new Error(
-      `Log channel with ID ${channelId} is not a ${type} channel!`
+      `Log channel with ID ${channelId} is not a ${type} channel!`,
     );
   logger.info(`✅ channel found! (${channel.name})`);
   return channel as T;
@@ -96,7 +103,10 @@ const assertChannel = async <T>(guild: Guild, channelId: string, type: ChannelTy
  * Assert that the bot has all the required permissions
  * @param member
  */
-const assertPermissions = async (member: GuildMember, permissions: Map<PermissionResolvable, string>) => {
+const assertPermissions = async (
+  member: GuildMember,
+  permissions: Map<PermissionResolvable, string>,
+) => {
   for (const [permission, permissionName] of permissions) {
     if (!member.permissions.has(permission))
       throw new Error(`Missing permission ${permissionName}!`);
@@ -111,7 +121,7 @@ const assertBotMember = async (guild: Guild, client: Client) => {
     throw new Error(
       `Member with ID ${
         client.user!.id
-      } not found! (Did you invite the bot to your server?)`
+      } not found! (Did you invite the bot to your server?)`,
     );
   }
   return member;
@@ -119,15 +129,16 @@ const assertBotMember = async (guild: Guild, client: Client) => {
 
 const assertRole = async (guild: Guild, roleId: string) => {
   const role = await guild.roles.fetch(roleId);
-  if (!role) throw new Error(`Role with ID ${roleId} not found but is required!`);
+  if (!role)
+    throw new Error(`Role with ID ${roleId} not found but is required!`);
   return role;
-}
+};
 
 const assertBotUser = async (client: Client) => {
   const user = await client.users.fetch(config.CLIENT_ID);
   if (!user)
     throw new Error(
-      `User with ID ${config.CLIENT_ID} not found! (Did you invite the bot to your server?)`
+      `User with ID ${config.CLIENT_ID} not found! (Did you invite the bot to your server?)`,
     );
   logger.info(`✅ Bot is logged in as ${user.tag}!`);
-}
+};

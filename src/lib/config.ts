@@ -13,7 +13,7 @@ const schema = z.object({
   PTERODACTYL_API_KEY: z.string().nonempty(),
   PTERODACTYL_API_URL: z.string().nonempty(),
   RULES_CHANNEL_ID: z.string().nonempty(),
-  BOT_USER_ID: z.string().nonempty()
+  BOT_USER_ID: z.string().nonempty(),
 });
 
 const rawConfig = schema.safeParse(process.env);

@@ -10,6 +10,6 @@ datasource db {
   url      = "file:./db.sqlite"
 }
 
-model BadSkin {
+model OffensiveMinecraftSkin {
   hash String @unique
 }

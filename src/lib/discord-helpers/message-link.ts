@@ -1,6 +1,6 @@
-import { Message } from "discord.js"
+import { Message } from "discord.js";
 
-export const toMessageLink = (message:Message) => {
+export const toMessageLink = (message: Message) => {
   const { channelId, id, guildId } = message;
-  return `https://discord.com/channels/${guildId}/${channelId}/${id}`
-}
+  return `https://discord.com/channels/${guildId}/${channelId}/${id}`;
+};

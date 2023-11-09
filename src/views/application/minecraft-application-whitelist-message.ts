@@ -1,5 +1,5 @@
 import { Application } from "discord.js";
 
-export const MinecraftApplicationWhitelistMessage = (application: Application) => {
-
-}
+export const MinecraftApplicationWhitelistMessageOptions = (
+  application: Application,
+) => {};

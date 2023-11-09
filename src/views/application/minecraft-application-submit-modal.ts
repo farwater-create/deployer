@@ -7,15 +7,13 @@ import {
 } from "discord.js";
 
 export enum MinecraftApplicationModalEvent {
-  Submit = "minecraft-application-model-submit"
+  Submit = "minecraft-application-model-submit",
 }
 
 const AGE_DESCRIPTION = "Age in years";
 const REASON_DESCRIPTION = "Reason for joining.";
-const MINECRAFT_NAME_DESCRIPTION =
-  "Minecraft name. (case sensitive)";
-const REFERRAL_DESCRIPTION =
-  "Referall (optional)";
+const MINECRAFT_NAME_DESCRIPTION = "Minecraft name. (case sensitive)";
+const REFERRAL_DESCRIPTION = "Referall (optional)";
 
 export const MinecraftApplicationModal = () => {
   return new ModalBuilder()

@@ -4,7 +4,7 @@ export interface ApplicationModel {
   age: string;
 }
 
-export type MinecraftApplicationModel  = {
+export type MinecraftApplicationModel = {
   minecraftName: string;
   minecraftUuid: string;
   minecraftSkinSum: string;

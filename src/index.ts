@@ -1,13 +1,17 @@
-import { ButtonInteraction, CacheType, Client, Collection, CommandInteraction, GatewayIntentBits, Interaction, PermissionsBitField, SlashCommandBuilder, StringSelectMenuInteraction } from "discord.js";
+import {
+  Client,
+  GatewayIntentBits,
+  PermissionsBitField,
+  SlashCommandBuilder,
+} from "discord.js";
 import { config } from "@lib/config";
-import { minecraftApplicationModalHandler } from "@controllers/applications/minecraft/handle-minecraft-application-modal";
 import { safetyCheck } from "@controllers/startup/safety-check";
-import { minecraftApplicationModalApplyButtonHandler } from "@controllers/applications/minecraft/handle-minecraft-application-modal-apply-button-press";
 import { CommandCollection } from "@controllers/commands/commands";
-import { MinecraftApplicationStartMessage } from "@views/application/minecraft-application-start-message";
-import { minecraftApplicationDenyHandler } from "@controllers/applications/minecraft/handle-minecraft-application-deny";
 import { logger } from "@logger";
 import { hasCooldown } from "@lib/interaction-cooldown";
+import { handleMinecraftApplicationModalApplyButtonPress } from "@controllers/applications/minecraft/handle-minecraft-application-modal-apply-button-press";
+import { handleMinecraftApplicationModalSubmit } from "@controllers/applications/minecraft/handle-minecraft-application-modal-submit";
+import { handleMinecraftApplicationDecisionMessageStringSelectMenu } from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-string-select-menu";
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -15,7 +19,7 @@ const intents = [
   GatewayIntentBits.MessageContent,
   GatewayIntentBits.GuildMembers,
   GatewayIntentBits.DirectMessages,
-  GatewayIntentBits.GuildModeration
+  GatewayIntentBits.GuildModeration,
 ];
 
 const client = new Client({
@@ -24,57 +28,56 @@ const client = new Client({
 
 CommandCollection.use({
   json: new SlashCommandBuilder()
-  .setName("applications-channel")
-  .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
-  .setDescription("Creates the initial application message.")
-  .toJSON(),
+    .setName("applications-channel")
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
+    .setDescription("Creates the initial application message.")
+    .toJSON(),
   handler: (interaction) => {
-    interaction.channel?.send(MinecraftApplicationStartMessage)
-  }
-})
+    interaction.channel?.send(MinecraftApplicationStartMessage);
+  },
+});
 
-
-
-
-
-client.on("interactionCreate", interaction => {
-
-  if(hasCooldown(interaction, 2000)) {
-    if(interaction.isRepliable()) {
+client.on("interactionCreate", (interaction) => {
+  if (hasCooldown(interaction, 2000)) {
+    if (interaction.isRepliable()) {
       interaction.reply("You're doing that too fast!");
     }
     return;
   }
 
-  if(interaction.isCommand()) {
+  if (interaction.isCommand()) {
     CommandCollection.handle(interaction);
     return;
   }
 
-  if(interaction.isModalSubmit()) {
-    minecraftApplicationModalHandler(interaction);
+  if (interaction.isModalSubmit()) {
+    handleMinecraftApplicationModalSubmit(interaction);
     return;
   }
 
-  if(interaction.isButton()) {
-    minecraftApplicationModalApplyButtonHandler(interaction);
+  if (interaction.isButton()) {
+    handleMinecraftApplicationModalApplyButtonPress(interaction);
     return;
   }
 
-  if(interaction.isStringSelectMenu()) {
-    minecraftApplicationDenyHandler(interaction);
+  if (interaction.isStringSelectMenu()) {
+    handleMinecraftApplicationDecisionMessageStringSelectMenu(interaction);
     return;
   }
 });
 
 client.on("ready", async (client) => {
   await safetyCheck(client);
-  CommandCollection.register(config.BOT_TOKEN, config.CLIENT_ID, config.GUILD_ID);
-  logger.discord("info", "Started deployer")
+  CommandCollection.register(
+    config.BOT_TOKEN,
+    config.CLIENT_ID,
+    config.GUILD_ID,
+  );
+  logger.discord("info", "Started deployer");
 });
 
 client.on("error", (e) => {
   logger.discord("error", e);
-})
+});
 
 client.login(config.BOT_TOKEN);

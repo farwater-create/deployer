@@ -1,4 +1,10 @@
-import { EmbedBuilder, GuildTextBasedChannel, Role, RoleResolvable, TextBasedChannel } from "discord.js";
+import {
+  EmbedBuilder,
+  GuildTextBasedChannel,
+  Role,
+  RoleResolvable,
+  TextBasedChannel,
+} from "discord.js";
 import pino from "pino";
 import { roleToMentionString } from "@lib/discord-helpers/mentions";
 import { config } from "@config";
@@ -45,14 +51,16 @@ export const logger: CustomLogger = {
     logger[level](message);
 
     let mention: string = "";
-    if(level === "error") {
-      mention = roleToMentionString(ADMIN_ROLE_ID)
+    if (level === "error") {
+      mention = roleToMentionString(ADMIN_ROLE_ID);
     }
 
     if (!logger.logChannel) {
-      logger.error("No log channel set, cannot log discord message, logging to console instead.");
+      logger.error(
+        "No log channel set, cannot log discord message, logging to console instead.",
+      );
       logger.error(message);
-      return
+      return;
     }
     logger.logChannel.send({
       embeds: [

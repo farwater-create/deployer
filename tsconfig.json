@@ -21,7 +21,7 @@
       "@controllers/*": ["controllers/*"],
       "@commands/*": ["controllers/commands/*"],
       "@lib/*": ["lib/*"],
-      "@discord-helpers/*": ["lib/discord-helpers/*"],
+      "@discord-helpers/*": ["lib/discord-helpers/*"]
     }
   },
   "ts-node": {

@@ -8,9 +8,10 @@ import {
 } from "discord.js";
 
 export enum MinecraftApplicationEvent {
-  Start = "application-start"
+  Start = "application-start",
 }
-const { RULES_CHANNEL_ID, GUILD_ID, APPLICATIONS_CHANNEL_ID, BOT_USER_ID } = config;
+const { RULES_CHANNEL_ID, GUILD_ID, APPLICATIONS_CHANNEL_ID, BOT_USER_ID } =
+  config;
 const rulesChannelLink = `https://discord.com/channels/${GUILD_ID}/${RULES_CHANNEL_ID}`;
 
 const TITLE = "🚀 Whitelist Application Process 📝";
@@ -34,17 +35,17 @@ const MinecraftApplicationSubmissionEmbed = new EmbedBuilder()
   .setTitle(TITLE)
   .setDescription(DESCRIPTION)
   .setThumbnail(
-    "https://media.forgecdn.net/avatars/thumbnails/444/296/64/64/637698958460822126.png"
+    "https://media.forgecdn.net/avatars/thumbnails/444/296/64/64/637698958460822126.png",
   );
 
-export const MinecraftApplicationStartMessage: MessageCreateOptions = {
+export const MinecraftApplicationStartMessageOptions: MessageCreateOptions = {
   embeds: [MinecraftApplicationSubmissionEmbed],
   components: [
     new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setCustomId(MinecraftApplicationEvent.Start)
         .setLabel("Apply")
-        .setStyle(ButtonStyle.Success)
+        .setStyle(ButtonStyle.Success),
     ),
   ],
 };
