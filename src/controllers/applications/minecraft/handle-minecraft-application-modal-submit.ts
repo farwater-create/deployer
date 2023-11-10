@@ -23,16 +23,22 @@ export const handleMinecraftApplicationModalSubmit = async (
     "minecraftName",
     ComponentType.TextInput,
   ).value;
-  const channel = interaction.client.channels.cache.get(
+
+  const applicationDecisionChannel = interaction.client.channels.cache.get(
     APPLICATIONS_CHANNEL_ID,
   );
-  if (!channel || channel.type !== ChannelType.GuildText) {
+
+  if (
+    !applicationDecisionChannel ||
+    applicationDecisionChannel.type !== ChannelType.GuildText
+  ) {
     logger.discord(
       "error",
-      `Could not find log channel with id ${APPLICATIONS_CHANNEL_ID} to log application submission`,
+      `Could not find log channel with id ${APPLICATIONS_CHANNEL_ID} to log application submission`
     );
     return;
   }
+
   let minecraftUuid = "⚠️NO UUID FOUND⚠️";
   try {
     const response = await fetch(
@@ -59,13 +65,11 @@ export const handleMinecraftApplicationModalSubmit = async (
 
   const application = new MinecraftApplication(applicationOptions);
 
-
-
   const autoReviewResult = await application.autoReviewResult(
     application,
   );
 
-  await channel.send(
+  await applicationDecisionChannel.send(
     MinecraftApplicationDecisionMessageOptions(application, autoReviewResult),
   );
 

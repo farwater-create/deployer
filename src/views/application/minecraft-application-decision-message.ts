@@ -94,18 +94,6 @@ const MinecraftApplicationDecisionEmbed = (
   return embed;
 };
 
-
-
-export const minecraftApplicationDenyReasonDescriptions = new Map<
-  MinecraftApplicationRejectReason,
-  string
->();
-
-
-minecraftApplicationDenyReasons.forEach((v) => {
-  minecraftApplicationDenyReasonDescriptions.set(v.value, v.label);
-});
-
 export const MinecraftApplicationDecisionMessageOptions = (
   application: MinecraftApplicationModel,
   autoReviewResult: MinecraftAutoReviewResult,

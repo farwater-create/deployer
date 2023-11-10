@@ -5,10 +5,8 @@ import {
   StringSelectMenuInteraction,
   Client,
 } from "discord.js";
-import { config } from "@config";
 import { MinecraftApplicationAutoReviewStatus, MinecraftApplicationRejectReason } from "@models/application";
-import { loggedKick } from "@lib/discord-helpers/logged-kick";
-import { MinecraftApplicationDecisionEvent, MinecraftApplicationDecisionMessageOptions, minecraftApplicationDenyReasonDescriptions } from "@views/application/minecraft-application-decision-message";
+import { MinecraftApplicationDecisionEvent, MinecraftApplicationDecisionMessageOptions } from "@views/application/minecraft-application-decision-message";
 import { MinecraftApplication } from "./application";
 
 export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
@@ -42,78 +40,7 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
         message,
       )}. Remember to take the appropriate administrative action.`,
     });
-
-    denyApplication(interaction.client, application, value);
   } catch (error) {
     logger.discord("error", error);
-  }
-};
-
-export const denyApplication = async (
-  client: Client,
-  application: MinecraftApplication,
-  reason: MinecraftApplicationRejectReason,
-) => {
-  const { discordId, minecraftUuid } = application;
-  const guild = client.guilds.cache.get(config.GUILD_ID);
-  if (!guild) {
-    throw new Error("guild not found");
-  }
-  const rejectReasonDescription =
-    minecraftApplicationDenyReasonDescriptions.get(reason);
-  const user = await client.users.fetch(discordId);
-  const member = guild.members.cache.get(user.id);
-  if (!user) return;
-  const dmChannel = await user.createDM(true);
-  try {
-    await dmChannel.send(
-      `Your farwater application was denied for reason: \`${rejectReasonDescription}\`. If you believe this was an error create a ticket.`,
-    );
-    switch (reason) {
-      case "other_bannable":
-        loggedKick(member, reason);
-        break;
-      case "underage":
-        loggedKick(member, reason);
-        break;
-      case "offensive_application":
-        loggedKick(member, reason);
-
-        break;
-      case "offensive_discord_user":
-        loggedKick(member, reason);
-        break;
-      case "offensive_skin":
-        await application.flagOffensiveSkin();
-        loggedKick(member, reason);
-        break;
-      case "offensive_name":
-        loggedKick(member, reason);
-        break;
-      case "no_reason_provided":
-        await dmChannel.send("Please reapply with a valid reason");
-        break;
-      case "user_not_in_discord_server":
-        break;
-      case "no_minecraft_account":
-        await dmChannel.send(
-          "Double check your minecraft name (case sensitive) and apply again.",
-        );
-        break;
-      case "invalid_age":
-        await dmChannel.send("Please enter a valid age when re-applying");
-      default:
-      case "low_effort_application":
-        await dmChannel.send(
-          "Please give more reasons for why you want to join farwater then apply again.",
-        );
-        break;
-      // do nothing
-    }
-  } catch (error) {
-    logger.discord(
-      "warn",
-      "Tried to send dm to user " + user.id + " but user has dms closed.",
-    );
   }
 };

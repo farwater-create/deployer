@@ -1,6 +1,8 @@
+import { config } from "@config";
 import { prisma } from "@lib/prisma";
-import { MinecraftApplicationAutoReviewStatus, MinecraftApplicationModel, MinecraftAutoReviewResult } from "@models/application";
-import { Message } from "discord.js";
+import { logger } from "@logger";
+import { MinecraftApplicationAutoReviewStatus, MinecraftApplicationModel, MinecraftApplicationRejectReason, MinecraftAutoReviewResult, minecraftApplicationDenyReasonDescriptions } from "@models/application";
+import { Client, DMChannel, Message } from "discord.js";
 
 export class MinecraftApplication implements MinecraftApplicationModel {
   discordId: string;
@@ -9,7 +11,9 @@ export class MinecraftApplication implements MinecraftApplicationModel {
   minecraftName: string;
   minecraftUuid: string;
   minecraftSkinSum: string;
-  private offensiveSkin: boolean | undefined;
+  private _offensiveSkin: boolean | undefined;
+  private _autoReviewResult: MinecraftAutoReviewResult | undefined;
+
   constructor(model: MinecraftApplicationModel) {
     this.discordId = model.discordId;
     this.reason = model.reason;
@@ -18,29 +22,34 @@ export class MinecraftApplication implements MinecraftApplicationModel {
     this.minecraftUuid = model.minecraftUuid;
     this.minecraftSkinSum = model.minecraftSkinSum;
   }
-  async hasOffensiveSkin(): Promise<boolean> {
+
+  async offensiveSkin(): Promise<boolean> {
     if (this.minecraftSkinSum === "null") return false;
-    if (this.offensiveSkin) return this.offensiveSkin;
+    if (this._offensiveSkin) return this._offensiveSkin;
     const result = await prisma.offensiveMinecraftSkin.findFirst({
       where: {
         hash: this.minecraftSkinSum,
       },
     });
-    this.offensiveSkin = result ? true : false;
-    return this.offensiveSkin;
+    this._offensiveSkin = result ? true : false;
+    return this._offensiveSkin;
   }
+
   async flagOffensiveSkin(): Promise<void> {
-    if(await this.hasOffensiveSkin()) {
+    if (await this.offensiveSkin()) {
       await prisma.offensiveMinecraftSkin.create({
         data: {
-          hash: this.minecraftSkinSum
-        }
-      })
+          hash: this.minecraftSkinSum,
+        },
+      });
     }
+    this._offensiveSkin = true;
   }
+
   async autoReviewResult(
     application: MinecraftApplication
   ): Promise<MinecraftAutoReviewResult> {
+    if (this._autoReviewResult) return this._autoReviewResult;
     const match = /^[1-9][0-9]?$/;
     if (!match.test(application.age)) {
       return {
@@ -79,7 +88,7 @@ export class MinecraftApplication implements MinecraftApplicationModel {
       };
     }
 
-    if (await application.hasOffensiveSkin()) {
+    if (await application.offensiveSkin()) {
       return {
         reason: "offensive_skin",
         status: MinecraftApplicationAutoReviewStatus.NeedsManualReview,
@@ -91,6 +100,7 @@ export class MinecraftApplication implements MinecraftApplicationModel {
       reason: "other",
     };
   }
+
   static fromMinecraftApplicationDecisionMessage = (
     message: Message
   ): MinecraftApplication => {
@@ -131,6 +141,78 @@ export class MinecraftApplication implements MinecraftApplicationModel {
       minecraftName,
       minecraftSkinSum,
       reason,
-    })
+    });
   };
+
+  async denyApplication(
+    client: Client,
+    application: MinecraftApplication,
+    reason: MinecraftApplicationRejectReason
+  ) {
+
+    const { discordId } = application;
+    const guild = client.guilds.cache.get(config.GUILD_ID);
+    if (!guild) {
+      throw new Error("guild not found");
+    }
+
+    const rejectReasonDescription =
+      minecraftApplicationDenyReasonDescriptions.get(reason);
+    const user = await client.users.fetch(discordId);
+    const member = guild.members.cache.get(user.id);
+    if (!user) return;
+    const dmChannel = await user.createDM(true);
+
+    try {
+      await dmChannel.send(
+        `Your farwater application was denied for reason: \`${rejectReasonDescription}\`. If you believe this was an error create a ticket.`
+      );
+      switch (reason) {
+        case "other_bannable":
+          break;
+        case "underage":
+          break;
+        case "offensive_application":
+          break;
+        case "offensive_discord_user":
+          break;
+        case "offensive_skin":
+          await application.flagOffensiveSkin();
+          break;
+        case "offensive_name":
+          break;
+        case "no_reason_provided":
+          await dmChannel.send("Please reapply with a valid reason");
+          break;
+        case "user_not_in_discord_server":
+          break;
+        case "no_minecraft_account":
+          await dmChannel.send(
+            "Double check your minecraft name (case sensitive) and apply again."
+          );
+          break;
+        case "invalid_age":
+          await dmChannel.send("Please enter a valid age when re-applying");
+        default:
+        case "low_effort_application":
+          await dmChannel.send(
+            "Please give more reasons for why you want to join farwater then apply again."
+          );
+          break;
+      }
+    } catch (error) {
+      logger.discord(
+        "warn",
+        "Tried to send dm to user " + user.id + " but user has dms closed."
+      );
+    }
+  };
+
+  async dmChannel(client: Client): Promise<DMChannel> {
+    return client.users.createDM(this.discordId);
+  }
+
+  async acceptApplication() {
+
+  }
 }

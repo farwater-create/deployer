@@ -1,8 +1,6 @@
 import {
   Client,
   GatewayIntentBits,
-  PermissionsBitField,
-  SlashCommandBuilder,
 } from "discord.js";
 import { config } from "@lib/config";
 import { safetyCheck } from "@controllers/startup/safety-check";
@@ -12,7 +10,8 @@ import { hasCooldown } from "@lib/interaction-cooldown";
 import { handleMinecraftApplicationModalApplyButtonPress } from "@controllers/applications/minecraft/handle-minecraft-application-modal-apply-button-press";
 import { handleMinecraftApplicationModalSubmit } from "@controllers/applications/minecraft/handle-minecraft-application-modal-submit";
 import { handleMinecraftApplicationDecisionMessageStringSelectMenu } from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-string-select-menu";
-import { MinecraftApplicationStartMessageOptions } from "@views/application/minecraft-application-start-message";
+import { handleMinecraftApplicationDecisionMessageAcceptButtonPress } from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-accept-button-press";
+import { applicationsChannelCommand } from "@controllers/commands/applications-channel";
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -27,16 +26,7 @@ const client = new Client({
   intents,
 });
 
-CommandCollection.use({
-  json: new SlashCommandBuilder()
-    .setName("applications-channel")
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
-    .setDescription("Creates the initial application message.")
-    .toJSON(),
-  handler: (interaction) => {
-    interaction.channel?.send(MinecraftApplicationStartMessageOptions);
-  },
-});
+CommandCollection.use(applicationsChannelCommand);
 
 client.on("interactionCreate", (interaction) => {
   if (hasCooldown(interaction, 2000)) {
@@ -57,6 +47,7 @@ client.on("interactionCreate", (interaction) => {
   }
 
   if (interaction.isButton()) {
+    handleMinecraftApplicationDecisionMessageAcceptButtonPress(interaction);
     handleMinecraftApplicationModalApplyButtonPress(interaction);
     return;
   }
