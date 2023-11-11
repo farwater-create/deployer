@@ -24,6 +24,12 @@ export const handleMinecraftApplicationModalSubmit = async (
     ComponentType.TextInput,
   ).value;
 
+  if(!age || !reason || !minecraftName) {
+    interaction.reply("You must provide a valid age, reason, and minecraft name!")
+    .catch(logger.error);
+    return;
+  }
+
   const applicationDecisionChannel = interaction.client.channels.cache.get(
     APPLICATIONS_CHANNEL_ID,
   );
@@ -40,17 +46,26 @@ export const handleMinecraftApplicationModalSubmit = async (
   }
 
   let minecraftUuid = "⚠️NO UUID FOUND⚠️";
-  try {
-    const response = await fetch(
-      "https://api.mojang.com/users/profiles/minecraft/" + minecraftName,
-    );
-    const expectedResponseSchema = z.object({
-      id: z.string(),
-      name: z.string(),
-    });
-    const result = expectedResponseSchema.parse(await response.json());
-    minecraftUuid = result.id;
-  } catch {}
+  const response = await fetch(
+    "https://api.mojang.com/users/profiles/minecraft/" + minecraftName,
+  ).catch(logger.error);
+  if(!response) return;
+  const expectedResponseSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+  });
+
+  const result = await expectedResponseSchema.parseAsync(await response.json())
+  .catch(() => undefined);
+  if(!result) {
+    interaction.reply({
+      ephemeral: true,
+      content: "Minecraft account not found"
+    }).catch(logger.error)
+    return;
+  }
+
+  minecraftUuid = result.id;
 
   const minecraftSkinSum = await digestSkinHex(await getSkin(minecraftUuid));
 
@@ -67,15 +82,17 @@ export const handleMinecraftApplicationModalSubmit = async (
 
   const autoReviewResult = await application.autoReviewResult(
     application,
-  );
+  ).catch(logger.error);
+  if(!autoReviewResult) return;
 
-  await applicationDecisionChannel.send(
+  const message = await applicationDecisionChannel.send(
     MinecraftApplicationDecisionMessageOptions(application, autoReviewResult),
-  );
+  ).catch(err => logger.error(err));
+  if(!message) return;
 
   await interaction.reply({
     content:
       "Your application has been submitted. Applications can take up to three days to review.",
     ephemeral: true,
-  });
+  }).catch(logger.error);
 };

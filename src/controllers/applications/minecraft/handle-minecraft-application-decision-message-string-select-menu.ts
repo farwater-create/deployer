@@ -14,33 +14,39 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
 ) => {
   if (interaction.customId !== MinecraftApplicationDecisionEvent.Reject) return;
   const value = interaction.values[0] as MinecraftApplicationRejectReason;
+  let application: MinecraftApplication | undefined;
 
-  try {
-    const application = MinecraftApplication.fromMinecraftApplicationDecisionMessage(
+  try  {
+    application = MinecraftApplication.fromMinecraftApplicationDecisionMessage(
       interaction.message,
     );
+  } catch(error) {
+    logger.error(error);
+    return;
+  }
+  if (!application) return;
 
-    const messageEditOptions = MinecraftApplicationDecisionMessageOptions(
-      application,
-      {
-        status: MinecraftApplicationAutoReviewStatus.Rejected,
-        reason: value,
-      },
-      interaction.user,
-    ) as MessageEditOptions;
+
+
+  const messageEditOptions = MinecraftApplicationDecisionMessageOptions(
+    application,
+    {
+      status: MinecraftApplicationAutoReviewStatus.Rejected,
+      reason: value,
+    },
+    interaction.user,
+  ) as MessageEditOptions;
 
     const message = await interaction.message.edit({
       ...messageEditOptions,
       components: [],
-    });
+    }).catch(err => logger.error(err));
+    if(!message) return;
 
     await interaction.reply({
       ephemeral: true,
       content: `Rejected application: ${toMessageLink(
         message,
       )}. Remember to take the appropriate administrative action.`,
-    });
-  } catch (error) {
-    logger.discord("error", error);
-  }
+    }).catch(err => logger.error(err))
 };

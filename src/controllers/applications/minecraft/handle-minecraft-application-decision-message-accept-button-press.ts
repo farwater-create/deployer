@@ -5,6 +5,8 @@ import { config } from "@config";
 import { MinecraftApplicationWhitelistMessageOptions } from "@views/application/minecraft-application-whitelist-message";
 import { MinecraftApplicationEvent } from "@views/application/minecraft-application-start-message";
 import { MinecraftApplicationDecisionEvent } from "@views/application/minecraft-application-decision-message";
+import { prisma } from "@lib/prisma";
+import { PterodactylPanel } from "@controllers/pterodactyl/pterodactyl";
 
 export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
   async (interaction: ButtonInteraction) => {
@@ -38,13 +40,26 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
 
     if (!application) return;
 
+    const _a = application?.serialize(prisma).catch(logger.error);
+    if(!_a) return;
+
     const opts = MinecraftApplicationWhitelistMessageOptions(application);
     channel
       .send(MinecraftApplicationWhitelistMessageOptions(application))
-      .catch(() => null);
+      .catch(logger.error);
+
+    await interaction.reply({
+      ephemeral: true,
+      content: "Accepted application" + messageLink(interaction.channelId, interaction.message.id)
+    }).catch(err => logger.error(err));
+
+    await interaction.message.edit({
+      components: []
+    }).catch(logger.error)
+
     const dmChannel = await interaction.client.users
       .createDM(application.discordId)
-      .catch(() => undefined);
+      .catch(logger.error);
     if (!dmChannel) return;
 
     dmChannel.send(opts).catch(() => {
@@ -52,14 +67,7 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
         "error",
         "could not open dm channel for user " + application?.discordId
       );
-    });
+    }).catch(logger.error);
 
-    await interaction.reply({
-      ephemeral: true,
-      content: "Accepted application" + messageLink(interaction.channelId, interaction.message.id)
-    });
-
-    await interaction.message.edit({
-      components: []
-    });
+    PterodactylPanel.minecraft(config.PTERODACTYL_SERVER_ID).whitelist(application.minecraftName).catch(err => logger.discord("error", err));
   };

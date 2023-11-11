@@ -28,10 +28,10 @@ const client = new Client({
 
 CommandCollection.use(applicationsChannelCommand);
 
-client.on("interactionCreate", (interaction) => {
-  if (hasCooldown(interaction, 2000)) {
+client.on("interactionCreate", async (interaction) => {
+  if (hasCooldown(interaction, 1000)) {
     if (interaction.isRepliable()) {
-      interaction.reply("You're doing that too fast!");
+      interaction.reply("You're doing that too fast!").catch(logger.error);
     }
     return;
   }
@@ -59,7 +59,10 @@ client.on("interactionCreate", (interaction) => {
 });
 
 client.on("ready", async (client) => {
-  await safetyCheck(client);
+  await safetyCheck(client).catch(error => {
+    logger.error(error);
+    process.exit(1);
+  })
   CommandCollection.register(
     config.BOT_TOKEN,
     config.CLIENT_ID,

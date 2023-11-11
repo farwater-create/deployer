@@ -1,3 +1,4 @@
+import { logger } from "@logger";
 import { Command } from "@models/command";
 import {
   CommandInteraction,
@@ -12,15 +13,15 @@ export class CommandCollection {
   static use(command: Command) {
     this.commandsMap.set(command.json.name, command);
   }
+
   static handle(interaction: CommandInteraction) {
-    try {
-      this.commandsMap.get(interaction.commandName)?.handler(interaction);
-    } catch (error) {
+    Promise.resolve(this.commandsMap.get(interaction.commandName)?.handler(interaction)).catch(() => {
       if (!interaction.replied) {
-        interaction.reply("Internal server error");
+        interaction.reply("Internal server error").catch(logger.error)
       }
-    }
+    });
   }
+
   static async register(token: string, clientId: string, guildId: string) {
     const commands: Array<RESTPostAPIApplicationCommandsJSONBody> = [];
     this.commandsMap.forEach((c) => {
@@ -34,6 +35,9 @@ export class CommandCollection {
     const rest = new REST().setToken(token);
     await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
       body: commands,
-    });
+    }).catch((err) => {
+      logger.error(err)
+      process.exit(1);
+    })
   }
 }

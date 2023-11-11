@@ -13,3 +13,11 @@ datasource db {
 model OffensiveMinecraftSkin {
   hash String @unique
 }
+
+model MinecraftApplication {
+  discordId String @id
+  minecraftUuid String
+  reason String
+  age String
+  createdAt DateTime @default(now())
+}

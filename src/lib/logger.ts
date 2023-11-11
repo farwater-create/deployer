@@ -50,11 +50,6 @@ export const logger: CustomLogger = {
   discord: (level: LogLevel, message: string) => {
     logger[level](message);
 
-    let mention: string = "";
-    if (level === "error") {
-      mention = roleToMentionString(ADMIN_ROLE_ID);
-    }
-
     if (!logger.logChannel) {
       logger.error(
         "No log channel set, cannot log discord message, logging to console instead.",
@@ -65,7 +60,7 @@ export const logger: CustomLogger = {
     logger.logChannel.send({
       embeds: [
         new EmbedBuilder()
-          .setTitle(`[${level}] ${mention}`)
+          .setTitle(`[${level}]`)
           .setDescription(`${message}`)
           .setColor(
             level === "error" ? "Red" : level === "warn" ? "Yellow" : "Blue",

@@ -2,6 +2,7 @@ import { config } from "@config";
 import { prisma } from "@lib/prisma";
 import { logger } from "@logger";
 import { MinecraftApplicationAutoReviewStatus, MinecraftApplicationModel, MinecraftApplicationRejectReason, MinecraftAutoReviewResult, minecraftApplicationDenyReasonDescriptions } from "@models/application";
+import { PrismaClient } from "@prisma/client";
 import { Client, DMChannel, Message } from "discord.js";
 
 export class MinecraftApplication implements MinecraftApplicationModel {
@@ -159,14 +160,13 @@ export class MinecraftApplication implements MinecraftApplicationModel {
     const rejectReasonDescription =
       minecraftApplicationDenyReasonDescriptions.get(reason);
     const user = await client.users.fetch(discordId);
-    const member = guild.members.cache.get(user.id);
     if (!user) return;
     const dmChannel = await user.createDM(true);
 
     try {
       await dmChannel.send(
         `Your farwater application was denied for reason: \`${rejectReasonDescription}\`. If you believe this was an error create a ticket.`
-      );
+      ).catch(logger.error);
       switch (reason) {
         case "other_bannable":
           break;
@@ -182,22 +182,22 @@ export class MinecraftApplication implements MinecraftApplicationModel {
         case "offensive_name":
           break;
         case "no_reason_provided":
-          await dmChannel.send("Please reapply with a valid reason");
+          await dmChannel.send("Please reapply with a valid reason").catch(logger.error);
           break;
         case "user_not_in_discord_server":
           break;
         case "no_minecraft_account":
           await dmChannel.send(
             "Double check your minecraft name (case sensitive) and apply again."
-          );
+          ).catch(logger.error);
           break;
         case "invalid_age":
-          await dmChannel.send("Please enter a valid age when re-applying");
+          await dmChannel.send("Please enter a valid age when re-applying").catch(logger.error);
         default:
         case "low_effort_application":
           await dmChannel.send(
             "Please give more reasons for why you want to join farwater then apply again."
-          );
+          ).catch(logger.error);
           break;
       }
     } catch (error) {
@@ -214,5 +214,25 @@ export class MinecraftApplication implements MinecraftApplicationModel {
 
   async acceptApplication() {
 
+  }
+
+  async serialize(prisma: PrismaClient) {
+    const { discordId, minecraftUuid, reason, age } = this;
+    prisma.minecraftApplication.create({
+      data: {
+        discordId,
+        minecraftUuid,
+        reason,
+        age
+      }
+    })
+  }
+
+  static async byDiscordId(prisma: PrismaClient, discordId: string) {
+    return prisma.minecraftApplication.findFirst({
+      where: {
+        discordId
+      }
+    });
   }
 }
