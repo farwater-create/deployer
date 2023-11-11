@@ -218,7 +218,7 @@ export class MinecraftApplication implements MinecraftApplicationModel {
 
   async serialize(prisma: PrismaClient) {
     const { discordId, minecraftUuid, reason, age } = this;
-    prisma.minecraftApplication.create({
+    await prisma.minecraftApplication.create({
       data: {
         discordId,
         minecraftUuid,

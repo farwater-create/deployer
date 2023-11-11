@@ -34,7 +34,8 @@ export type MinecraftApplicationRejectReason =
   | "no_minecraft_account"
   | "other_bannable"
   | "invalid_age"
-  | "other";
+  | "other"
+  | "is_banned"
 
 
 export const minecraftApplicationDenyReasons: Array<{
@@ -93,6 +94,10 @@ export const minecraftApplicationDenyReasons: Array<{
     label: "invalid age",
     value: "invalid_age",
   },
+  {
+    label: "is banned",
+    value: "is_banned"
+  }
 ];
 
 export const minecraftApplicationDenyReasonDescriptions = new Map<

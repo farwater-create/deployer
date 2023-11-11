@@ -7,6 +7,7 @@ import { MinecraftApplicationModalEvent } from "views/application/minecraft-appl
 import { digestSkinHex, getSkin } from "@lib/skin-id/skin-id";
 import { MinecraftApplicationModel } from "@models/application";
 import { MinecraftApplication } from "./application";
+import { fetchMinecraftUser } from "@lib/minecraft/fetch-minecraft-user";
 const { APPLICATIONS_CHANNEL_ID } = config;
 
 export const handleMinecraftApplicationModalSubmit = async (
@@ -45,29 +46,11 @@ export const handleMinecraftApplicationModalSubmit = async (
     return;
   }
 
-  let minecraftUuid = "⚠️NO UUID FOUND⚠️";
-  const response = await fetch(
-    "https://api.mojang.com/users/profiles/minecraft/" + minecraftName,
-  ).catch(logger.error);
-  if(!response) return;
-  const expectedResponseSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-  });
+  const userProfile = await fetchMinecraftUser(minecraftName);
 
-  const result = await expectedResponseSchema.parseAsync(await response.json())
-  .catch(() => undefined);
-  if(!result) {
-    interaction.reply({
-      ephemeral: true,
-      content: "Minecraft account not found"
-    }).catch(logger.error)
-    return;
-  }
+  const minecraftSkinSum = userProfile ? digestSkinHex(userProfile.textures.raw.value) : "null";
+  const minecraftUuid = userProfile ? userProfile.uuid : "null";
 
-  minecraftUuid = result.id;
-
-  const minecraftSkinSum = await digestSkinHex(await getSkin(minecraftUuid));
 
   const applicationOptions: MinecraftApplicationModel = {
     discordId: interaction.user.id,

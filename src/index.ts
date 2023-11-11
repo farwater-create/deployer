@@ -12,6 +12,7 @@ import { handleMinecraftApplicationModalSubmit } from "@controllers/applications
 import { handleMinecraftApplicationDecisionMessageStringSelectMenu } from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-string-select-menu";
 import { handleMinecraftApplicationDecisionMessageAcceptButtonPress } from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-accept-button-press";
 import { applicationsChannelCommand } from "@controllers/commands/applications-channel";
+import { ban } from "@controllers/commands/ban";
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -26,18 +27,17 @@ const client = new Client({
   intents,
 });
 
-CommandCollection.use(applicationsChannelCommand);
+CommandCollection.useCommand(applicationsChannelCommand);
+CommandCollection.useContextCommand(ban);
 
 client.on("interactionCreate", async (interaction) => {
-  if (hasCooldown(interaction, 1000)) {
-    if (interaction.isRepliable()) {
-      interaction.reply("You're doing that too fast!").catch(logger.error);
-    }
-    return;
-  }
 
   if (interaction.isCommand()) {
-    CommandCollection.handle(interaction);
+    if(interaction.isContextMenuCommand()) {
+      CommandCollection.handleContextCommand(interaction);
+    } else {
+      CommandCollection.handleCommand(interaction);
+    }
     return;
   }
 

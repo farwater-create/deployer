@@ -40,7 +40,7 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
 
     if (!application) return;
 
-    const _a = application?.serialize(prisma).catch(logger.error);
+    const _a = application.serialize(prisma).catch(logger.error);
     if(!_a) return;
 
     const opts = MinecraftApplicationWhitelistMessageOptions(application);

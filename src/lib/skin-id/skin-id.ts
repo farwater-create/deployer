@@ -4,8 +4,8 @@ import crypto from "node:crypto";
 
 // Define the schema
 const UserSessionSchema = z.object({
-  id: z.string(),
-  name: z.string(),
+  uuid: z.string(),
+  username: z.string(),
   properties: z.array(
     z.object({
       name: z.string(),
@@ -15,15 +15,13 @@ const UserSessionSchema = z.object({
   profileActions: z.array(z.object({})),
 });
 
-export const digestSkinHex = async (skin: string | undefined) => {
+export const digestSkinHex = (skin: string | undefined) => {
   if (!skin) return "null";
   return crypto.createHash("sha256").update(skin).digest("hex");
 };
 
 export const getSkin = async (uuid: string): Promise<string | undefined> => {
-  const url = new URL(
-    `https://sessionserver.mojang.com/session/minecraft/profile/${uuid}/`,
-  );
+  const url = new URL(`https://api.ashcon.app/mojang/v2/user/${uuid}/`);
   const resp = await axios.get(url.toString());
   const parsedData = UserSessionSchema.parse(resp.data);
   const skin = parsedData.properties.find((v) => v.name === "textures");
