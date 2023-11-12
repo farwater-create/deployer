@@ -1,4 +1,5 @@
-import { MinecraftApplicationAutoReviewStatus, MinecraftApplicationModel, MinecraftApplicationRejectReason, MinecraftAutoReviewResult, minecraftApplicationDenyReasons } from "@models/application";
+import { MinecraftApplicationModel, MinecraftAutoReviewResult, MinecraftApplicationAutoReviewStatus } from "@models/application/application";
+import { MinecraftApplicationRejectReasons, minecraftApplicationRejectReasons } from "@models/application/reject-reasons";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -6,9 +7,7 @@ import {
   ColorResolvable,
   Colors,
   EmbedBuilder,
-  Message,
   MessageCreateOptions,
-  SelectMenuBuilder,
   StringSelectMenuBuilder,
   User,
 } from "discord.js";
@@ -30,6 +29,7 @@ const MinecraftApplicationDecisionEmbed = (
     minecraftUuid,
     age,
     minecraftSkinSum,
+    serverId
   } = minecraftApplication;
   let color: ColorResolvable = Colors.Blurple;
 
@@ -77,6 +77,10 @@ const MinecraftApplicationDecisionEmbed = (
         name: "autoReviewComment",
         value: autoReviewResult.reason,
       },
+      {
+        name: "serverId",
+        value: serverId
+      }
     ])
     .setColor(color);
   const thumbnail = new URL(`https://mc-heads.net/body/${minecraftName}.png`);
@@ -108,18 +112,26 @@ export const MinecraftApplicationDecisionMessageOptions = (
       ),
     ],
   };
+
+  const options = Object.entries(minecraftApplicationRejectReasons).map((e) => {
+    return {
+      label: e[1],
+      value: e[0]
+    }
+  });
+
   opts.components = [
     new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setCustomId(MinecraftApplicationDecisionEvent.Accept)
         .setLabel("Accept")
-        .setStyle(ButtonStyle.Success),
+        .setStyle(ButtonStyle.Success)
     ),
-    new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+    new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
       new StringSelectMenuBuilder()
         .setCustomId(MinecraftApplicationDecisionEvent.Reject)
-        .addOptions(minecraftApplicationDenyReasons)
-        .setPlaceholder("Reject with reason"),
+        .addOptions(options)
+        .setPlaceholder("Reject with reason")
     ),
   ];
   return opts;

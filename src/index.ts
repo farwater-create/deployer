@@ -6,14 +6,14 @@ import { config } from "@lib/config";
 import { safetyCheck } from "@controllers/startup/safety-check";
 import { CommandCollection } from "@controllers/commands/commands";
 import { logger } from "@logger";
-import { hasCooldown } from "@lib/interaction-cooldown";
 import { handleMinecraftApplicationModalApplyButtonPress } from "@controllers/applications/minecraft/handle-minecraft-application-modal-apply-button-press";
 import { handleMinecraftApplicationModalSubmit } from "@controllers/applications/minecraft/handle-minecraft-application-modal-submit";
 import { handleMinecraftApplicationDecisionMessageStringSelectMenu } from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-string-select-menu";
 import { handleMinecraftApplicationDecisionMessageAcceptButtonPress } from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-accept-button-press";
 import { applicationsChannelCommand } from "@controllers/commands/applications-channel";
-import { ban } from "@controllers/commands/ban";
-
+import { whitelist } from "@controllers/commands/whitelist";
+import { unwhitelist } from "@controllers/commands/unwhitelist";
+import { skin } from "@controllers/commands/skin";
 const intents = [
   GatewayIntentBits.Guilds,
   GatewayIntentBits.GuildMessages,
@@ -28,7 +28,9 @@ const client = new Client({
 });
 
 CommandCollection.useCommand(applicationsChannelCommand);
-CommandCollection.useContextCommand(ban);
+CommandCollection.useContextCommand(whitelist);
+CommandCollection.useContextCommand(unwhitelist);
+CommandCollection.useCommand(skin);
 
 client.on("interactionCreate", async (interaction) => {
 

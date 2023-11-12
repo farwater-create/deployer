@@ -1,9 +1,15 @@
 import { config } from "@config";
+import { PterodactylPanel } from "@controllers/pterodactyl/pterodactyl";
+import { extractEmbedFields } from "@lib/discord-helpers/extract-fields";
+import { fetchMinecraftUser } from "@lib/minecraft/fetch-minecraft-user";
 import { prisma } from "@lib/prisma";
+import { digestSkinHex } from "@lib/skin-id/skin-id";
 import { logger } from "@logger";
-import { MinecraftApplicationAutoReviewStatus, MinecraftApplicationModel, MinecraftApplicationRejectReason, MinecraftAutoReviewResult, minecraftApplicationDenyReasonDescriptions } from "@models/application";
-import { PrismaClient } from "@prisma/client";
-import { Client, DMChannel, Message } from "discord.js";
+import { MinecraftApplicationAutoReviewStatus, MinecraftApplicationModel, MinecraftAutoReviewResult } from "@models/application/application";
+import { MinecraftApplicationRejectReason, minecraftApplicationRejectReasons } from "@models/application/reject-reasons";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { Client, GuildMember, Message } from "discord.js";
+import z from "zod";
 
 export class MinecraftApplication implements MinecraftApplicationModel {
   discordId: string;
@@ -12,16 +18,34 @@ export class MinecraftApplication implements MinecraftApplicationModel {
   minecraftName: string;
   minecraftUuid: string;
   minecraftSkinSum: string;
+  serverId: string;
+  client: Client;
+  createdAt: Date;
   private _offensiveSkin: boolean | undefined;
   private _autoReviewResult: MinecraftAutoReviewResult | undefined;
+  private _member: GuildMember | undefined;
 
-  constructor(model: MinecraftApplicationModel) {
+  constructor(model: MinecraftApplicationModel, client: Client) {
     this.discordId = model.discordId;
     this.reason = model.reason;
     this.age = model.age;
     this.minecraftName = model.minecraftName;
     this.minecraftUuid = model.minecraftUuid;
     this.minecraftSkinSum = model.minecraftSkinSum;
+    this.serverId = model.serverId;
+    this.client = client;
+    this.createdAt = model.createdAt;
+  }
+
+  async member() {
+    if(!this._member) {
+      this._member == (await this.client.guilds.fetch(config.GUILD_ID)).members.fetch(this.discordId);
+    }
+    return this._member;
+  }
+
+  async user() {
+    return this.client.users.fetch(this.discordId);
   }
 
   async offensiveSkin(): Promise<boolean> {
@@ -55,7 +79,7 @@ export class MinecraftApplication implements MinecraftApplicationModel {
     if (!match.test(application.age)) {
       return {
         status: MinecraftApplicationAutoReviewStatus.Rejected,
-        reason: "invalid_age",
+        reason: "invalidAge",
       };
     }
 
@@ -64,14 +88,14 @@ export class MinecraftApplication implements MinecraftApplicationModel {
     if (Number.isNaN(ageInt)) {
       return {
         status: MinecraftApplicationAutoReviewStatus.Rejected,
-        reason: "invalid_age",
+        reason: "invalidAge",
       };
     }
 
     if (!Number.isSafeInteger(ageInt)) {
       return {
         status: MinecraftApplicationAutoReviewStatus.Rejected,
-        reason: "invalid_age",
+        reason: "invalidAge",
       };
     }
 
@@ -85,13 +109,13 @@ export class MinecraftApplication implements MinecraftApplicationModel {
     if (application.minecraftUuid === "⚠️NO UUID FOUND⚠️") {
       return {
         status: MinecraftApplicationAutoReviewStatus.NeedsManualReview,
-        reason: "no_minecraft_account",
+        reason: "noMinecraftAccount",
       };
     }
 
     if (await application.offensiveSkin()) {
       return {
-        reason: "offensive_skin",
+        reason: "offensiveMinecraftSkin",
         status: MinecraftApplicationAutoReviewStatus.NeedsManualReview,
       };
     }
@@ -108,131 +132,93 @@ export class MinecraftApplication implements MinecraftApplicationModel {
     if (message.embeds.length < 1) {
       throw new Error("error parsing application decision message");
     }
+
     const embed = message.embeds[0];
-    const reason = embed.description;
-
-    let discordId: string | undefined;
-    let minecraftUuid: string | undefined;
-    let minecraftName: string | undefined;
-    let minecraftSkinSum: string | undefined;
-    let age: string | undefined;
-
-    embed.fields.forEach((field) => {
-      if (field.name === "discordId") discordId = field.value;
-      if (field.name === "minecraftUuid") minecraftUuid = field.value;
-      if (field.name === "minecraftName") minecraftName = field.value;
-      if (field.name === "age") age = field.value;
-      if (field.name === "minecraftSkinSum") minecraftSkinSum = field.value;
+    const embedSchema = z.object({
+      discordId: z.string(),
+      minecraftUuid: z.string(),
+      minecraftName: z.string(),
+      minecraftSkinSum: z.string(),
+      serverId: z.string(),
+      age: z.string(),
     });
 
-    if (
-      !discordId ||
-      !minecraftUuid ||
-      !minecraftName ||
-      !reason ||
-      !age ||
-      !minecraftSkinSum
-    ) {
-      throw new Error("embed missing fields.");
+    const embedFields = extractEmbedFields<MinecraftApplicationModel>(embed, embedSchema);
+    if(!embedFields) {
+      throw new Error("Missing embed fields");
     }
+    const reason = embed.description ? embed.description : "";
+
     return new MinecraftApplication({
-      age,
-      discordId,
-      minecraftUuid,
-      minecraftName,
-      minecraftSkinSum,
+      ...embedFields,
       reason,
-    });
+    }, message.client);
   };
 
-  async denyApplication(
-    client: Client,
-    application: MinecraftApplication,
-    reason: MinecraftApplicationRejectReason
-  ) {
-
-    const { discordId } = application;
-    const guild = client.guilds.cache.get(config.GUILD_ID);
-    if (!guild) {
-      throw new Error("guild not found");
-    }
-
-    const rejectReasonDescription =
-      minecraftApplicationDenyReasonDescriptions.get(reason);
-    const user = await client.users.fetch(discordId);
-    if (!user) return;
-    const dmChannel = await user.createDM(true);
-
-    try {
-      await dmChannel.send(
-        `Your farwater application was denied for reason: \`${rejectReasonDescription}\`. If you believe this was an error create a ticket.`
-      ).catch(logger.error);
-      switch (reason) {
-        case "other_bannable":
-          break;
-        case "underage":
-          break;
-        case "offensive_application":
-          break;
-        case "offensive_discord_user":
-          break;
-        case "offensive_skin":
-          await application.flagOffensiveSkin();
-          break;
-        case "offensive_name":
-          break;
-        case "no_reason_provided":
-          await dmChannel.send("Please reapply with a valid reason").catch(logger.error);
-          break;
-        case "user_not_in_discord_server":
-          break;
-        case "no_minecraft_account":
-          await dmChannel.send(
-            "Double check your minecraft name (case sensitive) and apply again."
-          ).catch(logger.error);
-          break;
-        case "invalid_age":
-          await dmChannel.send("Please enter a valid age when re-applying").catch(logger.error);
-        default:
-        case "low_effort_application":
-          await dmChannel.send(
-            "Please give more reasons for why you want to join farwater then apply again."
-          ).catch(logger.error);
-          break;
+  async update() {
+    const profile = await fetchMinecraftUser(this.minecraftUuid).catch(logger.error);
+    if(!profile) return;
+    this.minecraftUuid = profile.uuid;
+    this.minecraftName = profile.username;
+    this.minecraftSkinSum = digestSkinHex(profile.textures.raw.value);
+    const { minecraftUuid, minecraftName, minecraftSkinSum } = this;
+    prisma.minecraftApplication.update({
+      where: {
+        serverId: this.serverId,
+        discordId: this.discordId
+      },
+      data: {
+        minecraftName,
+        minecraftUuid,
+        minecraftSkinSum
       }
-    } catch (error) {
-      logger.discord(
-        "warn",
-        "Tried to send dm to user " + user.id + " but user has dms closed."
-      );
+    }).catch(logger.error);
+    if(await this.offensiveSkin()) {
+      this.unwhitelist();
+      logger.discord("warn", "found offensive skin while updating user application for " + `<@${this.discordId}>`);
     }
-  };
-
-  async dmChannel(client: Client): Promise<DMChannel> {
-    return client.users.createDM(this.discordId);
   }
 
-  async acceptApplication() {
+  async unwhitelist() {
+    PterodactylPanel.minecraft(config.PTERODACTYL_SERVER_ID)
+      .unwhitelist(this.minecraftName)
+      .catch((err) => logger.discord("error", err));
+  }
 
+  async whitelist() {
+    PterodactylPanel.minecraft(config.PTERODACTYL_SERVER_ID)
+      .whitelist(this.minecraftName)
+      .catch((err) => logger.discord("error", err));
   }
 
   async serialize(prisma: PrismaClient) {
-    const { discordId, minecraftUuid, reason, age } = this;
+    const { discordId, minecraftUuid, reason, age, serverId, createdAt, minecraftName, minecraftSkinSum } = this;
     await prisma.minecraftApplication.create({
       data: {
         discordId,
         minecraftUuid,
         reason,
-        age
+        age,
+        serverId,
+        createdAt,
+        minecraftName,
+        minecraftSkinSum
       }
-    })
+    }).catch(logger.error);
   }
 
-  static async byDiscordId(prisma: PrismaClient, discordId: string) {
-    return prisma.minecraftApplication.findFirst({
+  static async fromDiscordId(client: Client, discordId: string) {
+    const applicationModels = await prisma.minecraftApplication.findMany({
       where: {
         discordId
       }
     });
+    if(applicationModels) {
+      return applicationModels.map(m => new MinecraftApplication(m, client))
+    }
+  }
+
+  async skinURL() {
+    return new URL(`https://mc-heads.net/body/${this.minecraftUuid}.png`).toString()
   }
 }

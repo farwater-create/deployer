@@ -41,5 +41,5 @@ export const fetchMinecraftUser = async (identifier: string) => {
     return;
   }
   const raw = await resp.json();
-  return userSchema.parseAsync(raw).catch(console.error);
+  return userSchema.parseAsync(raw).catch(logger.error);
 }

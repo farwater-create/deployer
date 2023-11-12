@@ -22,7 +22,6 @@ export class CommandCollection {
   }
 
   static handleContextCommand(interaction: ContextMenuCommandInteraction) {
-    console.log("received " + interaction)
     Promise.resolve(
       this.contextMenuCommandsMap.get(interaction.commandName)?.handler(interaction)
     ).catch(() => {

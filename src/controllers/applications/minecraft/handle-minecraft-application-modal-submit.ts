@@ -1,19 +1,24 @@
 import { logger } from "@logger";
 import { MinecraftApplicationDecisionMessageOptions } from "@views/application/minecraft-application-decision-message";
 import { ComponentType, ChannelType, ModalSubmitInteraction } from "discord.js";
-import z from "zod";
 import { config } from "@config";
 import { MinecraftApplicationModalEvent } from "views/application/minecraft-application-submit-modal";
-import { digestSkinHex, getSkin } from "@lib/skin-id/skin-id";
-import { MinecraftApplicationModel } from "@models/application";
+import { digestSkinHex } from "@lib/skin-id/skin-id";
 import { MinecraftApplication } from "./application";
 import { fetchMinecraftUser } from "@lib/minecraft/fetch-minecraft-user";
+import z from "zod";
+import { extractEmbedFields } from "@lib/discord-helpers/extract-fields";
+import { MinecraftApplicationModel } from "@models/application/application";
 const { APPLICATIONS_CHANNEL_ID } = config;
 
 export const handleMinecraftApplicationModalSubmit = async (
   interaction: ModalSubmitInteraction,
 ) => {
   if (interaction.customId !== MinecraftApplicationModalEvent.Submit) return;
+  if (!interaction.message) {
+    logger.discord("error", "received button interaction from ghost message");
+    return;
+  }
 
   let age = interaction.fields.getField("age", ComponentType.TextInput).value;
   const reason = interaction.fields.getField(
@@ -47,9 +52,27 @@ export const handleMinecraftApplicationModalSubmit = async (
   }
 
   const userProfile = await fetchMinecraftUser(minecraftName);
-
   const minecraftSkinSum = userProfile ? digestSkinHex(userProfile.textures.raw.value) : "null";
   const minecraftUuid = userProfile ? userProfile.uuid : "null";
+
+  const embedFieldSchema = z.object({
+    serverId: z.string()
+  });
+
+  const embedFields = extractEmbedFields<typeof embedFieldSchema._type>(interaction.message.embeds[0], embedFieldSchema);
+  if(!embedFields) {
+    logger.discord(
+      "error",
+      "message embed does not contain a server id, deleting."
+    );
+    interaction.message?.delete().catch(logger.error);
+    interaction.reply({
+      ephemeral: true,
+      content: "internal server error"
+    });
+    return;
+  }
+  const { serverId } = embedFields;
 
 
   const applicationOptions: MinecraftApplicationModel = {
@@ -59,9 +82,11 @@ export const handleMinecraftApplicationModalSubmit = async (
     minecraftName,
     minecraftUuid,
     minecraftSkinSum,
+    serverId,
+    createdAt: new Date(Date.now())
   };
 
-  const application = new MinecraftApplication(applicationOptions);
+  const application = new MinecraftApplication(applicationOptions, interaction.client);
 
   const autoReviewResult = await application.autoReviewResult(
     application,

@@ -15,9 +15,13 @@ model OffensiveMinecraftSkin {
 }
 
 model MinecraftApplication {
-  discordId String @id
+  discordId String
   minecraftUuid String
+  minecraftName String
+  minecraftSkinSum String
   reason String
   age String
+  serverId String
   createdAt DateTime @default(now())
+  @@unique([discordId, serverId])
 }

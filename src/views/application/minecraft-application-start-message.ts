@@ -31,21 +31,31 @@ Remember, the whitelist application process helps us maintain a positive and fun
 Click the button below to get started!
 `;
 
-const MinecraftApplicationSubmissionEmbed = new EmbedBuilder()
-  .setTitle(TITLE)
-  .setDescription(DESCRIPTION)
-  .setThumbnail(
-    "https://media.forgecdn.net/avatars/thumbnails/444/296/64/64/637698958460822126.png",
-  );
-
-export const MinecraftApplicationStartMessageOptions: MessageCreateOptions = {
-  embeds: [MinecraftApplicationSubmissionEmbed],
-  components: [
-    new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId(MinecraftApplicationEvent.Start)
-        .setLabel("Apply")
-        .setStyle(ButtonStyle.Success),
-    ),
-  ],
+const MinecraftApplicationSubmissionEmbed = (serverId: string) => {
+  return new EmbedBuilder()
+    .setTitle(TITLE)
+    .setDescription(DESCRIPTION)
+    .setThumbnail(
+      "https://media.forgecdn.net/avatars/thumbnails/444/296/64/64/637698958460822126.png",
+    )
+    .addFields([
+      {
+        name: "serverId",
+        value: serverId
+      }
+    ])
 };
+
+export const MinecraftApplicationStartMessageOptions = (serverId: string) => {
+  return {
+    embeds: [MinecraftApplicationSubmissionEmbed(serverId)],
+    components: [
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(MinecraftApplicationEvent.Start)
+          .setLabel("Apply")
+          .setStyle(ButtonStyle.Success)
+      ),
+    ],
+  };
+}

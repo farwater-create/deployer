@@ -3,10 +3,8 @@ import { MinecraftApplication } from "./application";
 import { logger } from "@logger";
 import { config } from "@config";
 import { MinecraftApplicationWhitelistMessageOptions } from "@views/application/minecraft-application-whitelist-message";
-import { MinecraftApplicationEvent } from "@views/application/minecraft-application-start-message";
 import { MinecraftApplicationDecisionEvent } from "@views/application/minecraft-application-decision-message";
 import { prisma } from "@lib/prisma";
-import { PterodactylPanel } from "@controllers/pterodactyl/pterodactyl";
 
 export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
   async (interaction: ButtonInteraction) => {
@@ -30,11 +28,13 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
         MinecraftApplication.fromMinecraftApplicationDecisionMessage(
           interaction.message
         );
+      await application.whitelist();
     } catch (error) {
+
       logger.discord(
         "error",
         "failed to parse decision message " +
-          messageLink(interaction.channelId, interaction.message.id)
+          messageLink(interaction.channelId, interaction.message.id) + "\n" + error
       );
     }
 
@@ -57,10 +57,8 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
       components: []
     }).catch(logger.error)
 
-    const dmChannel = await interaction.client.users
-      .createDM(application.discordId)
-      .catch(logger.error);
-    if (!dmChannel) return;
+    const dmChannel = await (await application.user()).createDM(true).catch(logger.error);
+    if(!dmChannel) return;
 
     dmChannel.send(opts).catch(() => {
       logger.discord(
@@ -69,5 +67,4 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
       );
     }).catch(logger.error);
 
-    PterodactylPanel.minecraft(config.PTERODACTYL_SERVER_ID).whitelist(application.minecraftName).catch(err => logger.discord("error", err));
   };

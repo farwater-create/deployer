@@ -27,7 +27,9 @@ export class PterodactylPanel {
 
 class PterodactylServer {
   client: AxiosInstance;
+  uuid: string;
   constructor(uuid: string) {
+    this.uuid = uuid;
     const _client = axios.create({
       baseURL: new URL(`${panelUrl}/servers/${uuid}`).toString(),
       headers: pteroHeaders,
@@ -45,8 +47,10 @@ class PterodactylServer {
     this.client.post("command", {
       command: safeCommand,
     }).catch((err) => {
-      logger.discord("error", `could not run command ${command} on ${this.client.getUri()} due to error: ${err}`)
-    });
+      logger.discord("error", `could not run command ${command} on ${this.uuid} due to error: ${err}`)
+    }).then(() => {
+      logger.discord("info", `ran command \`${safeCommand}\` on ${this.uuid}`)
+    })
   }
   /**
    * Takes formatted string (see https://www.npmjs.com/package/sprintf-js)
@@ -67,7 +71,7 @@ class MinecraftPterodactylServer extends PterodactylServer {
   async whitelist(user: string) {
     return this.execute(this.safeCommand("whitelist add %s", user));
   }
-  async ban(user: string) {
+  async unwhitelist(user: string) {
     return this.execute(this.safeCommand("whitelist remove %s", user));
   }
 }
