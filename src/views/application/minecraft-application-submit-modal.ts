@@ -1,3 +1,4 @@
+import { MinecraftApplicationCustomId } from "@models/application/application";
 import {
   ActionRowBuilder,
   ModalActionRowComponentBuilder,
@@ -5,10 +6,6 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
-
-export enum MinecraftApplicationModalEvent {
-  Submit = "minecraft-application-model-submit",
-}
 
 const AGE_DESCRIPTION = "Age in years";
 const REASON_DESCRIPTION = "Reason for joining.";
@@ -18,7 +15,7 @@ const REFERRAL_DESCRIPTION = "Referall (optional)";
 export const MinecraftApplicationModal = () => {
   return new ModalBuilder()
     .setTitle("Whitelist Application")
-    .setCustomId(MinecraftApplicationModalEvent.Submit)
+    .setCustomId(MinecraftApplicationCustomId.Submit)
     .addComponents([
       new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
         new TextInputBuilder()
@@ -27,7 +24,7 @@ export const MinecraftApplicationModal = () => {
           .setMinLength(1)
           .setStyle(TextInputStyle.Short)
           .setLabel(AGE_DESCRIPTION)
-          .setRequired(true),
+          .setRequired(true)
       ),
       new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
         new TextInputBuilder()
@@ -36,7 +33,7 @@ export const MinecraftApplicationModal = () => {
           .setMinLength(1)
           .setStyle(TextInputStyle.Paragraph)
           .setLabel(REASON_DESCRIPTION)
-          .setRequired(true),
+          .setRequired(true)
       ),
       new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
         new TextInputBuilder()
@@ -45,7 +42,7 @@ export const MinecraftApplicationModal = () => {
           .setMinLength(1)
           .setStyle(TextInputStyle.Short)
           .setLabel(MINECRAFT_NAME_DESCRIPTION)
-          .setRequired(true),
+          .setRequired(true)
       ),
       new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
         new TextInputBuilder()
@@ -54,7 +51,7 @@ export const MinecraftApplicationModal = () => {
           .setMinLength(1)
           .setStyle(TextInputStyle.Short)
           .setLabel(REFERRAL_DESCRIPTION)
-          .setRequired(false),
+          .setRequired(false)
       ),
     ]);
 };

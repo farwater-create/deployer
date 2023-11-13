@@ -14,13 +14,18 @@ const panelUrl = new URL(`${config.PTERODACTYL_API_URL}/api/client`);
 
 
 export class PterodactylPanel {
-  client: AxiosInstance = axios.create({
+  static client: AxiosInstance = axios.create({
     baseURL: panelUrl.toString(),
     headers: pteroHeaders,
   });
 
   static minecraft(uuid: string): MinecraftPterodactylServer {
     return new MinecraftPterodactylServer(uuid);
+  }
+
+  static async servers() {
+    const resp = await this.client.get("/");
+    
   }
 }
 
@@ -73,5 +78,8 @@ class MinecraftPterodactylServer extends PterodactylServer {
   }
   async unwhitelist(user: string) {
     return this.execute(this.safeCommand("whitelist remove %s", user));
+  }
+  async kick(user: string) {
+    return this.execute(this.safeCommand("kick %s", user));
   }
 }

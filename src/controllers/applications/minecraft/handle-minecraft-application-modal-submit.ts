@@ -2,19 +2,17 @@ import { logger } from "@logger";
 import { MinecraftApplicationDecisionMessageOptions } from "@views/application/minecraft-application-decision-message";
 import { ComponentType, ChannelType, ModalSubmitInteraction } from "discord.js";
 import { config } from "@config";
-import { MinecraftApplicationModalEvent } from "views/application/minecraft-application-submit-modal";
 import { digestSkinHex } from "@lib/skin-id/skin-id";
 import { MinecraftApplication } from "./application";
 import { fetchMinecraftUser } from "@lib/minecraft/fetch-minecraft-user";
 import z from "zod";
-import { extractEmbedFields } from "@lib/discord-helpers/extract-fields";
+import { extractEmbedFields } from "@lib/discord/extract-fields";
 import { MinecraftApplicationModel } from "@models/application/application";
 const { APPLICATIONS_CHANNEL_ID } = config;
 
 export const handleMinecraftApplicationModalSubmit = async (
   interaction: ModalSubmitInteraction,
 ) => {
-  if (interaction.customId !== MinecraftApplicationModalEvent.Submit) return;
   if (!interaction.message) {
     logger.discord("error", "received button interaction from ghost message");
     return;

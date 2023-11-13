@@ -1,10 +1,10 @@
-import { toMessageLink } from "@lib/discord-helpers/message-link";
+import { toMessageLink } from "@lib/discord/message-link";
 import { logger } from "@logger";
 import {
   MessageEditOptions,
   StringSelectMenuInteraction
 } from "discord.js";
-import { MinecraftApplicationDecisionEvent, MinecraftApplicationDecisionMessageOptions } from "@views/application/minecraft-application-decision-message";
+import { MinecraftApplicationDecisionMessageOptions } from "@views/application/minecraft-application-decision-message";
 import { MinecraftApplication } from "./application";
 import { MinecraftApplicationAutoReviewStatus } from "@models/application/application";
 import { MinecraftApplicationRejectReason, minecraftApplicationRejectReasons } from "@models/application/reject-reasons";
@@ -13,7 +13,6 @@ import { config } from "@config";
 export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
   interaction: StringSelectMenuInteraction,
 ) => {
-  if (interaction.customId !== MinecraftApplicationDecisionEvent.Reject) return;
   const value = interaction.values[0] as MinecraftApplicationRejectReason;
   let application: MinecraftApplication | undefined;
 

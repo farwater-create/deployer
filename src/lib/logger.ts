@@ -6,7 +6,7 @@ import {
   TextBasedChannel,
 } from "discord.js";
 import pino from "pino";
-import { roleToMentionString } from "@lib/discord-helpers/mentions";
+import { roleToMentionString } from "@lib/discord/mentions";
 import { config } from "@config";
 const { ADMIN_ROLE_ID } = config;
 

@@ -1,16 +1,13 @@
 import { config } from "@config";
+import { MinecraftApplicationCustomId } from "@models/application/application";
 import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
-  MessageCreateOptions,
 } from "discord.js";
 
-export enum MinecraftApplicationEvent {
-  Start = "application-start",
-}
-const { RULES_CHANNEL_ID, GUILD_ID, APPLICATIONS_CHANNEL_ID, BOT_USER_ID } =
+const { RULES_CHANNEL_ID, GUILD_ID, BOT_USER_ID } =
   config;
 const rulesChannelLink = `https://discord.com/channels/${GUILD_ID}/${RULES_CHANNEL_ID}`;
 
@@ -52,7 +49,7 @@ export const MinecraftApplicationStartMessageOptions = (serverId: string) => {
     components: [
       new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
-          .setCustomId(MinecraftApplicationEvent.Start)
+          .setCustomId(MinecraftApplicationCustomId.Start)
           .setLabel("Apply")
           .setStyle(ButtonStyle.Success)
       ),

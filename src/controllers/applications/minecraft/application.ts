@@ -1,16 +1,14 @@
 import { config } from "@config";
 import { PterodactylPanel } from "@controllers/pterodactyl/pterodactyl";
-import { extractEmbedFields } from "@lib/discord-helpers/extract-fields";
+import { extractEmbedFields } from "@lib/discord/extract-fields";
 import { fetchMinecraftUser } from "@lib/minecraft/fetch-minecraft-user";
 import { prisma } from "@lib/prisma";
 import { digestSkinHex } from "@lib/skin-id/skin-id";
 import { logger } from "@logger";
 import { MinecraftApplicationAutoReviewStatus, MinecraftApplicationModel, MinecraftAutoReviewResult } from "@models/application/application";
-import { MinecraftApplicationRejectReason, minecraftApplicationRejectReasons } from "@models/application/reject-reasons";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient, MinecraftApplication as PrismaMinecraftApplication } from "@prisma/client";
 import { Client, GuildMember, Message } from "discord.js";
 import z from "zod";
-
 export class MinecraftApplication implements MinecraftApplicationModel {
   discordId: string;
   reason: string;
@@ -161,11 +159,13 @@ export class MinecraftApplication implements MinecraftApplicationModel {
     this.minecraftUuid = profile.uuid;
     this.minecraftName = profile.username;
     this.minecraftSkinSum = digestSkinHex(profile.textures.raw.value);
-    const { minecraftUuid, minecraftName, minecraftSkinSum } = this;
+    const { minecraftUuid, minecraftName, minecraftSkinSum, discordId, serverId } = this;
     prisma.minecraftApplication.update({
       where: {
-        serverId: this.serverId,
-        discordId: this.discordId
+        discordId_serverId: {
+          discordId,
+          serverId
+        }
       },
       data: {
         minecraftName,
@@ -176,17 +176,19 @@ export class MinecraftApplication implements MinecraftApplicationModel {
     if(await this.offensiveSkin()) {
       this.unwhitelist();
       logger.discord("warn", "found offensive skin while updating user application for " + `<@${this.discordId}>`);
+      PterodactylPanel.minecraft(this.serverId).kick(minecraftName);
+      (await this.user()).dmChannel?.send("You have been unwhitelisted and kicked for having an offensive skin. Submit a ticket.").catch(logger.error);
     }
   }
 
   async unwhitelist() {
-    PterodactylPanel.minecraft(config.PTERODACTYL_SERVER_ID)
+    PterodactylPanel.minecraft(this.serverId)
       .unwhitelist(this.minecraftName)
       .catch((err) => logger.discord("error", err));
   }
 
   async whitelist() {
-    PterodactylPanel.minecraft(config.PTERODACTYL_SERVER_ID)
+    PterodactylPanel.minecraft(this.serverId)
       .whitelist(this.minecraftName)
       .catch((err) => logger.discord("error", err));
   }
@@ -221,4 +223,5 @@ export class MinecraftApplication implements MinecraftApplicationModel {
   async skinURL() {
     return new URL(`https://mc-heads.net/body/${this.minecraftUuid}.png`).toString()
   }
+
 }

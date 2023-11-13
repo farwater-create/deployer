@@ -1,7 +1,11 @@
 import {
+  ButtonInteraction,
   Client,
   GatewayIntentBits,
+  ModalSubmitInteraction,
+  StringSelectMenuInteraction,
 } from "discord.js";
+
 import { config } from "@lib/config";
 import { safetyCheck } from "@controllers/startup/safety-check";
 import { CommandCollection } from "@controllers/commands/commands";
@@ -14,6 +18,9 @@ import { applicationsChannelCommand } from "@controllers/commands/applications-c
 import { whitelist } from "@controllers/commands/whitelist";
 import { unwhitelist } from "@controllers/commands/unwhitelist";
 import { skin } from "@controllers/commands/skin";
+import { DeployerInteractionRouter } from "@lib/discord/deployer-client";
+import { MinecraftApplicationCustomId } from "@models/application/application";
+
 const intents = [
   GatewayIntentBits.Guilds,
   GatewayIntentBits.GuildMessages,
@@ -23,41 +30,39 @@ const intents = [
   GatewayIntentBits.GuildModeration,
 ];
 
+CommandCollection.useCommand(applicationsChannelCommand);
+CommandCollection.useContextCommand(whitelist);
+CommandCollection.useContextCommand(unwhitelist);
+CommandCollection.useContextCommand(skin);
+
 const client = new Client({
   intents,
 });
 
-CommandCollection.useCommand(applicationsChannelCommand);
-CommandCollection.useContextCommand(whitelist);
-CommandCollection.useContextCommand(unwhitelist);
-CommandCollection.useCommand(skin);
+const router = new DeployerInteractionRouter(client);
 
-client.on("interactionCreate", async (interaction) => {
-
-  if (interaction.isCommand()) {
-    if(interaction.isContextMenuCommand()) {
-      CommandCollection.handleContextCommand(interaction);
-    } else {
-      CommandCollection.handleCommand(interaction);
-    }
-    return;
-  }
-
-  if (interaction.isModalSubmit()) {
-    handleMinecraftApplicationModalSubmit(interaction);
-    return;
-  }
-
-  if (interaction.isButton()) {
+router.on<ButtonInteraction>(MinecraftApplicationCustomId.Accept, (interaction) => {
     handleMinecraftApplicationDecisionMessageAcceptButtonPress(interaction);
-    handleMinecraftApplicationModalApplyButtonPress(interaction);
-    return;
-  }
+});
 
-  if (interaction.isStringSelectMenu()) {
+router.on<ButtonInteraction>(MinecraftApplicationCustomId.Start, (interaction) => {
+  handleMinecraftApplicationModalApplyButtonPress(interaction);
+});
+
+router.on<StringSelectMenuInteraction>(MinecraftApplicationCustomId.Reject, (interaction) => {
     handleMinecraftApplicationDecisionMessageStringSelectMenu(interaction);
-    return;
-  }
+});
+
+router.on<ModalSubmitInteraction>(MinecraftApplicationCustomId.Submit, (interaction) => {
+    handleMinecraftApplicationModalSubmit(interaction);
+});
+
+router.on("command", interaction => {
+  CommandCollection.handleCommand(interaction);
+});
+
+router.on("contextCommand", interaction => {
+  CommandCollection.handleContextCommand(interaction);
 });
 
 client.on("ready", async (client) => {

@@ -10,7 +10,7 @@ import { logger } from "@logger";
 import { ContextCommand } from "@models/command";
 export const skin: ContextCommand = {
   json: new ContextMenuCommandBuilder()
-    .setName("skin")
+    .setName("skins")
     .setDefaultMemberPermissions(PermissionsBitField.Flags.BanMembers)
     .setType(ApplicationCommandType.User),
   handler: async (interaction) => {
@@ -20,7 +20,13 @@ export const skin: ContextCommand = {
       interaction.client,
       user.id
     ).catch(logger.error);
-    if (!applications) return;
+    if (!applications) {
+      await interaction.reply({
+        ephemeral: true,
+        content: "user has not applied to any servers"
+      });
+      return;
+    }
     const skinURLS = await Promise.all(applications.map(a => a.skinURL()));
     const description = skinURLS.join('\n');
     await interaction.reply({

@@ -18,7 +18,8 @@
   "scripts": {
     "start": "bun run src/index.ts",
     "dev": "bun --watch src/index.ts",
-    "format": "prettier --write src/**/*.ts"
+    "format": "prettier --write src/**/*.ts",
+    "check": "tsc --noEmit"
   },
   "dependencies": {
     "@prisma/client": "5.5.2",

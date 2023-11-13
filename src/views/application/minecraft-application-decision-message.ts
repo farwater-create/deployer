@@ -1,5 +1,5 @@
-import { MinecraftApplicationModel, MinecraftAutoReviewResult, MinecraftApplicationAutoReviewStatus } from "@models/application/application";
-import { MinecraftApplicationRejectReasons, minecraftApplicationRejectReasons } from "@models/application/reject-reasons";
+import { MinecraftApplicationModel, MinecraftAutoReviewResult, MinecraftApplicationAutoReviewStatus, MinecraftApplicationCustomId } from "@models/application/application";
+import { minecraftApplicationRejectReasons } from "@models/application/reject-reasons";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -11,11 +11,6 @@ import {
   StringSelectMenuBuilder,
   User,
 } from "discord.js";
-
-export enum MinecraftApplicationDecisionEvent {
-  Accept = "minecraft-application-decision-accept",
-  Reject = "minecraft-application-decision-reject",
-}
 
 const MinecraftApplicationDecisionEmbed = (
   minecraftApplication: MinecraftApplicationModel,
@@ -123,13 +118,13 @@ export const MinecraftApplicationDecisionMessageOptions = (
   opts.components = [
     new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
-        .setCustomId(MinecraftApplicationDecisionEvent.Accept)
+        .setCustomId(MinecraftApplicationCustomId.Accept)
         .setLabel("Accept")
         .setStyle(ButtonStyle.Success)
     ),
     new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
       new StringSelectMenuBuilder()
-        .setCustomId(MinecraftApplicationDecisionEvent.Reject)
+        .setCustomId(MinecraftApplicationCustomId.Reject)
         .addOptions(options)
         .setPlaceholder("Reject with reason")
     ),

@@ -3,7 +3,6 @@ import { MinecraftApplication } from "./application";
 import { logger } from "@logger";
 import { config } from "@config";
 import { MinecraftApplicationWhitelistMessageOptions } from "@views/application/minecraft-application-whitelist-message";
-import { MinecraftApplicationDecisionEvent } from "@views/application/minecraft-application-decision-message";
 import { prisma } from "@lib/prisma";
 
 export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
@@ -18,8 +17,6 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
       );
       return;
     }
-
-    if(interaction.customId != MinecraftApplicationDecisionEvent.Accept) return;
 
     let application: MinecraftApplication | undefined;
 
