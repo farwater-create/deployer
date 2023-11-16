@@ -1,18 +1,8 @@
 import { MinecraftApplicationRejectReason } from "./reject-reasons";
 
-export interface ApplicationModel {
-  discordId: string;
-  reason: string;
-  age: string;
-}
+import { MinecraftApplication } from "@prisma/client";
 
-export type MinecraftApplicationModel = {
-  minecraftName: string;
-  minecraftUuid: string;
-  minecraftSkinSum: string;
-  serverId: string;
-  createdAt: Date;
-} & ApplicationModel;
+export type MinecraftApplicationModel = MinecraftApplication;
 
 export enum MinecraftApplicationAutoReviewStatus {
   Accepted,

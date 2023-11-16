@@ -3,7 +3,6 @@ import { MinecraftApplication } from "./application";
 import { logger } from "@logger";
 import { config } from "@config";
 import { MinecraftApplicationWhitelistMessageOptions } from "@views/application/minecraft-application-whitelist-message";
-import { prisma } from "@lib/prisma";
 
 export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
   async (interaction: ButtonInteraction) => {
@@ -37,7 +36,7 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
 
     if (!application) return;
 
-    const _a = application.serialize(prisma).catch(logger.error);
+    const _a = application.serialize().catch(logger.error);
     if(!_a) return;
 
     const opts = MinecraftApplicationWhitelistMessageOptions(application);
@@ -60,7 +59,7 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
     dmChannel.send(opts).catch(() => {
       logger.discord(
         "error",
-        "could not open dm channel for user " + application?.discordId
+        "could not open dm channel for user " + application?.getOptions().discordId
       );
     }).catch(logger.error);
 

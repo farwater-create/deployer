@@ -19,6 +19,7 @@ model MinecraftApplication {
   minecraftUuid String
   minecraftName String
   minecraftSkinSum String
+  roleId String
   reason String
   age String
   serverId String

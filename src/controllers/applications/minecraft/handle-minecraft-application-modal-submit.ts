@@ -54,7 +54,8 @@ export const handleMinecraftApplicationModalSubmit = async (
   const minecraftUuid = userProfile ? userProfile.uuid : "null";
 
   const embedFieldSchema = z.object({
-    serverId: z.string()
+    serverId: z.string(),
+    roleId: z.string()
   });
 
   const embedFields = extractEmbedFields<typeof embedFieldSchema._type>(interaction.message.embeds[0], embedFieldSchema);
@@ -70,7 +71,7 @@ export const handleMinecraftApplicationModalSubmit = async (
     });
     return;
   }
-  const { serverId } = embedFields;
+  const { serverId, roleId } = embedFields;
 
 
   const applicationOptions: MinecraftApplicationModel = {
@@ -81,18 +82,20 @@ export const handleMinecraftApplicationModalSubmit = async (
     minecraftUuid,
     minecraftSkinSum,
     serverId,
+    roleId,
     createdAt: new Date(Date.now())
   };
 
-  const application = new MinecraftApplication(applicationOptions, interaction.client);
+  const application = new MinecraftApplication({
+    ...applicationOptions,
+    client: interaction.client
+  });
 
-  const autoReviewResult = await application.autoReviewResult(
-    application,
-  ).catch(logger.error);
+  const autoReviewResult = await application.autoReviewResult().catch(logger.error);
   if(!autoReviewResult) return;
 
   const message = await applicationDecisionChannel.send(
-    MinecraftApplicationDecisionMessageOptions(application, autoReviewResult),
+    MinecraftApplicationDecisionMessageOptions(application.getOptions(), autoReviewResult),
   ).catch(err => logger.error(err));
   if(!message) return;
 

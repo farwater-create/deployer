@@ -28,7 +28,7 @@ Remember, the whitelist application process helps us maintain a positive and fun
 Click the button below to get started!
 `;
 
-const MinecraftApplicationSubmissionEmbed = (serverId: string) => {
+const MinecraftApplicationSubmissionEmbed = (serverId: string, roleId: string) => {
   return new EmbedBuilder()
     .setTitle(TITLE)
     .setDescription(DESCRIPTION)
@@ -39,13 +39,17 @@ const MinecraftApplicationSubmissionEmbed = (serverId: string) => {
       {
         name: "serverId",
         value: serverId
+      },
+      {
+        name: "roleId",
+        value: roleId
       }
     ])
 };
 
-export const MinecraftApplicationStartMessageOptions = (serverId: string) => {
+export const MinecraftApplicationStartMessageOptions = (serverId: string, roleId: string) => {
   return {
-    embeds: [MinecraftApplicationSubmissionEmbed(serverId)],
+    embeds: [MinecraftApplicationSubmissionEmbed(serverId, roleId)],
     components: [
       new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()

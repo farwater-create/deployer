@@ -7,11 +7,13 @@ export const applicationsChannelCommand: Command = {
     .setName("applications-channel")
     .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
     .setDescription("Creates the initial application message.")
-    .addStringOption(o => o.setName("serverid").setRequired(true).setDescription("deployer server id"))
+    .addStringOption(o => o.setName("server").setRequired(true).setDescription("deployer server id"))
+    .addRoleOption(r => r.setName("grant").setRequired(true).setDescription("role to grant on application accept"))
     .toJSON(),
   handler: (interaction) => {
-    const serverId = interaction.options.get("serverid", true).value as string;
-    interaction.channel?.send(MinecraftApplicationStartMessageOptions(serverId));
+    const serverId = interaction.options.get("server", true).value as string;
+    const roleId = interaction.options.get("grant", true).value as string;
+    interaction.channel?.send(MinecraftApplicationStartMessageOptions(serverId, roleId));
     interaction.reply({
       ephemeral: true,
       content: "created application message"

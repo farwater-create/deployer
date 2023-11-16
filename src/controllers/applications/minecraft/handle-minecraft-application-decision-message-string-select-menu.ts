@@ -26,7 +26,7 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
   }
   if (!application) return;
 
-  const { discordId } = application;
+  const { discordId } = application.getOptions();
   const guild = interaction.client.guilds.cache.get(config.GUILD_ID);
   if (!guild) {
     throw new Error("guild not found");
@@ -81,7 +81,7 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
   }
 
   const messageEditOptions = MinecraftApplicationDecisionMessageOptions(
-    application,
+    application.getOptions(),
     {
       status: MinecraftApplicationAutoReviewStatus.Rejected,
       reason: value,

@@ -6,52 +6,40 @@ import { prisma } from "@lib/prisma";
 import { digestSkinHex } from "@lib/skin-id/skin-id";
 import { logger } from "@logger";
 import { MinecraftApplicationAutoReviewStatus, MinecraftApplicationModel, MinecraftAutoReviewResult } from "@models/application/application";
-import { PrismaClient, MinecraftApplication as PrismaMinecraftApplication } from "@prisma/client";
 import { Client, GuildMember, Message } from "discord.js";
 import z from "zod";
-export class MinecraftApplication implements MinecraftApplicationModel {
-  discordId: string;
-  reason: string;
-  age: string;
-  minecraftName: string;
-  minecraftUuid: string;
-  minecraftSkinSum: string;
-  serverId: string;
-  client: Client;
-  createdAt: Date;
+
+export class MinecraftApplication {
   private _offensiveSkin: boolean | undefined;
   private _autoReviewResult: MinecraftAutoReviewResult | undefined;
   private _member: GuildMember | undefined;
+  constructor(private options: MinecraftApplicationModel & { client: Client }) {}
 
-  constructor(model: MinecraftApplicationModel, client: Client) {
-    this.discordId = model.discordId;
-    this.reason = model.reason;
-    this.age = model.age;
-    this.minecraftName = model.minecraftName;
-    this.minecraftUuid = model.minecraftUuid;
-    this.minecraftSkinSum = model.minecraftSkinSum;
-    this.serverId = model.serverId;
-    this.client = client;
-    this.createdAt = model.createdAt;
+  getOptions() {
+    return this.options;
   }
 
   async member() {
+    const { client, discordId } = this.options;
     if(!this._member) {
-      this._member == (await this.client.guilds.fetch(config.GUILD_ID)).members.fetch(this.discordId);
+      this._member == (await client.guilds.fetch(config.GUILD_ID)).members.fetch(discordId);
     }
     return this._member;
   }
 
   async user() {
-    return this.client.users.fetch(this.discordId);
+    const { client, discordId } = this.options;
+    return client.users.fetch(discordId);
   }
 
   async offensiveSkin(): Promise<boolean> {
-    if (this.minecraftSkinSum === "null") return false;
-    if (this._offensiveSkin) return this._offensiveSkin;
+    const { minecraftSkinSum } = this.options;
+    const { _offensiveSkin} = this;
+    if (minecraftSkinSum === "null") return false;
+    if (_offensiveSkin) return _offensiveSkin;
     const result = await prisma.offensiveMinecraftSkin.findFirst({
       where: {
-        hash: this.minecraftSkinSum,
+        hash: minecraftSkinSum,
       },
     });
     this._offensiveSkin = result ? true : false;
@@ -59,29 +47,30 @@ export class MinecraftApplication implements MinecraftApplicationModel {
   }
 
   async flagOffensiveSkin(): Promise<void> {
-    if (await this.offensiveSkin()) {
+    const { minecraftSkinSum } = this.options;
+    const offensiveSkin = await this.offensiveSkin();
+    if (offensiveSkin) {
       await prisma.offensiveMinecraftSkin.create({
         data: {
-          hash: this.minecraftSkinSum,
+          hash: minecraftSkinSum,
         },
       });
     }
-    this._offensiveSkin = true;
   }
 
   async autoReviewResult(
-    application: MinecraftApplication
   ): Promise<MinecraftAutoReviewResult> {
+    const { age, minecraftUuid } = this.options;
     if (this._autoReviewResult) return this._autoReviewResult;
     const match = /^[1-9][0-9]?$/;
-    if (!match.test(application.age)) {
+    if (!match.test(age)) {
       return {
         status: MinecraftApplicationAutoReviewStatus.Rejected,
         reason: "invalidAge",
       };
     }
 
-    const ageInt = Number.parseInt(application.age, 10);
+    const ageInt = Number.parseInt(age, 10);
 
     if (Number.isNaN(ageInt)) {
       return {
@@ -104,14 +93,14 @@ export class MinecraftApplication implements MinecraftApplicationModel {
       };
     }
 
-    if (application.minecraftUuid === "⚠️NO UUID FOUND⚠️") {
+    if (minecraftUuid === "⚠️NO UUID FOUND⚠️") {
       return {
         status: MinecraftApplicationAutoReviewStatus.NeedsManualReview,
         reason: "noMinecraftAccount",
       };
     }
 
-    if (await application.offensiveSkin()) {
+    if (await this.offensiveSkin()) {
       return {
         reason: "offensiveMinecraftSkin",
         status: MinecraftApplicationAutoReviewStatus.NeedsManualReview,
@@ -150,16 +139,18 @@ export class MinecraftApplication implements MinecraftApplicationModel {
     return new MinecraftApplication({
       ...embedFields,
       reason,
-    }, message.client);
+      client: message.client
+    });
   };
 
   async update() {
-    const profile = await fetchMinecraftUser(this.minecraftUuid).catch(logger.error);
+    const profile = await fetchMinecraftUser(this.options.minecraftUuid).catch(logger.error);
     if(!profile) return;
-    this.minecraftUuid = profile.uuid;
-    this.minecraftName = profile.username;
-    this.minecraftSkinSum = digestSkinHex(profile.textures.raw.value);
-    const { minecraftUuid, minecraftName, minecraftSkinSum, discordId, serverId } = this;
+    this.options.minecraftUuid = profile.uuid;
+    this.options.minecraftName = profile.username;
+    this.options.minecraftSkinSum = digestSkinHex(profile.textures.raw.value);
+
+    const { minecraftUuid, minecraftName, minecraftSkinSum, discordId, serverId } = this.options;
     prisma.minecraftApplication.update({
       where: {
         discordId_serverId: {
@@ -175,26 +166,28 @@ export class MinecraftApplication implements MinecraftApplicationModel {
     }).catch(logger.error);
     if(await this.offensiveSkin()) {
       this.unwhitelist();
-      logger.discord("warn", "found offensive skin while updating user application for " + `<@${this.discordId}>`);
-      PterodactylPanel.minecraft(this.serverId).kick(minecraftName);
+      logger.discord("warn", "found offensive skin while updating user application for " + `<@${discordId}>`);
+      PterodactylPanel.minecraft(serverId).kick(minecraftName);
       (await this.user()).dmChannel?.send("You have been unwhitelisted and kicked for having an offensive skin. Submit a ticket.").catch(logger.error);
     }
   }
 
   async unwhitelist() {
-    PterodactylPanel.minecraft(this.serverId)
-      .unwhitelist(this.minecraftName)
+    const { serverId, minecraftName } = this.options;
+    PterodactylPanel.minecraft(serverId)
+      .unwhitelist(minecraftName)
       .catch((err) => logger.discord("error", err));
   }
 
   async whitelist() {
-    PterodactylPanel.minecraft(this.serverId)
-      .whitelist(this.minecraftName)
+    const { serverId, minecraftName } = this.options;
+    PterodactylPanel.minecraft(serverId)
+      .whitelist(minecraftName)
       .catch((err) => logger.discord("error", err));
   }
 
-  async serialize(prisma: PrismaClient) {
-    const { discordId, minecraftUuid, reason, age, serverId, createdAt, minecraftName, minecraftSkinSum } = this;
+  async serialize() {
+    const { discordId, minecraftUuid, reason, age, serverId, createdAt, minecraftName, minecraftSkinSum, roleId } = this.options;
     await prisma.minecraftApplication.create({
       data: {
         discordId,
@@ -204,7 +197,8 @@ export class MinecraftApplication implements MinecraftApplicationModel {
         serverId,
         createdAt,
         minecraftName,
-        minecraftSkinSum
+        minecraftSkinSum,
+        roleId
       }
     }).catch(logger.error);
   }
@@ -216,12 +210,16 @@ export class MinecraftApplication implements MinecraftApplicationModel {
       }
     });
     if(applicationModels) {
-      return applicationModels.map(m => new MinecraftApplication(m, client))
+      return applicationModels.map(m => new MinecraftApplication({
+        ...m,
+        client
+      }))
     }
   }
 
   async skinURL() {
-    return new URL(`https://mc-heads.net/body/${this.minecraftUuid}.png`).toString()
+    const { minecraftUuid } = this.options;
+    return new URL(`https://mc-heads.net/body/${minecraftUuid}.png`).toString()
   }
 
 }
