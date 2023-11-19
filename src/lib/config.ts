@@ -1,39 +1,29 @@
 import dotenv from "dotenv";
+import z from "zod";
 dotenv.config();
-const assertEnvironment = (key: string, defaultValue?: string) => {
-  const value = process.env[key] || defaultValue;
-  if (!value) {
-    throw new Error(`${key} is undefined`);
-  }
-  return value;
-};
 
-export const config = {
-  ADMIN_ROLE: assertEnvironment("ADMIN_ROLE", "782936226013118494"),
-  DISCORD_TOKEN: assertEnvironment("DISCORD_TOKEN"),
-  PTERO_TOKEN: assertEnvironment("PTERO_TOKEN"),
-  PTERO_SERVER_ID: assertEnvironment("PTERO_SERVER_ID"),
-  PTERO_SERVER: assertEnvironment("PTERO_SERVER"),
-  APPLICATION_PENDING_CHANNEL: assertEnvironment(
-    "APPLICATION_PENDING_CHANNEL",
-    "1013541292300582922"
-  ),
-  DISCORD_CLIENT_ID: assertEnvironment("DISCORD_CLIENT_ID"),
-  DISCORD_GUILD_ID: assertEnvironment("DISCORD_GUILD_ID", "638990243587948555"),
-  APPLICATION_LOG_CHANNEL: assertEnvironment(
-    "APPLICATION_LOG_CHANNEL",
-    "1013558339227099236"
-  ),
-  APPLICATIONS_CHANNEL: assertEnvironment(
-    "APPLICATIONS_CHANNEL",
-    "1013903561391874078"
-  ),
-  APPLICATIONS_ACCEPTED_CHANNEL: assertEnvironment(
-    "APPLICATIONS_ACCEPTED_CHANNEL",
-    "1044731747260190790"
-  ),
-  FAQ_CHANNEL: assertEnvironment("FAQ_CHANNEL", "1046208302092136539"),
-  LOGS_CHANNEL: assertEnvironment("LOGS_CHANNEL", "1061159682338738226"),
-};
+const schema = z.object({
+  BOT_TOKEN: z.string().nonempty(),
+  CLIENT_ID: z.string().nonempty(),
+  GUILD_ID: z.string().nonempty(),
+  LOG_LEVEL: z.string().nonempty().default("info"),
+  LOG_CHANNEL_ID: z.string().nonempty(),
+  APPLICATIONS_CHANNEL_ID: z.string().nonempty(),
+  WHITELIST_NOTIFICATIONS_CHANNEL_ID: z.string().nonempty(),
+  PTERODACTYL_API_KEY: z.string().nonempty(),
+  PTERODACTYL_API_URL: z.string().nonempty(),
+  RULES_CHANNEL_ID: z.string().nonempty(),
+  BOT_USER_ID: z.string().nonempty(),
+});
 
-export type Config = typeof config;
+const rawConfig = schema.safeParse(process.env);
+
+if (rawConfig.success === false) {
+  console.error(
+    "❌ Invalid environment variables:",
+    rawConfig.error.flatten().fieldErrors,
+  );
+  process.exit(1);
+}
+
+export const config = rawConfig.data;

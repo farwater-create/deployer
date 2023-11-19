@@ -1,10 +1,5 @@
-node_modules
-# Keep environment variables out of version control
+dist
 .env
-build
-*.log
-*.db
-userdata.json
-logs
-build
-logs
+node_modules
+prisma/db.sqlite
+

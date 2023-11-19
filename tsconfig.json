@@ -1,16 +1,30 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "commonjs",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "sourceMap": false,
     "rootDir": "src",
-    "outDir": "build",
-    "resolveJsonModule": true
+    "outDir": "dist",
+    "baseUrl": "src",
+    "resolveJsonModule": true,
+    "paths": {
+      "@logger": ["lib/logger"],
+      "@config": ["lib/config.ts"],
+      "@listeners/*": ["lib/listeners/*"],
+      "@models/*": ["models/*"],
+      "@views/*": ["views/*"],
+      "@controllers/*": ["controllers/*"],
+      "@commands/*": ["controllers/commands/*"],
+      "@lib/*": ["lib/*"],
+      "@discord-helpers/*": ["lib/discord-helpers/*"]
+    }
   },
-  "include": ["src/**/*.ts", "src/**/*.json"],
-  "exclude": ["node_modules/", "migrations/", "src/**/*.spec.ts"]
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
 }

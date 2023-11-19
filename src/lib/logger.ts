@@ -1,46 +1,67 @@
-/* eslint-disable unicorn/prevent-abbreviations */
-import fs from "node:fs";
-try {
-  fs.mkdirSync("./logs");
-  // eslint-disable-next-line no-empty
-} catch {}
+import { EmbedBuilder, GuildTextBasedChannel } from "discord.js";
+import pino from "pino";
 
-const red = "\u001B[41m";
+type LogLevel = "info" | "error" | "warn" | "debug";
 
-const reset = "\u001B[0m";
+const pinoLogger = pino({
+  transport: {
+    target: "pino-pretty",
+  },
+});
 
-const logFile =
-  process.env.ENV === "production" &&
-  fs.createWriteStream(`./logs/${new Date(Date.now()).toISOString()}`);
+interface CustomLogger {
+  logChannel?: GuildTextBasedChannel;
+  discordLogQueue: any[];
+  info: (message: any) => void;
+  error: (message: any) => void;
+  warn: (message: any) => void;
+  debug: (message: any) => void;
+  fatal: (message: any) => void;
+  discord: (level: LogLevel, message: any) => void;
+}
 
-const prettyPrint = (object: unknown) => {
-  switch (typeof object) {
-    case "object": {
-      try {
-        return JSON.stringify(object, undefined, 2);
-      } catch {
-        return `${object}`;
-      }
+export const logger: CustomLogger = {
+  logChannel: undefined,
+  discordLogQueue: [],
+  info: (message: any) => {
+    pinoLogger.info(message);
+  },
+  error: (message: any) => {
+    pinoLogger.error(message);
+  },
+  warn: (message: any) => {
+    pinoLogger.warn(message);
+  },
+  debug: (message: any) => {
+    pinoLogger.debug(message);
+  },
+  fatal: (message: any) => {
+    pinoLogger.fatal(message);
+  },
+  discord: (level: LogLevel, message: string) => {
+    logger[level](message);
+
+    if (!logger.logChannel) {
+      logger.error(
+        "No log channel set, cannot log discord message, logging to console instead.",
+      );
+      logger.error(message);
+      return;
     }
-    default: {
-      return `${object}`;
-    }
-  }
+    logger.logChannel.send({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle(`[${level}]`)
+          .setDescription(`${message}`)
+          .setColor(
+            level === "error" ? "Red" : level === "warn" ? "Yellow" : "Blue",
+          )
+          .setTimestamp(new Date(Date.now())),
+      ],
+    });
+  },
 };
 
-const log = (color: string) => {
-  return (...args: unknown[]) => {
-    const contents = args.map((value) => prettyPrint(value)).join(" ") + "\n";
-    const date = `[${new Date(Date.now()).toISOString()}]`;
-    process.stdout.write(`${color}${date}${reset} ${contents}`);
-    logFile && logFile.write(`${date} ${contents}`);
-  };
-};
-
-export default {
-  error: log(red),
-  log: log(reset),
-  info: log(reset),
-};
-
-logFile && process.on("beforeExit", () => logFile.close());
+process.on("uncaughtException", (error) => {
+  logger.discord("warn", error);
+});
