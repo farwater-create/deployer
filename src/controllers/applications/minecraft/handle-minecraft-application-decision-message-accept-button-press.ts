@@ -38,6 +38,11 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
 
     const _a = application.serialize().catch(logger.error);
     if(!_a) return;
+    
+    const member = await application.member()
+    member?.roles.add(application.getOptions().roleId).catch(() => {
+      logger.discord("error", "could not grant role " + member.user.id)
+    });
 
     const opts = MinecraftApplicationWhitelistMessageOptions(application);
     channel

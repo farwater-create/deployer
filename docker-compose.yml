@@ -1,0 +1,5 @@
+services:
+  deployer:
+    build: .
+    env_file:
+      - .env
