@@ -24,7 +24,8 @@ const MinecraftApplicationDecisionEmbed = (
     minecraftUuid,
     age,
     minecraftSkinSum,
-    serverId
+    serverId,
+    roleId
   } = minecraftApplication;
   let color: ColorResolvable = Colors.Blurple;
 
@@ -75,6 +76,10 @@ const MinecraftApplicationDecisionEmbed = (
       {
         name: "serverId",
         value: serverId
+      },
+      {
+        name: "roleId",
+        value: roleId
       }
     ])
     .setColor(color);

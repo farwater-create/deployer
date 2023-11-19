@@ -39,7 +39,8 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress =
     const _a = application.serialize().catch(logger.error);
     if(!_a) return;
     
-    const member = await application.member()
+    const member = await application.member().catch(logger.error);
+    
     member?.roles.add(application.getOptions().roleId).catch(() => {
       logger.discord("error", "could not grant role " + member.user.id)
     });

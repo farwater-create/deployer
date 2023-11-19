@@ -128,6 +128,7 @@ export class MinecraftApplication {
       minecraftSkinSum: z.string(),
       serverId: z.string(),
       age: z.string(),
+      roleId: z.string()
     });
 
     const embedFields = extractEmbedFields<MinecraftApplicationModel>(embed, embedSchema);
