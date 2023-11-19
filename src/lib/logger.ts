@@ -1,14 +1,5 @@
-import {
-  EmbedBuilder,
-  GuildTextBasedChannel,
-  Role,
-  RoleResolvable,
-  TextBasedChannel,
-} from "discord.js";
+import { EmbedBuilder, GuildTextBasedChannel } from "discord.js";
 import pino from "pino";
-import { roleToMentionString } from "@lib/discord/mentions";
-import { config } from "@config";
-const { ADMIN_ROLE_ID } = config;
 
 type LogLevel = "info" | "error" | "warn" | "debug";
 

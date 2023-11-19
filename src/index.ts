@@ -39,29 +39,29 @@ const client = new Client({
   intents,
 });
 
-const router = new DeployerInteractionRouter(client);
+const interactionRouter = new DeployerInteractionRouter(client);
 
-router.on<ButtonInteraction>(MinecraftApplicationCustomId.Accept, (interaction) => {
+interactionRouter.on<ButtonInteraction>(MinecraftApplicationCustomId.Accept, (interaction) => {
     handleMinecraftApplicationDecisionMessageAcceptButtonPress(interaction);
 });
 
-router.on<ButtonInteraction>(MinecraftApplicationCustomId.Start, (interaction) => {
+interactionRouter.on<ButtonInteraction>(MinecraftApplicationCustomId.Start, (interaction) => {
   handleMinecraftApplicationModalApplyButtonPress(interaction);
 });
 
-router.on<StringSelectMenuInteraction>(MinecraftApplicationCustomId.Reject, (interaction) => {
+interactionRouter.on<StringSelectMenuInteraction>(MinecraftApplicationCustomId.Reject, (interaction) => {
     handleMinecraftApplicationDecisionMessageStringSelectMenu(interaction);
 });
 
-router.on<ModalSubmitInteraction>(MinecraftApplicationCustomId.Submit, (interaction) => {
+interactionRouter.on<ModalSubmitInteraction>(MinecraftApplicationCustomId.Submit, (interaction) => {
     handleMinecraftApplicationModalSubmit(interaction);
 });
 
-router.on("command", interaction => {
+interactionRouter.on("command", interaction => {
   CommandCollection.handleCommand(interaction);
 });
 
-router.on("contextCommand", interaction => {
+interactionRouter.on("contextCommand", interaction => {
   CommandCollection.handleContextCommand(interaction);
 });
 
