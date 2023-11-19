@@ -72,7 +72,7 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
           "Please give more reasons for why you want to join farwater then apply again.";
         break;
     }
-    await dmChannel.send(`${reply}\n${footnotes}`);
+    await dmChannel.send(`${reply}\n${footnotes || ""}`);
   } catch (error) {
     logger.discord(
       "warn",
