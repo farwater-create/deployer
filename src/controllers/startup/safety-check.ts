@@ -25,8 +25,6 @@ const requiredPermissions = new Map<PermissionResolvable, string>([
   [PermissionsBitField.Flags.ManageGuild, "Manage Guild"],
 ]);
 
-const requiredRoles = [config.ADMIN_ROLE_ID];
-
 /**
  * @param client
  * This function checks if the bot has all the required permissions to run.
@@ -55,10 +53,6 @@ export const safetyCheck = async (client: Client) => {
   const member = await assertBotMember(guild, client);
 
   await assertPermissions(member, requiredPermissions);
-
-  for (const roleId of requiredRoles) {
-    await assertRole(guild, roleId);
-  }
 
   logger.info("✅ Safety check passed!");
 };

@@ -3,3 +3,4 @@ services:
     build: .
     env_file:
       - .env
+    image: humbertovnavarro/deployer
