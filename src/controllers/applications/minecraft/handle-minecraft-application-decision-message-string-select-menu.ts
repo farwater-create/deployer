@@ -1,104 +1,95 @@
-import { toMessageLink } from "@lib/discord/message-link";
-import { logger } from "@logger";
-import {
-  MessageEditOptions,
-  StringSelectMenuInteraction
-} from "discord.js";
-import { MinecraftApplicationDecisionMessageOptions } from "@views/application/minecraft-application-decision-message";
-import { MinecraftApplication } from "./application";
-import { MinecraftApplicationAutoReviewStatus } from "@models/application/application";
-import { MinecraftApplicationRejectReason, minecraftApplicationRejectReasons } from "@models/application/reject-reasons";
-import { config } from "@config";
+import {config} from "@config";
+import {toMessageLink} from "@lib/discord/message-link";
+import {logger} from "@logger";
+import {MinecraftApplicationAutoReviewStatus} from "@models/application/application";
+import {MinecraftApplicationRejectReason, minecraftApplicationRejectReasons} from "@models/application/reject-reasons";
+import {MinecraftApplicationDecisionMessageOptions} from "@views/application/minecraft-application-decision-message";
+import {MessageEditOptions, StringSelectMenuInteraction} from "discord.js";
+import {MinecraftApplication} from "./application";
 
 export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
-  interaction: StringSelectMenuInteraction,
+    interaction: StringSelectMenuInteraction,
 ) => {
-  const value = interaction.values[0] as MinecraftApplicationRejectReason;
-  let application: MinecraftApplication | undefined;
+    const value = interaction.values[0] as MinecraftApplicationRejectReason;
+    let application: MinecraftApplication | undefined;
 
-  try  {
-    application = MinecraftApplication.fromMinecraftApplicationDecisionMessage(
-      interaction.message,
-    );
-  } catch(error) {
-    logger.error(error);
-    return;
-  }
-  if (!application) return;
-
-  const { discordId } = application.getOptions();
-  const guild = interaction.client.guilds.cache.get(config.GUILD_ID);
-  if (!guild) {
-    throw new Error("guild not found");
-  }
-  const rejectReasonDescription = minecraftApplicationRejectReasons[value];
-  const user = await interaction.client.users.fetch(discordId);
-  if (!user) return;
-  const dmChannel = await user.createDM(true);
-
-  try {
-    const reply = `Your farwater application was denied for reason: \`${rejectReasonDescription}\`. If you believe this was an error create a ticket.`;
-    let footnotes: string | undefined;
-    switch (value) {
-      case "otherBannable":
-        break;
-      case "underage":
-        break;
-      case "offensiveApplication":
-        footnotes =
-          "Create a ticket if you wish to re-apply with an apology.";
-        break;
-      case "offensiveDiscordUser":
-        footnotes =
-          "Create a ticket if you wish to re-apply with an apology.";
-        break;
-      case "offensiveMinecraftSkin":
-        await application.flagOffensiveSkin();
-        footnotes =
-          "Create a ticket if you wish to re-apply with an apology.";
-        break;
-      case "userLeftDiscordServer":
-        break;
-      case "noMinecraftAccount":
-        footnotes =
-          "Double check your minecraft name (case sensitive) and apply again.";
-        break;
-      case "invalidAge":
-        footnotes = "Please enter a valid age when re-applying";
-        break;
-      default:
-      case "lowEffortApplication":
-        footnotes =
-          "Please give more reasons for why you want to join farwater then apply again.";
-        break;
+    try {
+        application = MinecraftApplication.fromMinecraftApplicationDecisionMessage(interaction.message);
+    } catch (error) {
+        logger.error(error);
+        return;
     }
-    await dmChannel.send(`${reply}\n${footnotes || ""}`);
-  } catch (error) {
-    logger.discord(
-      "warn",
-      "Tried to send dm to user " + user.id + " but user has dms closed."
-    );
-  }
+    if (!application) return;
 
-  const messageEditOptions = MinecraftApplicationDecisionMessageOptions(
-    application.getOptions(),
-    {
-      status: MinecraftApplicationAutoReviewStatus.Rejected,
-      reason: value,
-    },
-    interaction.user,
-  ) as MessageEditOptions;
+    const {discordId} = application.getOptions();
+    const guild = interaction.client.guilds.cache.get(config.GUILD_ID);
+    if (!guild) {
+        throw new Error("guild not found");
+    }
+    const rejectReasonDescription = minecraftApplicationRejectReasons[value];
+    const user = await interaction.client.users.fetch(discordId);
+    if (!user) return;
+    const dmChannel = await user.createDM(true);
 
-    const message = await interaction.message.edit({
-      ...messageEditOptions,
-      components: [],
-    }).catch(err => logger.error(err));
-    if(!message) return;
+    try {
+        const reply = `Your farwater application was denied for reason: \`${rejectReasonDescription}\`. If you believe this was an error create a ticket.`;
+        let footnotes: string | undefined;
+        switch (value) {
+            case "otherBannable":
+                break;
+            case "underage":
+                break;
+            case "offensiveApplication":
+                footnotes = "Create a ticket if you wish to re-apply with an apology.";
+                break;
+            case "offensiveDiscordUser":
+                footnotes = "Create a ticket if you wish to re-apply with an apology.";
+                break;
+            case "offensiveMinecraftSkin":
+                await application.flagOffensiveSkin();
+                footnotes = "Create a ticket if you wish to re-apply with an apology.";
+                break;
+            case "userLeftDiscordServer":
+                break;
+            case "noMinecraftAccount":
+                footnotes = "Double check your minecraft name (case sensitive) and apply again.";
+                break;
+            case "invalidAge":
+                footnotes = "Please enter a valid age when re-applying";
+                break;
+            default:
+            case "lowEffortApplication":
+                footnotes = "Please give more reasons for why you want to join farwater then apply again.";
+                break;
+        }
+        await dmChannel.send(`${reply}\n${footnotes || ""}`);
+    } catch (error) {
+        logger.discord("warn", "Tried to send dm to user " + user.id + " but user has dms closed.");
+    }
 
-    await interaction.reply({
-      ephemeral: true,
-      content: `Rejected application: ${toMessageLink(
-        message,
-      )}. Remember to take the appropriate administrative action.`,
-    }).catch(err => logger.error(err))
+    const messageEditOptions = MinecraftApplicationDecisionMessageOptions(
+        application.getOptions(),
+        {
+            status: MinecraftApplicationAutoReviewStatus.Rejected,
+            reason: value,
+        },
+        interaction.user,
+    ) as MessageEditOptions;
+
+    const message = await interaction.message
+        .edit({
+            ...messageEditOptions,
+            components: [],
+        })
+        .catch((err) => logger.error(err));
+    if (!message) return;
+
+    await interaction
+        .reply({
+            ephemeral: true,
+            content: `Rejected application: ${toMessageLink(
+                message,
+            )}. Remember to take the appropriate administrative action.`,
+        })
+        .catch((err) => logger.error(err));
 };

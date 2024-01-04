@@ -7,7 +7,7 @@
     value: "no_reason_provided",
   },
   {
-    label: "Low effort application",
+    label: "low effort application",
     value: "low_effort_application",
   },
   {
