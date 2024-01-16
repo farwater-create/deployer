@@ -1,13 +1,13 @@
 import {prisma} from "@lib/prisma";
-import {DiscordUser} from "@prisma/client";
+import {FarwaterUser} from "@prisma/client";
 
 export const lookupLink = async (
     identifier: string,
     lookupType: "minecraftToDiscord" | "discordToMinecraft",
-): Promise<DiscordUser | null> => {
+): Promise<FarwaterUser | null> => {
     const whereCondition = lookupType === "minecraftToDiscord" ? {minecraftName: identifier} : {discordId: identifier};
 
-    const discordUser = await prisma.discordUser.findFirst({
+    const discordUser = await prisma.farwaterUser.findFirst({
         where: whereCondition,
     });
 

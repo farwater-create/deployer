@@ -6,7 +6,7 @@ export const minecraftApplicationRejectReasons = {
     offensiveDiscordName: "offensive discord name",
     offensiveDiscordUser: "offensive discord avatar/username/status/bio",
     offensiveApplication: "offensive application",
-    lowEffortApplication: "Low effort application",
+    lowEffortApplication: "low effort application",
     userLeftDiscordServer: "user left discord server",
     noMinecraftAccount: "minecraft account not found",
     other: "other",

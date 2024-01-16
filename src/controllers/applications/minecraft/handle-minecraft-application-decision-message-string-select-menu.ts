@@ -1,10 +1,19 @@
 import {config} from "@config";
+import {FarwaterUser} from "@controllers/users/farwater-user";
 import {toMessageLink} from "@lib/discord/message-link";
 import {logger} from "@logger";
-import {MinecraftApplicationAutoReviewStatus} from "@models/application/application";
+import {MinecraftApplicationReviewStatus} from "@models/application/application";
 import {MinecraftApplicationRejectReason, minecraftApplicationRejectReasons} from "@models/application/reject-reasons";
 import {MinecraftApplicationDecisionMessageOptions} from "@views/application/minecraft-application-decision-message";
-import {MessageEditOptions, StringSelectMenuInteraction} from "discord.js";
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    Colors,
+    EmbedBuilder,
+    MessageEditOptions,
+    StringSelectMenuInteraction,
+} from "discord.js";
 import {MinecraftApplication} from "./application";
 
 export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
@@ -12,14 +21,19 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
 ) => {
     const value = interaction.values[0] as MinecraftApplicationRejectReason;
     let application: MinecraftApplication | undefined;
+    let farwaterUser: FarwaterUser | undefined;
 
     try {
         application = MinecraftApplication.fromMinecraftApplicationDecisionMessage(interaction.message);
+        farwaterUser = await application.getFarwaterUser();
     } catch (error) {
         logger.error(error);
         return;
     }
     if (!application) return;
+    if (!farwaterUser) return;
+
+    await application.updateStatus(MinecraftApplicationReviewStatus.Rejected);
 
     const {discordId} = application.getOptions();
     const guild = interaction.client.guilds.cache.get(config.GUILD_ID);
@@ -32,7 +46,7 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
     const dmChannel = await user.createDM(true);
 
     try {
-        const reply = `Your farwater application was denied for reason: \`${rejectReasonDescription}\`. If you believe this was an error create a ticket.`;
+        const reply = `Your farwater application was denied for reason: \`${rejectReasonDescription}\`.`;
         let footnotes: string | undefined;
         switch (value) {
             case "otherBannable":
@@ -46,20 +60,20 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
                 footnotes = "Create a ticket if you wish to re-apply with an apology.";
                 break;
             case "offensiveMinecraftSkin":
-                await application.flagOffensiveSkin();
+                await application.getFarwaterUser().then((a) => a?.flagOffensiveSkin());
                 footnotes = "Create a ticket if you wish to re-apply with an apology.";
                 break;
             case "userLeftDiscordServer":
                 break;
             case "noMinecraftAccount":
-                footnotes = "Double check your minecraft name (case sensitive) and apply again.";
+                footnotes = "Double check your Minecraft name (case sensitive) and apply again.";
                 break;
             case "invalidAge":
-                footnotes = "Please enter a valid age when re-applying";
+                footnotes = "Please enter a valid age when re-applying.";
                 break;
             default:
             case "lowEffortApplication":
-                footnotes = "Please give more reasons for why you want to join farwater then apply again.";
+                footnotes = "Please provide more reasons for why you want to join farwater then apply again.";
                 break;
         }
         await dmChannel.send(`${reply}\n${footnotes || ""}`);
@@ -69,8 +83,9 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
 
     const messageEditOptions = MinecraftApplicationDecisionMessageOptions(
         application.getOptions(),
+        farwaterUser.getOptions(),
         {
-            status: MinecraftApplicationAutoReviewStatus.Rejected,
+            status: MinecraftApplicationReviewStatus.Rejected,
             reason: value,
         },
         interaction.user,
@@ -92,4 +107,19 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
             )}. Remember to take the appropriate administrative action.`,
         })
         .catch((err) => logger.error(err));
+
+    await interaction.message
+        .edit({
+            embeds: interaction.message.embeds.map((embed) => new EmbedBuilder(embed.data).setColor(Colors.Red)),
+            components: [
+                new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId("rejectedstatus")
+                        .setLabel("Rejected - " + value)
+                        .setStyle(ButtonStyle.Danger)
+                        .setDisabled(true),
+                ),
+            ],
+        })
+        .catch(logger.error);
 };

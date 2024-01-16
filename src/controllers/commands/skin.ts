@@ -1,7 +1,7 @@
-import {MinecraftApplication} from "@controllers/applications/minecraft/application";
 import {logger} from "@logger";
 import {ApplicationCommandType, ContextMenuCommandBuilder, EmbedBuilder, PermissionsBitField} from "discord.js";
 
+import {FarwaterUser} from "@controllers/users/farwater-user";
 import {ContextCommand} from "@models/command";
 export const skin: ContextCommand = {
     json: new ContextMenuCommandBuilder()
@@ -11,16 +11,16 @@ export const skin: ContextCommand = {
     handler: async (interaction) => {
         if (!interaction.isUserContextMenuCommand()) return;
         const user = interaction.targetUser;
-        const applications = await MinecraftApplication.fromDiscordId(interaction.client, user.id).catch(logger.error);
-        if (!applications) {
+        const farwaterUser = await FarwaterUser.fromDiscordId(interaction.client, user.id).catch(logger.error);
+        if (!farwaterUser) {
             await interaction.reply({
                 ephemeral: true,
-                content: "user has not applied to any servers",
+                content: "user not found",
             });
             return;
         }
-        const skinURLS = await Promise.all(applications.map((a) => a.skinURL()));
-        const description = skinURLS.join("\n");
+        const skinURL = await farwaterUser.skinURL();
+        const description = skinURL;
         await interaction.reply({
             ephemeral: true,
             embeds: [new EmbedBuilder().setDescription(description)],

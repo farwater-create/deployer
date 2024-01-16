@@ -1,4 +1,4 @@
-import {MinecraftApplication} from "@controllers/applications/minecraft/application";
+import {FarwaterUser} from "@controllers/users/farwater-user";
 import {logger} from "@logger";
 import {ContextCommand} from "@models/command";
 import {ApplicationCommandType, ContextMenuCommandBuilder, PermissionsBitField} from "discord.js";
@@ -30,10 +30,11 @@ export const whitelist: ContextCommand = {
                 content: "whitelisted minecraft user for " + member.displayName + " on all farwater applications",
             })
             .catch(logger.error);
-        const applications = await MinecraftApplication.fromDiscordId(interaction.client, user.id).catch(logger.error);
+        const farwaterUser = await FarwaterUser.fromDiscordId(interaction.client, user.id);
+        const applications = await farwaterUser.getMinecraftApplications();
         if (!applications) return;
         for (const application of applications) {
-            application.whitelist();
+            farwaterUser.whitelist(application.getOptions().serverId).catch(logger.error);
         }
     },
 };

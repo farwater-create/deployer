@@ -11,14 +11,14 @@ export const linkDiscordUserToMinecraft = async (discordId: string, minecraftIde
     }
 
     try {
-        const existingLink = await prisma.discordUser.findUnique({
+        const existingLink = await prisma.farwaterUser.findUnique({
             where: {
                 discordId: discordId,
             },
         });
 
         if (existingLink) {
-            await prisma.discordUser.update({
+            await prisma.farwaterUser.update({
                 where: {
                     discordId: discordId,
                 },
@@ -33,7 +33,7 @@ export const linkDiscordUserToMinecraft = async (discordId: string, minecraftIde
                 `Successfully updated link for <@${discordId}> from ${existingLink.minecraftName} to ${minecraftUser.username}`,
             );
         } else {
-            await prisma.discordUser.create({
+            await prisma.farwaterUser.create({
                 data: {
                     discordId,
                     minecraftUuid: minecraftUser.uuid,

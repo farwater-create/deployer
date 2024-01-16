@@ -1,7 +1,7 @@
-import {MinecraftApplication} from "@controllers/applications/minecraft/application";
 import {logger} from "@logger";
 import {ApplicationCommandType, ContextMenuCommandBuilder, PermissionsBitField} from "discord.js";
 
+import {FarwaterUser} from "@controllers/users/farwater-user";
 import {ContextCommand} from "@models/command";
 export const unwhitelist: ContextCommand = {
     json: new ContextMenuCommandBuilder()
@@ -31,10 +31,11 @@ export const unwhitelist: ContextCommand = {
             })
             .catch(logger.error);
         if (!member) return;
-        const applications = await MinecraftApplication.fromDiscordId(interaction.client, user.id).catch(logger.error);
+        const farwaterUser = await FarwaterUser.fromDiscordId(interaction.client, user.id);
+        const applications = await farwaterUser.getMinecraftApplications();
         if (!applications) return;
         for (const application of applications) {
-            application.unwhitelist().catch(logger.error);
+            farwaterUser.unwhitelist(application.getOptions().serverId).catch(logger.error);
         }
     },
 };

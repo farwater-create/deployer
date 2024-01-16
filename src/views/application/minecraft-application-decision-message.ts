@@ -1,10 +1,11 @@
 import {
-    MinecraftApplicationAutoReviewStatus,
     MinecraftApplicationCustomId,
     MinecraftApplicationModel,
+    MinecraftApplicationReviewStatus,
     MinecraftAutoReviewResult,
 } from "@models/application/application";
 import {minecraftApplicationRejectReasons} from "@models/application/reject-reasons";
+import {FarwaterUserModel} from "@models/user/farwater-user";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -19,21 +20,21 @@ import {
 
 const MinecraftApplicationDecisionEmbed = (
     minecraftApplication: MinecraftApplicationModel,
+    farwaterUser: FarwaterUserModel,
     autoReviewResult: MinecraftAutoReviewResult,
     reviewer?: User,
 ) => {
-    const {reason, discordId, minecraftName, minecraftUuid, age, minecraftSkinSum, serverId, roleId} =
-        minecraftApplication;
-    let color: ColorResolvable = Colors.Blurple;
+    const {reason, discordId, serverId, roleId} = minecraftApplication;
+    let color: ColorResolvable = Colors.Blue;
 
     switch (autoReviewResult.status) {
-        case MinecraftApplicationAutoReviewStatus.Accepted:
+        case MinecraftApplicationReviewStatus.Accepted:
             color = Colors.Green;
             break;
-        case MinecraftApplicationAutoReviewStatus.Rejected:
+        case MinecraftApplicationReviewStatus.Rejected:
             color = Colors.Red;
             break;
-        case MinecraftApplicationAutoReviewStatus.NeedsManualReview:
+        case MinecraftApplicationReviewStatus.NeedsManualReview:
             color = Colors.Yellow;
             break;
     }
@@ -44,7 +45,7 @@ const MinecraftApplicationDecisionEmbed = (
         .addFields([
             {
                 name: "discordId",
-                value: discordId,
+                value: discordId || "null",
             },
             {
                 name: "discord",
@@ -52,36 +53,36 @@ const MinecraftApplicationDecisionEmbed = (
             },
             {
                 name: "age",
-                value: age,
+                value: farwaterUser.age || "null",
             },
             {
                 name: "minecraftName",
-                value: minecraftName,
+                value: farwaterUser.minecraftName || "null",
             },
             {
                 name: "minecraftUuid",
-                value: minecraftUuid,
+                value: farwaterUser.minecraftUuid || "null",
             },
             {
                 name: "minecraftSkinSum",
-                value: minecraftSkinSum,
+                value: farwaterUser.minecraftSkinSum || "null",
             },
             {
                 name: "autoReviewComment",
-                value: autoReviewResult.reason,
+                value: autoReviewResult.reason || "null",
             },
             {
                 name: "serverId",
-                value: serverId,
+                value: serverId || "null",
             },
             {
                 name: "roleId",
-                value: roleId,
+                value: roleId || "null",
             },
         ])
         .setColor(color);
-    const thumbnail = new URL(`https://mc-heads.net/body/${minecraftName}.png`);
-    const image = new URL(`https://mc-heads.net/body/${minecraftName}.png`);
+    const thumbnail = new URL(`https://mc-heads.net/body/${farwaterUser.minecraftName}.png`);
+    const image = new URL(`https://mc-heads.net/body/${farwaterUser.minecraftName}.png`);
     embed.setImage(image.toString());
     embed.setThumbnail(thumbnail.toString());
     if (reviewer) {
@@ -97,11 +98,12 @@ const MinecraftApplicationDecisionEmbed = (
 
 export const MinecraftApplicationDecisionMessageOptions = (
     application: MinecraftApplicationModel,
+    farwaterUser: FarwaterUserModel,
     autoReviewResult: MinecraftAutoReviewResult,
     reviewer?: User,
 ) => {
     const opts: MessageCreateOptions = {
-        embeds: [MinecraftApplicationDecisionEmbed(application, autoReviewResult, reviewer)],
+        embeds: [MinecraftApplicationDecisionEmbed(application, farwaterUser, autoReviewResult, reviewer)],
     };
 
     const options = Object.entries(minecraftApplicationRejectReasons).map((e) => {

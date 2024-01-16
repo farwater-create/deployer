@@ -1,9 +1,11 @@
 import {config} from "@config";
+import {FarwaterUser} from "@controllers/users/farwater-user";
 import {extractEmbedFields} from "@lib/discord/extract-fields";
 import {fetchMinecraftUser} from "@lib/minecraft/fetch-minecraft-user";
 import {digestSkinHex} from "@lib/skin-id/skin-id";
 import {logger} from "@logger";
-import {MinecraftApplicationModel} from "@models/application/application";
+import {MinecraftApplicationModel, MinecraftApplicationReviewStatus} from "@models/application/application";
+import {FarwaterUserModel} from "@models/user/farwater-user";
 import {MinecraftApplicationDecisionMessageOptions} from "@views/application/minecraft-application-decision-message";
 import {ChannelType, ComponentType, ModalSubmitInteraction} from "discord.js";
 import z from "zod";
@@ -39,6 +41,22 @@ export const handleMinecraftApplicationModalSubmit = async (interaction: ModalSu
     const minecraftSkinSum = userProfile ? digestSkinHex(userProfile.textures?.raw.value) : "null";
     const minecraftUuid = userProfile ? userProfile.uuid : "null";
 
+    const farwaterUserOptions: FarwaterUserModel = {
+        discordId: interaction.user.id,
+        age,
+        minecraftName,
+        minecraftSkinSum,
+        minecraftUuid,
+        updatedAt: new Date(Date.now()),
+        createdAt: new Date(Date.now()),
+    };
+
+    const farwaterUser = new FarwaterUser({
+        ...farwaterUserOptions,
+        client: interaction.client,
+    });
+    await farwaterUser.serialize();
+
     const embedFieldSchema = z.object({
         serverId: z.string(),
         roleId: z.string(),
@@ -57,17 +75,26 @@ export const handleMinecraftApplicationModalSubmit = async (interaction: ModalSu
         });
         return;
     }
+
     const {serverId, roleId} = embedFields;
+
+    const existingApplication = await farwaterUser.getMinecraftApplicationByServerId(serverId);
+    if (existingApplication && existingApplication.getOptions().status == MinecraftApplicationReviewStatus.Pending) {
+        logger.discord("warn", `user ${interaction.user.id} already has a pending application for server ${serverId}`);
+        interaction.message?.delete().catch(logger.error);
+        interaction.reply({
+            ephemeral: true,
+            content: `You already have a pending application for server ${serverId}. Please give us some time to review your application.`,
+        });
+        return;
+    }
 
     const applicationOptions: MinecraftApplicationModel = {
         discordId: interaction.user.id,
-        age,
         reason,
-        minecraftName,
-        minecraftUuid,
-        minecraftSkinSum,
         serverId,
         roleId,
+        status: MinecraftApplicationReviewStatus.Pending,
         createdAt: new Date(Date.now()),
     };
 
@@ -75,12 +102,19 @@ export const handleMinecraftApplicationModalSubmit = async (interaction: ModalSu
         ...applicationOptions,
         client: interaction.client,
     });
+    application.serialize();
 
     const autoReviewResult = await application.autoReviewResult().catch(logger.error);
     if (!autoReviewResult) return;
 
     const message = await applicationDecisionChannel
-        .send(MinecraftApplicationDecisionMessageOptions(application.getOptions(), autoReviewResult))
+        .send(
+            MinecraftApplicationDecisionMessageOptions(
+                application.getOptions(),
+                farwaterUser.getOptions(),
+                autoReviewResult,
+            ),
+        )
         .catch((err) => logger.error(err));
     if (!message) return;
 

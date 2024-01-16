@@ -4,14 +4,15 @@ import {MinecraftApplication} from "@prisma/client";
 
 export type MinecraftApplicationModel = MinecraftApplication;
 
-export enum MinecraftApplicationAutoReviewStatus {
-    Accepted,
-    Rejected,
-    NeedsManualReview,
+export enum MinecraftApplicationReviewStatus {
+    Accepted = "accepted",
+    Rejected = "rejected",
+    NeedsManualReview = "needsManualReview",
+    Pending = "pending",
 }
 
 export type MinecraftAutoReviewResult = {
-    status: MinecraftApplicationAutoReviewStatus;
+    status: MinecraftApplicationReviewStatus;
     reason: MinecraftApplicationRejectReason;
 };
 
