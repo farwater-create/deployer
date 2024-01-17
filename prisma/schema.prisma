@@ -14,15 +14,26 @@ model OffensiveMinecraftSkin {
   hash String @unique
 }
 
-model MinecraftApplication {
+model FarwaterUser {
   discordId String
-  minecraftUuid String
-  minecraftName String
-  minecraftSkinSum String
+  minecraftUuid String? 
+  minecraftName String?
+  minecraftSkinSum String?
+  age String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  minecraftApplications MinecraftApplication[]
+  @@unique([discordId])
+}
+
+model MinecraftApplication {
+  id Int @id @default(autoincrement())
+  farwaterUser FarwaterUser @relation(fields: [discordId], references: [discordId])
+  discordId String
   roleId String
   reason String
-  age String
-  serverId String
+  minecraftServerId String
+  status String
   createdAt DateTime @default(now())
-  @@unique([discordId, serverId])
+  @@unique([discordId, minecraftServerId])
 }

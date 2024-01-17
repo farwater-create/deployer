@@ -1,14 +1,8 @@
-import { config } from "@config";
-import { MinecraftApplicationCustomId } from "@models/application/application";
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  EmbedBuilder,
-} from "discord.js";
+import {config} from "@config";
+import {MinecraftApplicationCustomId} from "@models/application/application";
+import {ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder} from "discord.js";
 
-const { RULES_CHANNEL_ID, GUILD_ID, BOT_USER_ID } =
-  config;
+const {RULES_CHANNEL_ID, GUILD_ID, BOT_USER_ID} = config;
 const rulesChannelLink = `https://discord.com/channels/${GUILD_ID}/${RULES_CHANNEL_ID}`;
 
 const TITLE = "🚀 Whitelist Application Process 📝";
@@ -23,40 +17,38 @@ Welcome to our Minecraft server discord whitelist application process! We're exc
 
 3. **Notification**: We'll send you a direct message with our decision. Make sure your DMS are open to our bot <@${BOT_USER_ID}>. If your application is accepted, you'll receive instructions on joining the server.
 
-Remember, the whitelist application process helps us maintain a positive and fun community. We appreciate your interest in our Minecraft server discord, and we can't wait to play with you! 🎮✨
+Remember, the whitelist application process helps us maintain a positive and fun community. We appreciate your interest in our community and we can't wait to play with you! 🎮✨
 
 Click the button below to get started!
 `;
 
 const MinecraftApplicationSubmissionEmbed = (serverId: string, roleId: string) => {
-  return new EmbedBuilder()
-    .setTitle(TITLE)
-    .setDescription(DESCRIPTION)
-    .setThumbnail(
-      "https://media.forgecdn.net/avatars/thumbnails/444/296/64/64/637698958460822126.png",
-    )
-    .addFields([
-      {
-        name: "serverId",
-        value: serverId
-      },
-      {
-        name: "roleId",
-        value: roleId
-      }
-    ])
+    return new EmbedBuilder()
+        .setTitle(TITLE)
+        .setDescription(DESCRIPTION)
+        .setThumbnail("https://media.forgecdn.net/avatars/thumbnails/444/296/64/64/637698958460822126.png")
+        .addFields([
+            {
+                name: "serverId",
+                value: serverId,
+            },
+            {
+                name: "roleId",
+                value: roleId,
+            },
+        ]);
 };
 
 export const MinecraftApplicationStartMessageOptions = (serverId: string, roleId: string) => {
-  return {
-    embeds: [MinecraftApplicationSubmissionEmbed(serverId, roleId)],
-    components: [
-      new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId(MinecraftApplicationCustomId.Start)
-          .setLabel("Apply")
-          .setStyle(ButtonStyle.Success)
-      ),
-    ],
-  };
-}
+    return {
+        embeds: [MinecraftApplicationSubmissionEmbed(serverId, roleId)],
+        components: [
+            new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(MinecraftApplicationCustomId.Start)
+                    .setLabel("Apply")
+                    .setStyle(ButtonStyle.Success),
+            ),
+        ],
+    };
+};
