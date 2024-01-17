@@ -19,37 +19,45 @@ export const lookupLinkCommand: Command = {
             userId ? "discordToMinecraft" : "minecraftToDiscord",
         );
 
-        const embed = new EmbedBuilder().setTitle("Minecraft Lookup").addFields([
-            {
-                name: "Discord",
-                value: result ? result.map((r) => `<@${r.discordId}>`).join(", ") : "Not found",
-            },
-            {
-                name: "Minecraft",
-                value: result && result[0]?.minecraftName ? result[0]?.minecraftName : "Not found",
-            },
-            {
-                name: "UUID",
-                value: result && result[0]?.minecraftUuid ? result[0]?.minecraftUuid : "Not found",
-            },
-        ]);
-        const thumbnail = new URL(
-            `https://mc-heads.net/body/${
-                result && result[0]?.minecraftName ? result[0]?.minecraftName : "Not found"
-            }.png`,
-        );
-        const image = new URL(
-            `https://mc-heads.net/body/${
-                result && result[0]?.minecraftName ? result[0]?.minecraftName : "Not found"
-            }.png`,
-        );
-        embed.setImage(image.toString());
-        embed.setThumbnail(thumbnail.toString());
+        if (result && result.length > 0) {
+            const embed = new EmbedBuilder().setTitle("Minecraft Lookup").addFields([
+                {
+                    name: "Discord",
+                    value: result ? result.map((r) => `<@${r.discordId}>`).join(", ") : "Not found",
+                },
+                {
+                    name: "Minecraft",
+                    value: result && result[0]?.minecraftName ? result[0]?.minecraftName : "Not found",
+                },
+                {
+                    name: "UUID",
+                    value: result && result[0]?.minecraftUuid ? result[0]?.minecraftUuid : "Not found",
+                },
+            ]);
 
-        await interaction.reply({
+            const thumbnail = new URL(
+                `https://mc-heads.net/body/${
+                    result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
+                }.png`,
+            );
+
+            const image = new URL(
+                `https://mc-heads.net/body/${
+                    result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
+                }.png`,
+            );
+
+            embed.setImage(image.toString());
+            embed.setThumbnail(thumbnail.toString());
+
+            return await interaction.reply({
+                embeds: [embed],
+            });
+        }
+
+        return await interaction.reply({
             ephemeral: true,
-            embeds: result ? [embed] : [],
-            content: result ? "" : `No link found for ${userId ? `<@${userId}>` : minecraft}.`,
+            content: `No link found for ${userId ? `<@${userId}>` : minecraft}.`,
         });
     },
 };
