@@ -5,7 +5,7 @@ import {EmbedBuilder, PermissionsBitField, SlashCommandBuilder} from "discord.js
 export const lookupLinkCommand: Command = {
     json: new SlashCommandBuilder()
         .setName("lookup")
-        .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.KickMembers)
         .setDescription("Look up a Minecraft or Discord account link.")
         .addUserOption((o) => o.setName("user").setRequired(false).setDescription("discord user"))
         .addStringOption((o) => o.setName("minecraft").setRequired(false).setDescription("minecraft username"))
@@ -22,23 +22,31 @@ export const lookupLinkCommand: Command = {
         const embed = new EmbedBuilder().setTitle("Minecraft Lookup").addFields([
             {
                 name: "Discord",
-                value: result?.discordId ? `<@${result.discordId}>` : "Not found",
+                value: result ? result.map((r) => `<@${r.discordId}>`).join(", ") : "Not found",
             },
             {
                 name: "Minecraft",
-                value: result?.minecraftName ?? "Not found",
+                value: result && result[0]?.minecraftName ? result[0]?.minecraftName : "Not found",
             },
             {
                 name: "UUID",
-                value: result?.minecraftUuid ?? "Not found",
+                value: result && result[0]?.minecraftUuid ? result[0]?.minecraftUuid : "Not found",
             },
         ]);
-        const thumbnail = new URL(`https://mc-heads.net/body/${result?.minecraftName}.png`);
-        const image = new URL(`https://mc-heads.net/body/${result?.minecraftName}.png`);
+        const thumbnail = new URL(
+            `https://mc-heads.net/body/${
+                result && result[0]?.minecraftName ? result[0]?.minecraftName : "Not found"
+            }.png`,
+        );
+        const image = new URL(
+            `https://mc-heads.net/body/${
+                result && result[0]?.minecraftName ? result[0]?.minecraftName : "Not found"
+            }.png`,
+        );
         embed.setImage(image.toString());
         embed.setThumbnail(thumbnail.toString());
 
-        interaction.reply({
+        await interaction.reply({
             ephemeral: true,
             embeds: [embed],
             content: result ? "" : `No link found for ${userId ? `<@${userId}>` : minecraft}.`,

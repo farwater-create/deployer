@@ -37,6 +37,15 @@ export const handleMinecraftApplicationModalSubmit = async (interaction: ModalSu
         return;
     }
 
+    const minecraftUser = await FarwaterUser.fromMinecraftName(interaction.client, minecraftName);
+
+    if (minecraftUser) {
+        return interaction.reply({
+            ephemeral: true,
+            content: `Minecraft account **${minecraftName}** is already linked to a Discord account. If you believe this is a mistake, please create a ticket.`,
+        });
+    }
+
     const userProfile = await fetchMinecraftUser(minecraftName);
     const minecraftSkinSum = userProfile ? digestSkinHex(userProfile.textures?.raw.value) : "null";
     const minecraftUuid = userProfile ? userProfile.uuid : "null";
@@ -55,6 +64,7 @@ export const handleMinecraftApplicationModalSubmit = async (interaction: ModalSu
         ...farwaterUserOptions,
         client: interaction.client,
     });
+
     await farwaterUser.serialize();
 
     const embedFieldSchema = z.object({
@@ -102,7 +112,8 @@ export const handleMinecraftApplicationModalSubmit = async (interaction: ModalSu
         ...applicationOptions,
         client: interaction.client,
     });
-    application.serialize();
+
+    await application.serialize();
 
     const autoReviewResult = await application.autoReviewResult().catch(logger.error);
     if (!autoReviewResult) return;

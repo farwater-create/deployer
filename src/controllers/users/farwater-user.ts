@@ -4,11 +4,10 @@ import {PterodactylPanel} from "@controllers/pterodactyl/pterodactyl";
 import {prisma} from "@lib/prisma";
 import {logger} from "@logger";
 import {FarwaterUserModel} from "@models/user/farwater-user";
-import {Client, GuildMember} from "discord.js";
+import {Client} from "discord.js";
 
 export class FarwaterUser {
     private _offensiveSkin: boolean | undefined;
-    private _member: GuildMember | undefined;
 
     constructor(private options: FarwaterUserModel & {client: Client}) {}
 
@@ -18,10 +17,7 @@ export class FarwaterUser {
 
     async member() {
         const {client, discordId} = this.options;
-        if (!this._member) {
-            this._member == (await client.guilds.fetch(config.GUILD_ID)).members.fetch(discordId);
-        }
-        return this._member;
+        return (await client.guilds.fetch(config.GUILD_ID)).members.fetch(discordId);
     }
 
     async user() {
@@ -80,6 +76,24 @@ export class FarwaterUser {
                 },
             });
         }
+
+        return new FarwaterUser({
+            ...farwaterUser,
+            client,
+        });
+    }
+
+    static async fromMinecraftName(client: Client, minecraftName: string): Promise<FarwaterUser | null> {
+        const farwaterUser = await prisma.farwaterUser.findFirst({
+            where: {
+                minecraftName,
+            },
+            include: {
+                minecraftApplications: true,
+            },
+        });
+
+        if (!farwaterUser) return null;
 
         return new FarwaterUser({
             ...farwaterUser,

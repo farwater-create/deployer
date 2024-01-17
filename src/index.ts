@@ -14,6 +14,7 @@ import {applicationsChannelCommand} from "@controllers/commands/applications-cha
 import {CommandCollection} from "@controllers/commands/commands";
 import {linkMinecraftCommand} from "@controllers/commands/minecraft-link";
 import {lookupLinkCommand} from "@controllers/commands/minecraft-lookup";
+import {unlinkMinecraftCommand} from "@controllers/commands/minecraft-unlink";
 import {skin} from "@controllers/commands/skin";
 import {unwhitelist} from "@controllers/commands/unwhitelist";
 import {whitelist} from "@controllers/commands/whitelist";
@@ -35,6 +36,7 @@ const intents = [
 CommandCollection.useCommand(applicationsChannelCommand);
 CommandCollection.useCommand(linkMinecraftCommand);
 CommandCollection.useCommand(lookupLinkCommand);
+CommandCollection.useCommand(unlinkMinecraftCommand);
 CommandCollection.useContextCommand(whitelist);
 CommandCollection.useContextCommand(unwhitelist);
 CommandCollection.useContextCommand(skin);

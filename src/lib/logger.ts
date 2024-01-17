@@ -1,7 +1,7 @@
 import {EmbedBuilder, GuildTextBasedChannel} from "discord.js";
 import pino from "pino";
 
-type LogLevel = "info" | "error" | "warn" | "debug";
+export type LogLevel = "info" | "error" | "warn" | "debug";
 
 const pinoLogger = pino({
     transport: {

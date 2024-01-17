@@ -32,7 +32,9 @@ export class CommandCollection {
     static handleCommand(interaction: CommandInteraction) {
         Promise.resolve(this.commandsMap.get(interaction.commandName)?.handler(interaction)).catch(() => {
             if (!interaction.replied) {
-                interaction.reply("Internal server error").catch(logger.error);
+                interaction.reply("Internal server error").catch((err) => {
+                    logger.discord("error", "Failed to reply to interaction. `" + err + "`");
+                });
             }
         });
     }

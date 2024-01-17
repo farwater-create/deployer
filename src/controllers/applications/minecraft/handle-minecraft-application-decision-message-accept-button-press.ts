@@ -49,8 +49,8 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress = async 
 
     const member = await farwaterUser.member().catch(logger.error);
 
-    member?.roles.add(application.getOptions().roleId).catch(() => {
-        logger.error("could not grant role " + member.user.id);
+    await member?.roles.add(application.getOptions().roleId).catch(() => {
+        logger.discord("error", "could not grant role " + member.user.id);
     });
 
     const opts = MinecraftApplicationWhitelistMessageOptions(application);
