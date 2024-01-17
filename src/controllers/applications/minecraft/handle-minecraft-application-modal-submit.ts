@@ -18,7 +18,7 @@ export const handleMinecraftApplicationModalSubmit = async (interaction: ModalSu
         return;
     }
 
-    let age = interaction.fields.getField("age", ComponentType.TextInput).value;
+    const age = interaction.fields.getField("age", ComponentType.TextInput).value;
     const reason = interaction.fields.getField("reason", ComponentType.TextInput).value;
     const minecraftName = interaction.fields.getField("minecraftName", ComponentType.TextInput).value;
 
@@ -39,10 +39,10 @@ export const handleMinecraftApplicationModalSubmit = async (interaction: ModalSu
 
     const minecraftUser = await FarwaterUser.fromMinecraftName(interaction.client, minecraftName);
 
-    if (minecraftUser) {
+    if (minecraftUser && minecraftUser.getOptions().discordId != interaction.user.id) {
         return interaction.reply({
             ephemeral: true,
-            content: `Minecraft account **${minecraftName}** is already linked to a Discord account. If you believe this is a mistake, please create a ticket.`,
+            content: `Minecraft account **${minecraftName}** is already linked to another Discord account. If you believe this is a mistake, please create a ticket.`,
         });
     }
 
@@ -52,7 +52,7 @@ export const handleMinecraftApplicationModalSubmit = async (interaction: ModalSu
 
     const farwaterUserOptions: FarwaterUserModel = {
         discordId: interaction.user.id,
-        age,
+        age: age.toString(),
         minecraftName,
         minecraftSkinSum,
         minecraftUuid,
@@ -89,9 +89,14 @@ export const handleMinecraftApplicationModalSubmit = async (interaction: ModalSu
     const {serverId, roleId} = embedFields;
 
     const existingApplication = await farwaterUser.getMinecraftApplicationByServerId(serverId);
-    if (existingApplication && existingApplication.getOptions().status == MinecraftApplicationReviewStatus.Pending) {
+    const existingAppFarwaterUser = await existingApplication?.getFarwaterUser();
+
+    if (
+        existingApplication &&
+        existingApplication.getOptions().status == MinecraftApplicationReviewStatus.Pending &&
+        existingAppFarwaterUser?.getOptions().minecraftName != null
+    ) {
         logger.discord("warn", `user ${interaction.user.id} already has a pending application for server ${serverId}`);
-        interaction.message?.delete().catch(logger.error);
         interaction.reply({
             ephemeral: true,
             content: `You already have a pending application for server ${serverId}. Please give us some time to review your application.`,

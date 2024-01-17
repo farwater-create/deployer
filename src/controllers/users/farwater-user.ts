@@ -152,6 +152,7 @@ export class FarwaterUser {
                     minecraftName,
                     minecraftSkinSum,
                     minecraftUuid,
+                    age,
                     updatedAt: new Date(Date.now()),
                 },
                 create: {

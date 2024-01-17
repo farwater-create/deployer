@@ -1,4 +1,4 @@
-import {lookupLink} from "@lib/discord/lookup-minecraft";
+import {lookupLink} from "@lib/discord/minecraft-lookup";
 import {Command} from "@models/command";
 import {EmbedBuilder, PermissionsBitField, SlashCommandBuilder} from "discord.js";
 

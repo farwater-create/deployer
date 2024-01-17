@@ -11,7 +11,7 @@ export const handleMinecraftApplicationModalApplyButtonPress = async (interactio
     const fw = await FarwaterUser.fromDiscordId(interaction.client, interaction.user.id);
     const app = await fw.getMinecraftApplicationByServerId(serverId);
 
-    if (app && app.getOptions().status != "rejected") {
+    if (app && app.getOptions().status != "rejected" && fw.getOptions().minecraftName != null) {
         const content = `You have already applied for this server. Your application is currently **${
             app.getOptions().status
         }**.`;
