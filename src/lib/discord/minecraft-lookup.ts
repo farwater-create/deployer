@@ -7,10 +7,10 @@ export const lookupLink = async (
 ): Promise<FarwaterUser[] | null> => {
     const whereCondition = lookupType === "minecraftToDiscord" ? {minecraftName: identifier} : {discordId: identifier};
 
-    const discordUser = await prisma.farwaterUser.findMany({
+    const discordUsers = await prisma.farwaterUser.findMany({
         where: whereCondition,
     });
 
-    if (!discordUser) return null;
-    return discordUser;
+    if (!discordUsers) return null;
+    return discordUsers;
 };

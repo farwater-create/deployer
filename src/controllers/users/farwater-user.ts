@@ -1,8 +1,11 @@
 import {config} from "@config";
 import {MinecraftApplication} from "@controllers/applications/minecraft/application";
 import {PterodactylPanel} from "@controllers/pterodactyl/pterodactyl";
+import {fetchMinecraftUser} from "@lib/minecraft/fetch-minecraft-user";
 import {prisma} from "@lib/prisma";
+import {digestSkinHex} from "@lib/skin-id/skin-id";
 import {logger} from "@logger";
+import {MinecraftApplicationReviewStatus} from "@models/application/application";
 import {FarwaterUserModel} from "@models/user/farwater-user";
 import {Client} from "discord.js";
 
@@ -27,9 +30,7 @@ export class FarwaterUser {
 
     async offensiveSkin(): Promise<boolean> {
         const {minecraftSkinSum} = this.options;
-        const {_offensiveSkin} = this;
-        if (minecraftSkinSum === "null" || !minecraftSkinSum) return false;
-        if (_offensiveSkin) return _offensiveSkin;
+        if (typeof minecraftSkinSum != "string") return false;
         const result = await prisma.offensiveMinecraftSkin.findFirst({
             where: {
                 hash: minecraftSkinSum,
@@ -41,14 +42,23 @@ export class FarwaterUser {
 
     async flagOffensiveSkin(): Promise<void> {
         const {minecraftSkinSum} = this.options;
-        const offensiveSkin = await this.offensiveSkin();
-        if (offensiveSkin && minecraftSkinSum) {
-            await prisma.offensiveMinecraftSkin.create({
-                data: {
+        if (minecraftSkinSum) {
+            await prisma.offensiveMinecraftSkin.upsert({
+                create: {
+                    hash: minecraftSkinSum,
+                },
+                update: {
+                    hash: minecraftSkinSum,
+                },
+                where: {
                     hash: minecraftSkinSum,
                 },
             });
         }
+        return logger.discord(
+            "warn",
+            `flagged offensive skin for <@${this.options.discordId}> ${this.options.minecraftName}`,
+        );
     }
 
     async skinURL() {
@@ -141,6 +151,27 @@ export class FarwaterUser {
         });
     }
 
+    async update() {
+        if (this.options.minecraftName) {
+            const userProfile = await fetchMinecraftUser(this.options.minecraftName);
+            const minecraftSkinSum = userProfile ? digestSkinHex(userProfile.textures?.raw.value) : "null";
+            const minecraftUuid = userProfile ? userProfile.uuid : "null";
+
+            this.options.minecraftSkinSum = minecraftSkinSum;
+            this.options.minecraftUuid = minecraftUuid;
+
+            await this.serialize();
+
+            if (await this.offensiveSkin()) {
+                this.unwhitelistAll();
+                logger.discord(
+                    "warn",
+                    "found offensive skin while updating user application for " + `<@${this.options.discordId}>`,
+                );
+            }
+        }
+    }
+
     async serialize() {
         const {discordId, minecraftName, minecraftSkinSum, minecraftUuid, age} = this.options;
         await prisma.farwaterUser
@@ -182,5 +213,32 @@ export class FarwaterUser {
             PterodactylPanel.minecraft(serverId)
                 .whitelist(minecraftName)
                 .catch((err) => logger.discord("error", err));
+    }
+
+    async whitelistAll(ignoreStatus = false) {
+        const {minecraftName} = this.options;
+        const applications = await this.getMinecraftApplications();
+
+        if (minecraftName && applications) {
+            for (const application of applications) {
+                if (application.getOptions().status != MinecraftApplicationReviewStatus.Accepted || ignoreStatus)
+                    PterodactylPanel.minecraft(application.getOptions().serverId)
+                        .whitelist(minecraftName)
+                        .catch((err) => logger.discord("error", err));
+            }
+        }
+    }
+
+    async unwhitelistAll() {
+        const {minecraftName} = this.options;
+        const applications = await this.getMinecraftApplications();
+
+        if (minecraftName && applications) {
+            applications.forEach((application) => {
+                PterodactylPanel.minecraft(application.getOptions().serverId)
+                    .whitelist(minecraftName)
+                    .catch((err) => logger.discord("error", err));
+            });
+        }
     }
 }

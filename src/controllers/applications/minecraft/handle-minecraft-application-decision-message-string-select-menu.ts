@@ -1,6 +1,5 @@
 import {config} from "@config";
 import {FarwaterUser} from "@controllers/users/farwater-user";
-import {toMessageLink} from "@lib/discord/message-link";
 import {logger} from "@logger";
 import {MinecraftApplicationReviewStatus} from "@models/application/application";
 import {MinecraftApplicationRejectReason, minecraftApplicationRejectReasons} from "@models/application/reject-reasons";
@@ -102,9 +101,7 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
     await interaction
         .reply({
             ephemeral: true,
-            content: `Rejected application: ${toMessageLink(
-                message,
-            )}. Remember to take the appropriate administrative action.`,
+            content: `Rejected application. Remember to take the appropriate administrative action.`,
         })
         .catch((err) => logger.error(err));
 

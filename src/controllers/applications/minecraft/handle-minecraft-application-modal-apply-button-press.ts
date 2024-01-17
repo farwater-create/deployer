@@ -3,8 +3,6 @@ import {MinecraftApplicationModal} from "@views/application/minecraft-applicatio
 import {ButtonInteraction} from "discord.js";
 
 export const handleMinecraftApplicationModalApplyButtonPress = async (interaction: ButtonInteraction) => {
-    const i = interaction as ButtonInteraction;
-
     const serverId = interaction.message.embeds[0].fields.find((f) => f.name === "serverId")?.value;
     if (!serverId) return;
 
@@ -16,12 +14,12 @@ export const handleMinecraftApplicationModalApplyButtonPress = async (interactio
             app.getOptions().status
         }**.`;
 
-        i.reply({
+        interaction.reply({
             ephemeral: true,
             content,
         });
         return;
     }
 
-    i.showModal(MinecraftApplicationModal());
+    interaction.showModal(MinecraftApplicationModal());
 };
