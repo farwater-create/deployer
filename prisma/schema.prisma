@@ -27,7 +27,6 @@ model FarwaterUser {
 }
 
 model MinecraftApplication {
-  id Int @id @default(autoincrement())
   farwaterUser FarwaterUser @relation(fields: [discordId], references: [discordId])
   discordId String
   roleId String
