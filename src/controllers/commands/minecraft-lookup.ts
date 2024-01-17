@@ -48,7 +48,7 @@ export const lookupLinkCommand: Command = {
 
         await interaction.reply({
             ephemeral: true,
-            embeds: [embed],
+            embeds: result ? [embed] : [],
             content: result ? "" : `No link found for ${userId ? `<@${userId}>` : minecraft}.`,
         });
     },
