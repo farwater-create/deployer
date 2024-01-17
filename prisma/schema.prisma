@@ -32,8 +32,8 @@ model MinecraftApplication {
   discordId String
   roleId String
   reason String
-  minecraftServerId String
+  serverId String
   status String
   createdAt DateTime @default(now())
-  @@unique([discordId, minecraftServerId])
+  @@unique([discordId, serverId])
 }
