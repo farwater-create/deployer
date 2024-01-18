@@ -41,7 +41,6 @@ export const linkMinecraftCommand: Command = {
                 .serialize()
                 .then(() =>
                     interaction.reply({
-                        ephemeral: true,
                         content: `Linked Minecraft account **${minecraft}** to <@${userId}>.`,
                     }),
                 )
