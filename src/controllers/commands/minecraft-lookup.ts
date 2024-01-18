@@ -5,7 +5,6 @@ import {EmbedBuilder, PermissionsBitField, SlashCommandBuilder} from "discord.js
 export const lookupLinkCommand: Command = {
     json: new SlashCommandBuilder()
         .setName("lookup")
-        .setDefaultMemberPermissions(PermissionsBitField.Flags.KickMembers)
         .setDescription("Look up a Minecraft or Discord account link.")
         .addUserOption((o) => o.setName("user").setRequired(false).setDescription("discord user"))
         .addStringOption((o) => o.setName("minecraft").setRequired(false).setDescription("minecraft username"))
