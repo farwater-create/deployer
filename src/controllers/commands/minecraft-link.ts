@@ -53,7 +53,6 @@ export const linkMinecraftCommand: Command = {
                 });
         } else {
             return interaction.reply({
-                ephemeral: true,
                 content: `Minecraft account **${minecraft}** is already linked to <@${
                     minecraftUser.getOptions().discordId
                 }>. Run \`/unlink\` to unlink it.`,
