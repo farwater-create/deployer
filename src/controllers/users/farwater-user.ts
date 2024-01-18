@@ -221,7 +221,7 @@ export class FarwaterUser {
 
         if (minecraftName && applications) {
             for (const application of applications) {
-                if (application.getOptions().status != MinecraftApplicationReviewStatus.Accepted || ignoreStatus)
+                if (application.getOptions().status == MinecraftApplicationReviewStatus.Accepted || ignoreStatus)
                     PterodactylPanel.minecraft(application.getOptions().serverId)
                         .whitelist(minecraftName)
                         .catch((err) => logger.discord("error", err));
