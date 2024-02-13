@@ -10,6 +10,8 @@ import {
 import {Client, Message} from "discord.js";
 import z from "zod";
 
+const DISCORD_TOS_AGE = 13;
+
 export class MinecraftApplication {
     private _autoReviewResult: MinecraftAutoReviewResult | undefined;
     private _farwaterUser: FarwaterUser | undefined;
@@ -46,7 +48,7 @@ export class MinecraftApplication {
                 };
             }
 
-            if (Number.isNaN(ageInt) || !Number.isSafeInteger(ageInt) || ageInt < 13) {
+            if (Number.isNaN(ageInt) || !Number.isSafeInteger(ageInt) || ageInt < DISCORD_TOS_AGE) {
                 return {
                     status: MinecraftApplicationReviewStatus.Rejected,
                     reason: "invalidAge",
