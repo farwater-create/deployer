@@ -1,6 +1,6 @@
-import {lookupLink} from "@lib/discord/minecraft-lookup";
-import {Command} from "@models/command";
-import {EmbedBuilder, PermissionsBitField, SlashCommandBuilder} from "discord.js";
+import { lookupLink } from "@lib/discord/minecraft-lookup";
+import { Command, ContextCommand } from "@models/command";
+import { ApplicationCommandType, ContextMenuCommandBuilder, EmbedBuilder, PermissionsBitField, SlashCommandBuilder } from "discord.js";
 
 export const lookupLinkCommand: Command = {
     json: new SlashCommandBuilder()
@@ -11,7 +11,9 @@ export const lookupLinkCommand: Command = {
         .toJSON(),
     handler: async (interaction) => {
         const minecraft = interaction.options.get("minecraft", false)?.value as string;
-        const userId = interaction.options.get("user", false)?.user?.id;
+        let userId = interaction.options.get("user", false)?.user?.id;
+
+        if (!minecraft && !userId) userId = interaction.user.id;
 
         const result = await lookupLink(
             userId ? userId : minecraft,
@@ -35,14 +37,12 @@ export const lookupLinkCommand: Command = {
             ]);
 
             const thumbnail = new URL(
-                `https://mc-heads.net/body/${
-                    result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
+                `https://mc-heads.net/body/${result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
                 }.png`,
             );
 
             const image = new URL(
-                `https://mc-heads.net/body/${
-                    result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
+                `https://mc-heads.net/body/${result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
                 }.png`,
             );
 
@@ -57,6 +57,61 @@ export const lookupLinkCommand: Command = {
         return await interaction.reply({
             ephemeral: true,
             content: `No link found for ${userId ? `<@${userId}>` : minecraft}.`,
+        });
+    },
+};
+
+export const lookupLinkApp: ContextCommand = {
+    json: new ContextMenuCommandBuilder()
+        .setName("lookup")
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.BanMembers)
+        .setType(ApplicationCommandType.User),
+    handler: async (interaction) => {
+        if (!interaction.isUserContextMenuCommand()) return;
+        const userId = interaction.options.get("user", false)?.user?.id as string;
+
+        const result = await lookupLink(
+            userId,
+            "discordToMinecraft",
+        );
+
+        if (result && result.length > 0) {
+            const embed = new EmbedBuilder().setTitle("Minecraft Lookup").addFields([
+                {
+                    name: "Discord",
+                    value: result ? result.map((r) => `<@${r.discordId}>`).join(", ") : "Not found",
+                },
+                {
+                    name: "Minecraft",
+                    value: result && result[0]?.minecraftName ? result[0]?.minecraftName : "Not found",
+                },
+                {
+                    name: "UUID",
+                    value: result && result[0]?.minecraftUuid ? result[0]?.minecraftUuid : "Not found",
+                },
+            ]);
+
+            const thumbnail = new URL(
+                `https://mc-heads.net/body/${result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
+                }.png`,
+            );
+
+            const image = new URL(
+                `https://mc-heads.net/body/${result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
+                }.png`,
+            );
+
+            embed.setImage(image.toString());
+            embed.setThumbnail(thumbnail.toString());
+
+            return await interaction.reply({
+                embeds: [embed],
+            });
+        }
+
+        return await interaction.reply({
+            ephemeral: true,
+            content: `No link found for <@${userId}>.`,
         });
     },
 };

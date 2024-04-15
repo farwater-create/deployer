@@ -6,23 +6,24 @@ import {
     StringSelectMenuInteraction,
 } from "discord.js";
 
-import {handleMinecraftApplicationDecisionMessageAcceptButtonPress} from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-accept-button-press";
-import {handleMinecraftApplicationDecisionMessageStringSelectMenu} from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-string-select-menu";
-import {handleMinecraftApplicationModalApplyButtonPress} from "@controllers/applications/minecraft/handle-minecraft-application-modal-apply-button-press";
-import {handleMinecraftApplicationModalSubmit} from "@controllers/applications/minecraft/handle-minecraft-application-modal-submit";
-import {applicationsChannelCommand} from "@controllers/commands/applications-channel";
-import {CommandCollection} from "@controllers/commands/commands";
-import {linkMinecraftCommand} from "@controllers/commands/minecraft-link";
-import {lookupLinkCommand} from "@controllers/commands/minecraft-lookup";
-import {unlinkMinecraftCommand} from "@controllers/commands/minecraft-unlink";
-import {skin} from "@controllers/commands/skin";
-import {unwhitelist} from "@controllers/commands/unwhitelist";
-import {whitelist} from "@controllers/commands/whitelist";
-import {safetyCheck} from "@controllers/startup/safety-check";
-import {config} from "@lib/config";
-import {DeployerInteractionRouter} from "@lib/discord/deployer-client";
-import {logger} from "@logger";
-import {MinecraftApplicationCustomId} from "@models/application/application";
+import { handleMinecraftApplicationDecisionMessageAcceptButtonPress } from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-accept-button-press";
+import { handleMinecraftApplicationDecisionMessageStringSelectMenu } from "@controllers/applications/minecraft/handle-minecraft-application-decision-message-string-select-menu";
+import { handleMinecraftApplicationModalApplyButtonPress } from "@controllers/applications/minecraft/handle-minecraft-application-modal-apply-button-press";
+import { handleMinecraftApplicationModalSubmit } from "@controllers/applications/minecraft/handle-minecraft-application-modal-submit";
+import { applicationsChannelCommand } from "@controllers/commands/applications-channel";
+import { CommandCollection } from "@controllers/commands/commands";
+import { linkMinecraftCommand } from "@controllers/commands/minecraft-link";
+import { lookupLinkApp, lookupLinkCommand } from "@controllers/commands/minecraft-lookup";
+import { unlinkMinecraftCommand } from "@controllers/commands/minecraft-unlink";
+import { unwhitelist } from "@controllers/commands/unwhitelist";
+import { whitelist } from "@controllers/commands/whitelist";
+import { safetyCheck } from "@controllers/startup/safety-check";
+import { config } from "@lib/config";
+import { DeployerInteractionRouter } from "@lib/discord/deployer-client";
+import { logger } from "@logger";
+import { MinecraftApplicationCustomId } from "@models/application/application";
+import { onUserJoin } from "@controllers/events/user-join";
+import { onUserLeave } from "@controllers/events/user-leave";
 
 const intents = [
     GatewayIntentBits.Guilds,
@@ -39,7 +40,7 @@ CommandCollection.useCommand(lookupLinkCommand);
 CommandCollection.useCommand(unlinkMinecraftCommand);
 CommandCollection.useContextCommand(whitelist);
 CommandCollection.useContextCommand(unwhitelist);
-CommandCollection.useContextCommand(skin);
+CommandCollection.useContextCommand(lookupLinkApp);
 
 const client = new Client({
     intents,
@@ -79,6 +80,15 @@ client.on("ready", async (client) => {
     CommandCollection.register(config.BOT_TOKEN, config.CLIENT_ID, config.GUILD_ID);
     logger.discord("info", "Started deployer");
 });
+
+client.on('guildMemberAdd', (member) => {
+    onUserJoin(member);
+});
+
+client.on('guildMemberRemove', (member) => {
+    onUserLeave(member);
+});
+
 
 client.on("error", (e) => {
     logger.discord("error", e);

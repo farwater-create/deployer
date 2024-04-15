@@ -1,0 +1,23 @@
+[2023-03-29T10:13:53.320Z] Logged in as EXPERIMENT
+[2023-03-29T10:13:53.554Z] last message is from bot, assuming it exists
+[2023-03-29T10:13:53.586Z] reloaded 3 slash commands
+[2023-03-29T10:13:54.419Z] blacklisted 837969 urls
+[2023-03-29T10:14:02.929Z] Recieved application: 
+ {
+  "discordID": "656861522718621717",
+  "reason": "Nice",
+  "age": 18,
+  "minecraftUUID": "becf36af68d041f0b3b4aeb0c47041c3",
+  "status": "pending"
+}
+[2023-03-29T10:16:33.897Z] Recieved application: 
+ {
+  "discordID": "656861522718621717",
+  "reason": "xdlol",
+  "age": 10,
+  "minecraftUUID": "becf36af68d041f0b3b4aeb0c47041c3",
+  "status": "pending"
+}
+[2023-03-29T10:16:47.371Z] {}
+[2023-03-29T10:17:03.300Z] {}
+[2023-03-29T10:17:41.748Z] {}

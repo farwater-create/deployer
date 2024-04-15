@@ -1,35 +1,35 @@
-import {config} from "@config";
-import {MinecraftApplication} from "@controllers/applications/minecraft/application";
-import {PterodactylPanel} from "@controllers/pterodactyl/pterodactyl";
-import {fetchMinecraftUser} from "@lib/minecraft/fetch-minecraft-user";
-import {prisma} from "@lib/prisma";
-import {digestSkinHex} from "@lib/skin-id/skin-id";
-import {logger} from "@logger";
-import {MinecraftApplicationReviewStatus} from "@models/application/application";
-import {FarwaterUserModel} from "@models/user/farwater-user";
-import {Client} from "discord.js";
+import { config } from "@config";
+import { MinecraftApplication } from "@controllers/applications/minecraft/application";
+import { PterodactylPanel } from "@controllers/pterodactyl/pterodactyl";
+import { fetchMinecraftUser } from "@lib/minecraft/fetch-minecraft-user";
+import { prisma } from "@lib/prisma";
+import { digestSkinHex } from "@lib/skin-id/skin-id";
+import { logger } from "@logger";
+import { MinecraftApplicationReviewStatus } from "@models/application/application";
+import { FarwaterUserModel } from "@models/user/farwater-user";
+import { Client } from "discord.js";
 
 export class FarwaterUser {
     private _offensiveSkin: boolean | undefined;
 
-    constructor(private options: FarwaterUserModel & {client: Client}) {}
+    constructor(private options: FarwaterUserModel & { client: Client }) { }
 
     getOptions() {
         return this.options;
     }
 
     async member() {
-        const {client, discordId} = this.options;
+        const { client, discordId } = this.options;
         return (await client.guilds.fetch(config.GUILD_ID)).members.fetch(discordId);
     }
 
     async user() {
-        const {client, discordId} = this.options;
+        const { client, discordId } = this.options;
         return client.users.fetch(discordId);
     }
 
     async offensiveSkin(): Promise<boolean> {
-        const {minecraftSkinSum} = this.options;
+        const { minecraftSkinSum } = this.options;
         if (typeof minecraftSkinSum != "string") return false;
         const result = await prisma.offensiveMinecraftSkin.findFirst({
             where: {
@@ -41,7 +41,7 @@ export class FarwaterUser {
     }
 
     async flagOffensiveSkin(): Promise<void> {
-        const {minecraftSkinSum} = this.options;
+        const { minecraftSkinSum } = this.options;
         if (minecraftSkinSum) {
             await prisma.offensiveMinecraftSkin.upsert({
                 create: {
@@ -62,7 +62,7 @@ export class FarwaterUser {
     }
 
     async skinURL() {
-        const {minecraftUuid} = this.options;
+        const { minecraftUuid } = this.options;
         return new URL(`https://mc-heads.net/body/${minecraftUuid}.png`).toString();
     }
 
@@ -112,7 +112,7 @@ export class FarwaterUser {
     }
 
     async getMinecraftApplications(): Promise<MinecraftApplication[] | null> {
-        const {client, discordId} = this.options;
+        const { client, discordId } = this.options;
         const applications = await prisma.minecraftApplication.findMany({
             where: {
                 discordId,
@@ -132,7 +132,7 @@ export class FarwaterUser {
     }
 
     async getMinecraftApplicationByServerId(serverId: string): Promise<MinecraftApplication | null> {
-        const {client, discordId} = this.options;
+        const { client, discordId } = this.options;
         const application = await prisma.minecraftApplication.findFirst({
             where: {
                 discordId,
@@ -173,7 +173,7 @@ export class FarwaterUser {
     }
 
     async serialize() {
-        const {discordId, minecraftName, minecraftSkinSum, minecraftUuid, age} = this.options;
+        const { discordId, minecraftName, minecraftSkinSum, minecraftUuid, age } = this.options;
         await prisma.farwaterUser
             .upsert({
                 where: {
@@ -200,7 +200,7 @@ export class FarwaterUser {
     }
 
     async unwhitelist(serverId: string) {
-        const {minecraftName} = this.options;
+        const { minecraftName } = this.options;
         if (minecraftName)
             PterodactylPanel.minecraft(serverId)
                 .unwhitelist(minecraftName)
@@ -208,7 +208,7 @@ export class FarwaterUser {
     }
 
     async whitelist(serverId: string) {
-        const {minecraftName} = this.options;
+        const { minecraftName } = this.options;
         if (minecraftName)
             PterodactylPanel.minecraft(serverId)
                 .whitelist(minecraftName)
@@ -216,7 +216,7 @@ export class FarwaterUser {
     }
 
     async whitelistAll(ignoreStatus = false) {
-        const {minecraftName} = this.options;
+        const { minecraftName } = this.options;
         const applications = await this.getMinecraftApplications();
 
         if (minecraftName && applications) {
@@ -230,7 +230,7 @@ export class FarwaterUser {
     }
 
     async unwhitelistAll() {
-        const {minecraftName} = this.options;
+        const { minecraftName } = this.options;
         const applications = await this.getMinecraftApplications();
 
         if (minecraftName && applications) {
