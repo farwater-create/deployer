@@ -1,13 +1,13 @@
-import {FarwaterUser} from "@controllers/users/farwater-user";
-import {extractEmbedFields} from "@lib/discord/extract-fields";
-import {prisma} from "@lib/prisma";
-import {logger} from "@logger";
+import { FarwaterUser } from "@controllers/users/farwater-user";
+import { extractEmbedFields } from "@lib/discord/extract-fields";
+import { prisma } from "@lib/prisma";
+import { logger } from "@logger";
 import {
     MinecraftApplicationModel,
     MinecraftApplicationReviewStatus,
     MinecraftAutoReviewResult,
 } from "@models/application/application";
-import {Client, Message} from "discord.js";
+import { Client, Message } from "discord.js";
 import z from "zod";
 
 const DISCORD_TOS_AGE = 13;
@@ -16,7 +16,7 @@ export class MinecraftApplication {
     private _autoReviewResult: MinecraftAutoReviewResult | undefined;
     private _farwaterUser: FarwaterUser | undefined;
 
-    constructor(private options: MinecraftApplicationModel & {client: Client}) {
+    constructor(private options: MinecraftApplicationModel & { client: Client }) {
         this.initializeFarwaterUser();
     }
 
@@ -28,12 +28,12 @@ export class MinecraftApplication {
         if (!this._farwaterUser) {
             // Handle the case where farwaterUser is null
             return {
-                status: MinecraftApplicationReviewStatus.Rejected,
+                status: MinecraftApplicationReviewStatus.NeedsManualReview,
                 reason: "other",
             };
         }
 
-        const {age, minecraftUuid} = this._farwaterUser.getOptions();
+        const { age, minecraftUuid } = this._farwaterUser.getOptions();
 
         if (this._autoReviewResult) return this._autoReviewResult;
         const match = /^[1-9][0-9]?$/;
@@ -58,7 +58,7 @@ export class MinecraftApplication {
 
         if (minecraftUuid === "⚠️NO UUID FOUND⚠️") {
             return {
-                status: MinecraftApplicationReviewStatus.NeedsManualReview,
+                status: MinecraftApplicationReviewStatus.Rejected,
                 reason: "noMinecraftAccount",
             };
         }
@@ -71,7 +71,7 @@ export class MinecraftApplication {
         }
 
         return {
-            status: MinecraftApplicationReviewStatus.Accepted,
+            status: MinecraftApplicationReviewStatus.NeedsManualReview,
             reason: "other",
         };
     }
@@ -106,7 +106,7 @@ export class MinecraftApplication {
     };
 
     async serialize() {
-        const {discordId, reason, serverId, createdAt, roleId} = this.options;
+        const { discordId, reason, serverId, createdAt, roleId } = this.options;
         await prisma.minecraftApplication
             .upsert({
                 where: {
@@ -134,7 +134,7 @@ export class MinecraftApplication {
     }
 
     async updateStatus(status: MinecraftApplicationReviewStatus) {
-        const {discordId, serverId} = this.options;
+        const { discordId, serverId } = this.options;
 
         await prisma.minecraftApplication.update({
             where: {
@@ -158,7 +158,7 @@ export class MinecraftApplication {
     }
 
     private async initializeFarwaterUser() {
-        const {discordId} = this.options;
+        const { discordId } = this.options;
         const farwaterUser = await prisma.farwaterUser.findUnique({
             where: {
                 discordId,

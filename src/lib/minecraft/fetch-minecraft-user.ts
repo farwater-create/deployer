@@ -1,4 +1,4 @@
-import {logger} from "@logger";
+import { logger } from "@logger";
 import z from "zod";
 
 const usernameHistorySchema = z.object({
@@ -43,5 +43,5 @@ export const fetchMinecraftUser = async (identifier: string) => {
         return;
     }
     const raw = await resp.json();
-    return userSchema.parseAsync(raw).catch(logger.error);
+    return userSchema.parseAsync(raw).catch(() => logger.error("failed to parse minecraft user " + identifier));
 };

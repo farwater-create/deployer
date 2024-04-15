@@ -1,8 +1,8 @@
-import {config} from "@config";
-import {FarwaterUser} from "@controllers/users/farwater-user";
-import {logger} from "@logger";
-import {MinecraftApplicationCustomId, MinecraftApplicationReviewStatus} from "@models/application/application";
-import {MinecraftApplicationWhitelistMessageOptions} from "@views/application/minecraft-application-whitelist-message";
+import { config } from "@config";
+import { FarwaterUser } from "@controllers/users/farwater-user";
+import { logger } from "@logger";
+import { MinecraftApplicationCustomId, MinecraftApplicationReviewStatus } from "@models/application/application";
+import { MinecraftApplicationWhitelistMessageOptions } from "@views/application/minecraft-application-whitelist-message";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -10,9 +10,11 @@ import {
     ButtonStyle,
     Colors,
     EmbedBuilder,
+    MessageEditOptions,
     messageLink,
 } from "discord.js";
-import {MinecraftApplication} from "./application";
+import { MinecraftApplication } from "./application";
+import { MinecraftApplicationDecisionMessageOptions } from "@views/application/minecraft-application-decision-message";
 
 export const handleMinecraftApplicationDecisionMessageAcceptButtonPress = async (interaction: ButtonInteraction) => {
     interaction.deferUpdate();
@@ -36,9 +38,9 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress = async 
         logger.discord(
             "error",
             "failed to parse decision message " +
-                messageLink(interaction.channelId, interaction.message.id) +
-                "\n" +
-                error,
+            messageLink(interaction.channelId, interaction.message.id) +
+            "\n" +
+            error,
         );
     }
 
@@ -56,20 +58,22 @@ export const handleMinecraftApplicationDecisionMessageAcceptButtonPress = async 
     const opts = MinecraftApplicationWhitelistMessageOptions(application);
     channel.send(await MinecraftApplicationWhitelistMessageOptions(application)).catch(logger.error);
 
-    await interaction.message
+    const messageEditOptions = MinecraftApplicationDecisionMessageOptions(
+        application.getOptions(),
+        farwaterUser.getOptions(),
+        {
+            status: MinecraftApplicationReviewStatus.Accepted,
+            reason: "accepted"
+        },
+        interaction.user,
+    ) as MessageEditOptions;
+
+    const message = await interaction.message
         .edit({
-            embeds: interaction.message.embeds.map((embed) => new EmbedBuilder(embed.data).setColor(Colors.Green)),
-            components: [
-                new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder()
-                        .setCustomId(MinecraftApplicationCustomId.Start)
-                        .setLabel("Accepted")
-                        .setStyle(ButtonStyle.Success)
-                        .setDisabled(true),
-                ),
-            ],
+            ...messageEditOptions,
         })
-        .catch(logger.error);
+        .catch((err) => logger.error(err));
+    if (!message) return;
 
     const dmChannel = await (await farwaterUser.user()).createDM(true).catch(logger.error);
     if (!dmChannel) return;

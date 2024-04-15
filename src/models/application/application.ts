@@ -1,6 +1,6 @@
-import {MinecraftApplicationRejectReason} from "./reject-reasons";
+import { MinecraftApplicationRejectReason } from "./reject-reasons";
 
-import {MinecraftApplication} from "@prisma/client";
+import { MinecraftApplication } from "@prisma/client";
 
 export type MinecraftApplicationModel = MinecraftApplication;
 
@@ -21,4 +21,6 @@ export enum MinecraftApplicationCustomId {
     Reject = "minecraft-application-decision-reject",
     Submit = "minecraft-application-model-submit",
     Start = "minecraft-application-start",
+    Accepted = "minecraft-application-decision-accepted",
+    Rejected = "minecraft-application-decision-rejected",
 }

@@ -1,149 +1,108 @@
-import {config} from "@config";
-import {FarwaterUser} from "@controllers/users/farwater-user";
-import {extractEmbedFields} from "@lib/discord/extract-fields";
-import {fetchMinecraftUser} from "@lib/minecraft/fetch-minecraft-user";
-import {digestSkinHex} from "@lib/skin-id/skin-id";
-import {logger} from "@logger";
-import {MinecraftApplicationModel, MinecraftApplicationReviewStatus} from "@models/application/application";
-import {FarwaterUserModel} from "@models/user/farwater-user";
-import {MinecraftApplicationDecisionMessageOptions} from "@views/application/minecraft-application-decision-message";
-import {ChannelType, ComponentType, ModalSubmitInteraction} from "discord.js";
+import { config } from "@config";
+import { FarwaterUser } from "@controllers/users/farwater-user";
+import { extractEmbedFields } from "@lib/discord/extract-fields";
+import { fetchMinecraftUser } from "@lib/minecraft/fetch-minecraft-user";
+import { digestSkinHex } from "@lib/skin-id/skin-id";
+import { logger } from "@logger";
+import { MinecraftApplicationReviewStatus } from "@models/application/application";
+import { FarwaterUserModel } from "@models/user/farwater-user";
+import { MinecraftApplicationDecisionMessageOptions } from "@views/application/minecraft-application-decision-message";
+import { ChannelType, ModalSubmitInteraction, TextChannel } from "discord.js";
 import z from "zod";
-import {MinecraftApplication} from "./application";
-const {APPLICATIONS_CHANNEL_ID} = config;
+import { MinecraftApplication } from "./application";
+const { APPLICATIONS_CHANNEL_ID } = config;
 
-export const handleMinecraftApplicationModalSubmit = async (interaction: ModalSubmitInteraction) => {
+export async function handleMinecraftApplicationModalSubmit(interaction: ModalSubmitInteraction) {
     if (!interaction.message) {
-        logger.discord("error", "received button interaction from ghost message");
+        logger.discord("error", "Received button interaction from ghost message");
         return;
     }
 
-    const age = interaction.fields.getField("age", ComponentType.TextInput).value;
-    const reason = interaction.fields.getField("reason", ComponentType.TextInput).value;
-    const minecraftName = interaction.fields.getField("minecraftName", ComponentType.TextInput).value;
+    type FieldInputs = { age: string; reason: string; minecraftName: string };
+    const fieldInputs: FieldInputs = ['age', 'reason', 'minecraftName']
+        .reduce((acc, fieldName) => ({
+            ...acc,
+            [fieldName]: interaction.fields.getTextInputValue(fieldName)
+        }), {} as FieldInputs);
+
+    const { age, reason, minecraftName } = fieldInputs;
 
     if (!age || !reason || !minecraftName) {
-        interaction.reply("You must provide a valid age, reason, and minecraft name!").catch(logger.error);
-        return;
+        return await interaction.reply("You must provide a valid age, reason, and Minecraft name!").catch(logger.error);
     }
 
-    const applicationDecisionChannel = interaction.client.channels.cache.get(APPLICATIONS_CHANNEL_ID);
-
+    const applicationDecisionChannel = interaction.client.channels.cache.get(APPLICATIONS_CHANNEL_ID) as TextChannel | undefined;
     if (!applicationDecisionChannel || applicationDecisionChannel.type !== ChannelType.GuildText) {
-        logger.discord(
-            "error",
-            `Could not find log channel with id ${APPLICATIONS_CHANNEL_ID} to log application submission`,
-        );
-        return;
+        return logger.discord("error", `Could not find application decision channel with ID ${APPLICATIONS_CHANNEL_ID}`);
     }
 
     const minecraftUser = await FarwaterUser.fromMinecraftName(interaction.client, minecraftName);
-
-    if (minecraftUser) {
-        if (minecraftUser.getOptions().discordId.toString() != interaction.user.id.toString())
-            return interaction.reply({
-                ephemeral: true,
-                content: `Minecraft account **${minecraftName}** is already linked to another Discord account. If you believe this is a mistake, please create a ticket.`,
-            });
+    if (minecraftUser && minecraftUser.getOptions().discordId !== interaction.user.id) {
+        return await interaction.reply({
+            ephemeral: true,
+            content: `Minecraft account **${minecraftName}** is already linked to another Discord account. If you believe this is a mistake, please create a ticket.`,
+        });
     }
 
     const userProfile = await fetchMinecraftUser(minecraftName);
-    const minecraftSkinSum = userProfile ? digestSkinHex(userProfile.textures?.raw.value) : "null";
-    const minecraftUuid = userProfile ? userProfile.uuid : "null";
+    if (!userProfile) {
+        return await interaction.reply({
+            ephemeral: true,
+            content: `We could not find a Minecraft account with the name **${minecraftName}**. Please double check your Minecraft name as it is case-sensitive. If you continue having issues, please create a ticket.`,
+        });
+    }
 
     const farwaterUserOptions: FarwaterUserModel = {
         discordId: interaction.user.id,
-        age: age.toString(),
-        minecraftName,
-        minecraftSkinSum,
-        minecraftUuid,
-        updatedAt: new Date(Date.now()),
-        createdAt: new Date(Date.now()),
+        age,
+        minecraftName: userProfile ? userProfile.username : minecraftName,
+        minecraftSkinSum: userProfile ? digestSkinHex(userProfile.textures?.raw.value) : "null",
+        minecraftUuid: userProfile ? userProfile.uuid : "null",
+        updatedAt: new Date(),
+        createdAt: new Date(),
     };
 
-    const farwaterUser = new FarwaterUser({
-        ...farwaterUserOptions,
-        client: interaction.client,
-    });
+    const farwaterUser = new FarwaterUser({ ...farwaterUserOptions, client: interaction.client });
+    await farwaterUser.serialize();
 
-    const embedFieldSchema = z.object({
-        serverId: z.string(),
-        roleId: z.string(),
-    });
-
-    const embedFields = extractEmbedFields<typeof embedFieldSchema._type>(
-        interaction.message.embeds[0],
-        embedFieldSchema,
-    );
+    const embedFieldSchema = z.object({ serverId: z.string(), roleId: z.string() });
+    const embedFields = extractEmbedFields(interaction.message.embeds[0], embedFieldSchema);
     if (!embedFields) {
-        await farwaterUser.serialize();
-        logger.discord("error", "message embed does not contain a server id, deleting.");
-        interaction.message?.delete().catch(logger.error);
-        interaction.reply({
+        logger.discord("error", "Message embed does not contain required fields");
+        await interaction.message?.delete().catch(logger.error);
+        await interaction.reply({ ephemeral: true, content: "Internal server error" });
+        return;
+    }
+
+    const { serverId, roleId } = embedFields as { serverId: string, roleId: string };
+    const existingApplication = await farwaterUser.getMinecraftApplicationByServerId(serverId);
+    if (existingApplication && existingApplication.getOptions().status === MinecraftApplicationReviewStatus.Pending) {
+        await interaction.reply({
             ephemeral: true,
-            content: "internal server error",
+            content: `You already have a pending application for server ${serverId}. Please give us some time to review your application.`,
         });
         return;
     }
 
-    const {serverId, roleId} = embedFields;
-
-    const existingApplication = await farwaterUser.getMinecraftApplicationByServerId(serverId);
-    const existingAppFarwaterUser = await existingApplication?.getFarwaterUser();
-
-    await farwaterUser.serialize();
-
-    if (
-        existingApplication &&
-        existingApplication.getOptions().status == MinecraftApplicationReviewStatus.Pending &&
-        existingAppFarwaterUser?.getOptions().minecraftName != null
-    ) {
-        logger.discord(
-            "warn",
-            `user @<${interaction.user.id}> already has a pending application for server ${serverId}\n
-            old minecraft: ${existingAppFarwaterUser?.getOptions().minecraftName}\n
-            new minecraft: ${minecraftName}`,
-        );
-        return interaction.reply({
-            ephemeral: true,
-            content: `You already have a pending application for server ${serverId}. Please give us some time to review your application.`,
-        });
-    }
-
-    const applicationOptions: MinecraftApplicationModel = {
+    const application = new MinecraftApplication({
         discordId: interaction.user.id,
         reason,
         serverId,
         roleId,
         status: MinecraftApplicationReviewStatus.Pending,
-        createdAt: new Date(Date.now()),
-    };
-
-    const application = new MinecraftApplication({
-        ...applicationOptions,
+        createdAt: new Date(),
         client: interaction.client,
     });
-
     await application.serialize();
 
     const autoReviewResult = await application.autoReviewResult().catch(logger.error);
     if (!autoReviewResult) return;
 
-    const message = await applicationDecisionChannel
-        .send(
-            MinecraftApplicationDecisionMessageOptions(
-                application.getOptions(),
-                farwaterUser.getOptions(),
-                autoReviewResult,
-            ),
-        )
-        .catch((err) => logger.error(err));
-    if (!message) return;
-
-    await interaction
-        .reply({
-            content: "Your application has been submitted. Applications can take up to three days to review.",
-            ephemeral: true,
-        })
-        .catch(logger.error);
-};
+    await applicationDecisionChannel.send(
+        MinecraftApplicationDecisionMessageOptions(application.getOptions(), farwaterUser.getOptions(), autoReviewResult)
+    ).catch(logger.error);
+    await interaction.reply({
+        content: "Your application has been submitted. Applications can take up to three days to review.",
+        ephemeral: true,
+    }).catch(logger.error);
+}

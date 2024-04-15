@@ -37,7 +37,7 @@ export const lookupLinkCommand: Command = {
             ]);
 
             const thumbnail = new URL(
-                `https://mc-heads.net/body/${result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
+                `https://mc-heads.net/head/${result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
                 }.png`,
             );
 
@@ -92,7 +92,7 @@ export const lookupLinkApp: ContextCommand = {
             ]);
 
             const thumbnail = new URL(
-                `https://mc-heads.net/body/${result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
+                `https://mc-heads.net/head/${result && result[0]?.minecraftName ? result[0].minecraftName : "Not found"
                 }.png`,
             );
 

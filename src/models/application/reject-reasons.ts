@@ -13,6 +13,7 @@ export const minecraftApplicationRejectReasons = {
     otherBannable: "other (bannable)",
     invalidAge: "invalid age",
     isBanned: "is banned",
+    accepted: "accepted",
 } as const;
 
 export type MinecraftApplicationRejectReasons = typeof minecraftApplicationRejectReasons;
