@@ -48,10 +48,17 @@ export class MinecraftApplication {
                 };
             }
 
-            if (Number.isNaN(ageInt) || !Number.isSafeInteger(ageInt) || ageInt < DISCORD_TOS_AGE) {
+            if (Number.isNaN(ageInt) || !Number.isSafeInteger(ageInt)) {
                 return {
                     status: MinecraftApplicationReviewStatus.Rejected,
                     reason: "invalidAge",
+                };
+            }
+
+            if (ageInt < DISCORD_TOS_AGE) {
+                return {
+                    status: MinecraftApplicationReviewStatus.Rejected,
+                    reason: "underage",
                 };
             }
         }
