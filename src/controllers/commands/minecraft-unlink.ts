@@ -1,13 +1,13 @@
-import {FarwaterUser} from "@controllers/users/farwater-user";
-import {prisma} from "@lib/prisma";
-import {logger} from "@logger";
-import {Command} from "@models/command";
-import {PermissionsBitField, SlashCommandBuilder} from "discord.js";
+import { FarwaterUser } from "@controllers/users/farwater-user";
+import { prisma } from "@lib/prisma";
+import { logger } from "@logger";
+import { Command } from "@models/command";
+import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 
 export const unlinkMinecraftCommand: Command = {
     json: new SlashCommandBuilder()
         .setName("unlink")
-        .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.KickMembers)
         .setDescription("Unlink a Minecraft account from a Discord user.")
         .addUserOption((o) => o.setName("user").setDescription("discord user"))
         .addStringOption((o) => o.setName("minecraft").setDescription("minecraft username"))

@@ -1,14 +1,14 @@
-import {FarwaterUser} from "@controllers/users/farwater-user";
-import {fetchMinecraftUser} from "@lib/minecraft/fetch-minecraft-user";
-import {digestSkinHex} from "@lib/skin-id/skin-id";
-import {logger} from "@logger";
-import {Command} from "@models/command";
-import {PermissionsBitField, SlashCommandBuilder} from "discord.js";
+import { FarwaterUser } from "@controllers/users/farwater-user";
+import { fetchMinecraftUser } from "@lib/minecraft/fetch-minecraft-user";
+import { digestSkinHex } from "@lib/skin-id/skin-id";
+import { logger } from "@logger";
+import { Command } from "@models/command";
+import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 
 export const linkMinecraftCommand: Command = {
     json: new SlashCommandBuilder()
         .setName("link")
-        .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.KickMembers)
         .setDescription("Links a Discord user to a Minecraft account.")
         .addUserOption((o) => o.setName("user").setRequired(true).setDescription("discord user"))
         .addStringOption((o) => o.setName("minecraft").setRequired(true).setDescription("minecraft username"))
@@ -23,9 +23,8 @@ export const linkMinecraftCommand: Command = {
         if (!minecraftUser) {
             if (discordUser.getOptions().minecraftName !== null) {
                 return interaction.reply({
-                    content: `Minecraft account **${
-                        discordUser.getOptions().minecraftName
-                    }** is already linked to <@${userId}>. Run \`/unlink\` to unlink it.`,
+                    content: `Minecraft account **${discordUser.getOptions().minecraftName
+                        }** is already linked to <@${userId}>. Run \`/unlink\` to unlink it.`,
                 });
             }
 
@@ -53,9 +52,8 @@ export const linkMinecraftCommand: Command = {
                 });
         } else {
             return interaction.reply({
-                content: `Minecraft account **${minecraft}** is already linked to <@${
-                    minecraftUser.getOptions().discordId
-                }>. Run \`/unlink\` to unlink it.`,
+                content: `Minecraft account **${minecraft}** is already linked to <@${minecraftUser.getOptions().discordId
+                    }>. Run \`/unlink\` to unlink it.`,
             });
         }
     },

@@ -1,4 +1,4 @@
-import { EmbedBuilder, GuildTextBasedChannel } from "discord.js";
+import {EmbedBuilder, GuildTextBasedChannel} from "discord.js";
 import pino from "pino";
 
 export type LogLevel = "info" | "error" | "warn" | "debug";

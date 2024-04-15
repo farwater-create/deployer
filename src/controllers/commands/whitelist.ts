@@ -1,12 +1,12 @@
-import {FarwaterUser} from "@controllers/users/farwater-user";
-import {logger} from "@logger";
-import {ContextCommand} from "@models/command";
-import {ApplicationCommandType, ContextMenuCommandBuilder, PermissionsBitField} from "discord.js";
+import { FarwaterUser } from "@controllers/users/farwater-user";
+import { logger } from "@logger";
+import { ContextCommand } from "@models/command";
+import { ApplicationCommandType, ContextMenuCommandBuilder, PermissionsBitField } from "discord.js";
 
 export const whitelist: ContextCommand = {
     json: new ContextMenuCommandBuilder()
         .setName("whitelist")
-        .setDefaultMemberPermissions(PermissionsBitField.Flags.BanMembers)
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.KickMembers)
         .setType(ApplicationCommandType.User),
     handler: async (interaction) => {
         if (!interaction.isUserContextMenuCommand()) return;
