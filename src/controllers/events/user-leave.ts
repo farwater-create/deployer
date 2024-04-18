@@ -9,6 +9,6 @@ export const onUserLeave = async (member: GuildMember | PartialGuildMember) => {
 	);
 
 	if (result && result.length > 0) {
-		logger.discord("info", `:red_circle: ${member.user.username} (<@${member.id}>) left the server with linked account ${result[0]?.minecraftName}`);
+		logger.discord("info", `:red_circle: ${member.user.username} (<@${member.id}>) left the server with linked account **${result[0]?.minecraftName}**`);
 	}
 };
