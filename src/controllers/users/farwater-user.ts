@@ -236,7 +236,7 @@ export class FarwaterUser {
         if (minecraftName && applications) {
             applications.forEach((application) => {
                 PterodactylPanel.minecraft(application.getOptions().serverId)
-                    .whitelist(minecraftName)
+                    .unwhitelist(minecraftName)
                     .catch((err) => logger.discord("error", err));
             });
         }

@@ -1,87 +1,55 @@
 import { config } from "@config";
-import { FarwaterUser } from "@controllers/users/farwater-user";
 import { logger } from "@logger";
-import { MinecraftApplicationCustomId, MinecraftApplicationReviewStatus } from "@models/application/application";
-import { MinecraftApplicationWhitelistMessageOptions } from "@views/application/minecraft-application-whitelist-message";
-import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonInteraction,
-    ButtonStyle,
-    Colors,
-    EmbedBuilder,
-    MessageEditOptions,
-    messageLink,
-} from "discord.js";
+import { MinecraftApplicationReviewStatus } from "@models/application/application";
+import { ButtonInteraction, MessageEditOptions, TextBasedChannel } from "discord.js";
 import { MinecraftApplication } from "./application";
+import { MinecraftApplicationWhitelistMessageOptions } from "@views/application/minecraft-application-whitelist-message";
 import { MinecraftApplicationDecisionMessageOptions } from "@views/application/minecraft-application-decision-message";
 
 export const handleMinecraftApplicationDecisionMessageAcceptButtonPress = async (interaction: ButtonInteraction) => {
-    interaction.deferUpdate();
+    await interaction.deferUpdate();
 
-    const channel = interaction.client.channels.cache.get(config.WHITELIST_NOTIFICATIONS_CHANNEL_ID);
+    const channel = interaction.client.channels.cache.get(config.WHITELIST_NOTIFICATIONS_CHANNEL_ID) as TextBasedChannel;
     if (!channel?.isTextBased()) {
-        logger.discord("error", "WHITELIST_NOTIFICATIONS_CHANNEL IS NOT A TEXT BASED CHANNEL!!!");
+        logger.discord("error", "WHITELIST_NOTIFICATIONS_CHANNEL is not a text-based channel!");
         return;
     }
 
-    let application: MinecraftApplication | undefined;
-    let farwaterUser: FarwaterUser | undefined;
-
     try {
-        application = MinecraftApplication.fromMinecraftApplicationDecisionMessage(interaction.message);
-        farwaterUser = await application.getFarwaterUser();
-        if (farwaterUser) {
-            await farwaterUser.whitelist(application.getOptions().serverId);
+        const application = MinecraftApplication.fromMinecraftApplicationDecisionMessage(interaction.message);
+        const farwaterUser = await application.getFarwaterUser();
+
+        if (!farwaterUser) {
+            logger.discord("error", `No user found for ${application.getOptions().serverId} + ${application.getOptions().discordId}.`);
+            return;
         }
-    } catch (error) {
-        logger.discord(
-            "error",
-            "failed to parse decision message " +
-            messageLink(interaction.channelId, interaction.message.id) +
-            "\n" +
-            error,
-        );
-    }
 
-    if (!application) return;
-    if (!farwaterUser) return;
+        await farwaterUser.whitelist(application.getOptions().serverId);
+        await application.updateStatus(MinecraftApplicationReviewStatus.Accepted);
 
-    await application.updateStatus(MinecraftApplicationReviewStatus.Accepted);
+        const member = await farwaterUser.member().catch(err => logger.error(err));
 
-    const member = await farwaterUser.member().catch(logger.error);
+        await member?.roles.add(application.getOptions().roleId).catch(err => {
+            logger.discord("error", "Could not grant role: " + err.message);
+        });
 
-    await member?.roles.add(application.getOptions().roleId).catch(() => {
-        logger.discord("error", "could not grant role " + member.user.id);
-    });
+        const messageOpts = await MinecraftApplicationWhitelistMessageOptions(application);
+        await channel.send(messageOpts).catch(err => logger.error(err));
 
-    const opts = MinecraftApplicationWhitelistMessageOptions(application);
-    channel.send(await MinecraftApplicationWhitelistMessageOptions(application)).catch(logger.error);
-
-    const messageEditOptions = MinecraftApplicationDecisionMessageOptions(
-        application.getOptions(),
-        farwaterUser.getOptions(),
-        {
+        const editOptions: MessageEditOptions = MinecraftApplicationDecisionMessageOptions(application.getOptions(), farwaterUser.getOptions(), {
             status: MinecraftApplicationReviewStatus.Accepted,
             reason: "accepted"
-        },
-        interaction.user,
-    ) as MessageEditOptions;
+        }, interaction.user);
 
-    const message = await interaction.message
-        .edit({
-            ...messageEditOptions,
-        })
-        .catch((err) => logger.error(err));
-    if (!message) return;
+        await interaction.message.edit(editOptions).catch(err => logger.error(err));
 
-    const dmChannel = await (await farwaterUser.user()).createDM(true).catch(logger.error);
-    if (!dmChannel) return;
+        const dmChannel = await farwaterUser.user().then(user => user.createDM()).catch(err => logger.error(err));
+        if (!dmChannel) return;
 
-    dmChannel
-        .send(await opts)
-        .catch(() => {
-            logger.discord("error", "could not open dm channel for user " + application?.getOptions().discordId);
-        })
-        .catch(logger.error);
+        await dmChannel.send(messageOpts).catch(err => {
+            logger.discord("error", "Could not send DM: " + err.message);
+        });
+    } catch (error) {
+        logger.discord("error", "Failed to handle application decision: " + error);
+    }
 };

@@ -1,30 +1,30 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "rootDir": "src",
-    "outDir": "dist",
-    "baseUrl": "src",
-    "resolveJsonModule": true,
-    "paths": {
-      "@logger": ["lib/logger"],
-      "@config": ["lib/config.ts"],
-      "@listeners/*": ["lib/listeners/*"],
-      "@models/*": ["models/*"],
-      "@views/*": ["views/*"],
-      "@controllers/*": ["controllers/*"],
-      "@commands/*": ["controllers/commands/*"],
-      "@lib/*": ["lib/*"],
-      "@discord-helpers/*": ["lib/discord-helpers/*"]
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "rootDir": "src",
+        "outDir": "dist",
+        "baseUrl": "src",
+        "resolveJsonModule": true,
+        "paths": {
+            "@logger": ["lib/logger"],
+            "@config": ["lib/config.ts"],
+            "@listeners/*": ["lib/listeners/*"],
+            "@models/*": ["models/*"],
+            "@views/*": ["views/*"],
+            "@controllers/*": ["controllers/*"],
+            "@commands/*": ["controllers/commands/*"],
+            "@lib/*": ["lib/*"],
+            "@discord-helpers/*": ["lib/discord-helpers/*"]
+        }
+    },
+    "ts-node": {
+        "require": ["tsconfig-paths/register"]
     }
-  },
-  "ts-node": {
-    "require": ["tsconfig-paths/register"]
-  }
 }

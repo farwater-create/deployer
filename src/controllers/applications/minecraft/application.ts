@@ -97,17 +97,16 @@ export class MinecraftApplication {
             serverId: z.string(),
             age: z.string(),
             roleId: z.string(),
+            reason: z.string(),
         });
 
         const embedFields = extractEmbedFields<MinecraftApplicationModel>(embed, embedSchema);
         if (!embedFields) {
             throw new Error("Missing embed fields");
         }
-        const reason = embed.description ? embed.description : "";
 
         return new MinecraftApplication({
             ...embedFields,
-            reason,
             client: message.client,
         });
     };
