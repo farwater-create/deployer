@@ -17,8 +17,6 @@ Welcome to our Minecraft server discord whitelist application process! We're exc
 
 3. **Notification**: If accepted, you’ll get a direct message from our bot <@${BOT_USER_ID}> with joining instructions.
 
-3. **Notification**: If accepted, you’ll get a direct message from our bot <@${BOT_USER_ID}> with joining instructions.
-
 4. **Get Started!**: Check out the new channels you now have access to for setup instructions and important details about the server.
 
 Remember, the whitelist application process helps us maintain a positive and fun community. We appreciate your interest in our community and we can't wait to play with you! 🎮✨
