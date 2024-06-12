@@ -1,8 +1,8 @@
-import {config} from "@config";
-import {logger} from "@logger";
-import axios, {type AxiosInstance} from "axios";
+import { config } from "@config";
+import { logger } from "@logger";
+import axios, { type AxiosInstance } from "axios";
 import rateLimit from "axios-rate-limit";
-import {sprintf} from "sprintf-js";
+import { sprintf } from "sprintf-js";
 
 const pteroHeaders = {
     Accept: "Application/vnd.pterodactyl.v1+json",
@@ -29,6 +29,7 @@ export class PterodactylPanel {
 class PterodactylServer {
     client: AxiosInstance;
     uuid: string;
+
     constructor(uuid: string) {
         this.uuid = uuid;
         const _client = axios.create({
@@ -55,18 +56,12 @@ class PterodactylServer {
                 logger.discord("info", `ran command \`${safeCommand}\` on ${this.uuid}`);
             });
     }
-    /**
-     * Takes formatted string (see https://www.npmjs.com/package/sprintf-js)
-     * Outputs sanitized command
-     * @param command
-     * @param args
-     * @returns
-     */
+
     safeCommand(command: string, ...args: string[]) {
         args = args.map((arg) => {
             return arg.replace(/^\s+|\s+$|\s+(?=\s)/g, "").replace(/[^\w\s]/gi, "");
         });
-        return sprintf(command, args);
+        return sprintf(command, ...args);
     }
 }
 
@@ -79,5 +74,11 @@ class MinecraftPterodactylServer extends PterodactylServer {
     }
     async kick(user: string) {
         return this.execute(this.safeCommand("kick %s", user));
+    }
+    async addRole(user: string, role: string) {
+        return this.execute(this.safeCommand("lp user %s parent add %s", user, role));
+    }
+    async removeRole(user: string, role: string) {
+        return this.execute(this.safeCommand("lp user %s parent remove %s", user, role));
     }
 }

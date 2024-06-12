@@ -215,6 +215,32 @@ export class FarwaterUser {
                 .catch((err) => logger.discord("error", err));
     }
 
+    async addRole(role: string) {
+        const { minecraftName } = this.options;
+        const applications = await this.getMinecraftApplications();
+
+        if (minecraftName && applications) {
+            for (const application of applications) {
+                PterodactylPanel.minecraft(application.getOptions().serverId)
+                    .addRole(minecraftName, role)
+                    .catch((err) => logger.discord("error", err));
+            }
+        }
+    }
+
+    async removeRole(role: string) {
+        const { minecraftName } = this.options;
+        const applications = await this.getMinecraftApplications();
+
+        if (minecraftName && applications) {
+            for (const application of applications) {
+                PterodactylPanel.minecraft(application.getOptions().serverId)
+                    .removeRole(minecraftName, role)
+                    .catch((err) => logger.discord("error", err));
+            }
+        }
+    }
+
     async whitelistAll(ignoreStatus = false) {
         const { minecraftName } = this.options;
         const applications = await this.getMinecraftApplications();

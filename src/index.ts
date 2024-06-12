@@ -2,7 +2,9 @@ import {
     ButtonInteraction,
     Client,
     GatewayIntentBits,
+    GuildMember,
     ModalSubmitInteraction,
+    PartialGuildMember,
     StringSelectMenuInteraction,
 } from "discord.js";
 
@@ -24,6 +26,7 @@ import { logger } from "@logger";
 import { MinecraftApplicationCustomId } from "@models/application/application";
 import { onUserJoin } from "@controllers/events/user-join";
 import { onUserLeave } from "@controllers/events/user-leave";
+import { onMemberRoleUpdate } from "@controllers/events/member-role-update";
 
 const intents = [
     GatewayIntentBits.Guilds,
@@ -89,6 +92,9 @@ client.on('guildMemberRemove', (member) => {
     onUserLeave(member);
 });
 
+client.on('guildMemberUpdate', async (oldMember: GuildMember | PartialGuildMember, newMember: GuildMember | PartialGuildMember) => {
+    onMemberRoleUpdate(oldMember, newMember);
+});
 
 client.on("error", (e) => {
     logger.discord("error", e);
