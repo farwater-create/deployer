@@ -5,14 +5,12 @@ export const minecraftApplicationRejectReasons = {
     offensiveDiscordProfilePicture: "offensive discord profile picture",
     offensiveDiscordName: "offensive discord name",
     offensiveDiscordUser: "offensive discord avatar/username/status/bio",
-    offensiveApplication: "offensive application",
-    lowEffortApplication: "low effort application",
     userLeftDiscordServer: "user left discord server",
     noMinecraftAccount: "minecraft account not found",
     other: "other",
     otherBannable: "other (bannable)",
     invalidAge: "invalid age",
-    isBanned: "is banned",
+    isBanned: "banned",
     accepted: "accepted",
 } as const;
 

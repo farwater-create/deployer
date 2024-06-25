@@ -30,7 +30,6 @@ model MinecraftApplication {
   farwaterUser FarwaterUser @relation(fields: [discordId], references: [discordId])
   discordId String
   roleId String
-  reason String
   serverId String
   status String
   createdAt DateTime @default(now())

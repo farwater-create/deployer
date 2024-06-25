@@ -13,7 +13,7 @@ export const onMemberRoleUpdate = async (oldMember: GuildMember | PartialGuildMe
 
 	const result = await lookupLink(newMember.id, "discordToMinecraft");
 
-	if (result && result.length > 0) {
+	if ((addedRole || removedRole) && result && result.length > 0) {
 		const fw = await FarwaterUser.fromDiscordId(newMember.client, newMember.id);
 		if (!fw) return;
 

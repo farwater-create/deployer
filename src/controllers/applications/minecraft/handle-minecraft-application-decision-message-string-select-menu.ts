@@ -53,9 +53,6 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
             case "noMinecraftAccount":
                 footnotes = "Double check your Minecraft name (case sensitive) and apply again.";
                 break;
-            case "offensiveApplication":
-                footnotes = "If you still wish to join our community, you can re-apply with an apology.";
-                break;
             case "offensiveDiscordUser":
                 footnotes = "If you still wish to join our community, please change your name and re-apply.";
                 break;
@@ -69,8 +66,6 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
                 footnotes = "Please enter a valid age when re-applying.";
                 break;
             default:
-            case "lowEffortApplication":
-                footnotes = "Please put more effort in your application and explain your reasons for wanting to join Farwater.";
                 break;
         }
         await dmChannel.send(`${reply}\n${footnotes || ""}`);
@@ -94,12 +89,4 @@ export const handleMinecraftApplicationDecisionMessageStringSelectMenu = async (
         })
         .catch((err) => logger.error(err));
     if (!message) return;
-
-    // need to automate this..
-    // await interaction
-    //     .reply({
-    //         ephemeral: true,
-    //         content: `Rejected application. Remember to take the appropriate administrative action.`,
-    //     })
-    //     .catch((err) => logger.error(err));
 };

@@ -97,7 +97,6 @@ export class MinecraftApplication {
             serverId: z.string(),
             age: z.string(),
             roleId: z.string(),
-            reason: z.string(),
         });
 
         const embedFields = extractEmbedFields<MinecraftApplicationModel>(embed, embedSchema);
@@ -112,7 +111,7 @@ export class MinecraftApplication {
     };
 
     async serialize() {
-        const { discordId, reason, serverId, createdAt, roleId } = this.options;
+        const { discordId, serverId, createdAt, roleId } = this.options;
         await prisma.minecraftApplication
             .upsert({
                 where: {
@@ -122,14 +121,12 @@ export class MinecraftApplication {
                     },
                 },
                 update: {
-                    reason,
                     createdAt,
                     roleId,
                     status: "pending",
                 },
                 create: {
                     discordId,
-                    reason,
                     serverId,
                     createdAt,
                     roleId,
@@ -142,18 +139,37 @@ export class MinecraftApplication {
     async updateStatus(status: MinecraftApplicationReviewStatus) {
         const { discordId, serverId } = this.options;
 
-        await prisma.minecraftApplication.update({
-            where: {
-                discordId_serverId: {
-                    discordId,
-                    serverId,
+        try {
+            const existingApplication = await prisma.minecraftApplication.findUnique({
+                where: {
+                    discordId_serverId: {
+                        discordId,
+                        serverId,
+                    },
                 },
-            },
-            data: {
-                status,
-            },
-        });
+            });
+
+            if (!existingApplication) {
+                throw new Error(`Minecraft application for discordId: ${discordId} and serverId: ${serverId} not found.`);
+            }
+
+            await prisma.minecraftApplication.update({
+                where: {
+                    discordId_serverId: {
+                        discordId,
+                        serverId,
+                    },
+                },
+                data: {
+                    status,
+                },
+            });
+        } catch (error) {
+            logger.error(`Failed to update application status: ${error}`);
+            throw new Error(`Failed to update application status: ${error}`);
+        }
     }
+
 
     async getFarwaterUser(): Promise<FarwaterUser | undefined> {
         if (!this._farwaterUser) {

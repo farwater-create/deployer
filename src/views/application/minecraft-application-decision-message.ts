@@ -46,7 +46,6 @@ const MinecraftApplicationDecisionEmbed = (
             roleId: application.roleId || "null",
             minecraftName: user.minecraftName || "null",
             age: user.age || "null",
-            reason: application.reason || "null",
         }).map(([key, value]) => ({ name: key, value })))
         .setThumbnail(`https://mc-heads.net/head/${user.minecraftName}.png`)
         .setImage(`https://mc-heads.net/body/${user.minecraftName}.png`);
